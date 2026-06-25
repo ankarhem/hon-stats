@@ -1,0 +1,17 @@
+@model IReadOnlyList<PlayerSearchResult>
+
+@if (Model.Count == 0)
+{
+    <p class="search-results__empty">No players found.</p>
+}
+else
+{
+    <ul class="search-results__list">
+        @foreach (var player in Model)
+        {
+            <li class="search-results__item" role="option">
+                <a href="/Players/Profile/@player.AccountId">@player.Username</a>
+            </li>
+        }
+    </ul>
+}

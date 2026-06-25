@@ -1,0 +1,60 @@
+@model MatchDetailView
+@if (Model.Detail is null)
+{
+    <p class="muted">Match not found.</p>
+}
+else
+{
+    var d = Model.Detail;
+    <dialog open class="match-modal">
+        <div class="match-modal__bar">
+            <span class="match-modal__title">
+                Match #@d.GameId · @d.Map · @(d.Duration / 60)m @(d.Duration % 60)s · @d.Date.ToString("yyyy-MM-dd")
+            </span>
+            <form method="dialog"><button class="btn btn--ghost" type="submit">Close ✕</button></form>
+        </div>
+        <div class="match-modal__body">
+            @foreach (var team in d.Players.GroupBy(p => p.Team))
+            {
+                var teamLower = team.Key.ToLowerInvariant();
+                <section class="match-modal__team">
+                    <p class="match-modal__team-title team--@teamLower">
+                        @team.Key @(team.Key == d.WinningTeam ? "· Winner" : "")
+                    </p>
+                    <table class="match-table">
+                        <thead>
+                            <tr><th>Hero</th><th>K/D/A</th><th>Wards</th><th>Net worth</th><th>Items</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var pl in team)
+                            {
+                                var hero = Model.Heroes.GetValueOrDefault(pl.HeroId);
+                                <tr>
+                                    <td>
+                                        <div class="match-row__hero">
+                                            <img class="hero-icon" src="@hero?.IconUrl" alt="" loading="lazy" />
+                                            <span class="hero-name">@(hero?.TranslatedName ?? pl.HeroId.ToString())</span>
+                                        </div>
+                                    </td>
+                                    <td class="kda">@pl.Kills/@pl.Deaths/@pl.Assists</td>
+                                    <td class="muted">👁 @pl.WardOfSightPlaced / @pl.WardOfRevelationPlaced</td>
+                                    <td class="muted">@pl.NetWorth</td>
+                                    <td>
+                                        <div class="item-row">
+                                            @foreach (var itemId in pl.Inventory)
+                                            {
+                                                var item = Model.Items.GetValueOrDefault(itemId);
+                                                var iconUrl = item?.IconUrl ?? $"https://gamestorage.juvio.com/items/{itemId}/icon.webp";
+                                                <img class="item-icon" src="@iconUrl" alt="@item?.TranslatedName" loading="lazy" />
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </section>
+            }
+        </div>
+    </dialog>
+}

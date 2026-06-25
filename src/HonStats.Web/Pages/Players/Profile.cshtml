@@ -1,0 +1,58 @@
+@page "{accountId:guid}"
+@model ProfileModel
+@{
+    ViewData["Title"] = Model.Profile?.Identity.DisplayName ?? "Player";
+}
+
+@if (Model.Profile is null)
+{
+    <div class="empty-state">
+        <h2>Player not found</h2>
+        <p>No profile data for this account.</p>
+        <p><a href="/">← Back to search</a></p>
+    </div>
+}
+else
+{
+    var p = Model.Profile;
+    <div class="profile-header">
+        <div class="profile-header__id">
+            <h1 class="profile-header__name">
+                <span class="flag">@ProfileModel.Flag(p.Identity.Country)</span>@p.Identity.DisplayName
+            </h1>
+            <p class="profile-header__meta">
+                @if (!string.IsNullOrEmpty(p.Identity.Username))
+                {
+                    <span>@@@p.Identity.Username</span>
+                }
+                <span> · @p.Overview.MatchesPlayed games</span>
+                <span> · last played @p.Overview.LastPlayed.ToString("yyyy-MM-dd")</span>
+            </p>
+        </div>
+        @if (p.Rank is not null)
+        {
+            <span class="rank-badge" style="color: @p.Rank.Color">
+                @p.Rank.RankName <span class="rank-badge__stars">@ProfileModel.Stars(p.Rank.StarLevel)</span>
+            </span>
+        }
+        <partial name="_ReindexButton" model="new ReindexButtonView(Model.AccountId, null, Model.Indexed)" />
+    </div>
+
+    <div class="card">
+        <p class="card__title">Profile stats</p>
+        <div class="stat-grid">
+            <div class="stat"><div class="stat__label">K/D/A</div><div class="stat__value">@p.Overview.AverageKDA.ToString("0.00")</div></div>
+            <div class="stat"><div class="stat__label">Win rate</div><div class="stat__value">@p.Overview.WinRate.ToString("0.0")<span class="stat__sub">%</span></div></div>
+            <div class="stat"><div class="stat__label">KDR</div><div class="stat__value">@p.Summary.KillDeathRatio.ToString("0.00")</div></div>
+            <div class="stat"><div class="stat__label">Wards placed</div><div class="stat__value">@p.Overview.AllTimeRecord.WardsPlaced</div></div>
+            <div class="stat"><div class="stat__label">Avg GPM</div><div class="stat__value">@p.Overview.AverageGPM.ToString("0")</div></div>
+            <div class="stat"><div class="stat__label">Avg XPM</div><div class="stat__value">@p.Overview.AverageXPM.ToString("0")</div></div>
+        </div>
+    </div>
+
+    <div id="profile-region"
+         hx-get="/Players/Profile/@Model.AccountId?handler=matches&offset=0"
+         hx-trigger="load" hx-swap="innerHTML">
+        <p class="muted">Loading matches…</p>
+    </div>
+}

@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/HonStats.App/HonStats.App.csproj" />
+    <Project Path="src/HonStats.Domain/HonStats.Domain.csproj" />
+    <Project Path="src/HonStats.Infra/HonStats.Infra.csproj" />
+    <Project Path="src/HonStats.Web/HonStats.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/HonStats.App.Tests/HonStats.App.Tests.csproj" />
+  </Folder>
+</Solution>

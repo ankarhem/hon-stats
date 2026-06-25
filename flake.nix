@@ -47,6 +47,7 @@
                 dotnet
                 omnisharp-roslyn
                 nuget
+                just
               ]
               ++ config.pre-commit.settings.enabledPackages;
           };

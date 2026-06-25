@@ -1,0 +1,30 @@
+@model MatchesView
+@foreach (var m in Model.Matches)
+{
+    var hero = Model.Heroes.GetValueOrDefault(m.HeroId);
+    var won = m.Team == m.WinningTeam;
+    <tr class="match-row"
+        hx-get="/Players/Profile/@Model.AccountId?handler=matchDetail&gameId=@m.GameId"
+        hx-target="#match-detail-host" hx-swap="innerHTML">
+        <td>
+            <div class="match-row__hero">
+                <img class="hero-icon" src="@hero?.IconUrl" alt="" loading="lazy" />
+                <span class="hero-name">@(hero?.TranslatedName ?? ("Hero " + m.HeroId))</span>
+            </div>
+        </td>
+        <td><span class="result-badge @(won ? "result-badge--win" : "result-badge--loss")">@(won ? "Win" : "Loss")</span></td>
+        <td class="kda">@m.Kills/@m.Deaths/@m.Assists</td>
+        <td class="muted">@(m.Duration / 60)m</td>
+        <td class="muted">@m.Map</td>
+        <td class="muted">@m.Date.ToString("yyyy-MM-dd")</td>
+    </tr>
+}
+@if (Model.HasMore)
+{
+    var next = Model.Offset + Model.PageSize;
+    <tr class="loading-row"
+        hx-get="/Players/Profile/@Model.AccountId?handler=matchesMore&offset=@next"
+        hx-trigger="revealed" hx-target="this" hx-swap="outerHTML">
+        <td colspan="6">Loading more…</td>
+    </tr>
+}

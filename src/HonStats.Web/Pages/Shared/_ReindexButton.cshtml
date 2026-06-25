@@ -1,0 +1,38 @@
+@model ReindexButtonView
+@{
+    var rejected = Model.Result is { Outcome: ReindexOutcome.CooldownRejected };
+    var indexing = Model.Indexed?.Status == IndexingStatus.Indexing;
+}
+<form method="post"
+      hx-post="/Players/Profile/@Model.AccountId?handler=reindex"
+      hx-target="this" hx-swap="outerHTML"
+      hx-disabled-elt="button">
+    @if (indexing)
+    {
+        <button class="btn" type="submit" disabled>Indexing…</button>
+    }
+    else
+    {
+        <button class="btn" type="submit">Reindex</button>
+    }
+    @if (Model.Result is not null)
+    {
+        if (rejected)
+        {
+            var mins = (int)Math.Ceiling(Model.Result.RetryAfter?.TotalMinutes ?? 0);
+            <span class="reindex-status">On cooldown — try in @mins min</span>
+        }
+        else
+        {
+            <span class="reindex-status">Queued ✓ refresh shortly</span>
+        }
+    }
+    else if (Model.Indexed?.LastReindexAt is not null)
+    {
+        <span class="reindex-status">Last indexed @Model.Indexed.LastReindexAt.Value.ToString("yyyy-MM-dd HH:mm")</span>
+    }
+    else
+    {
+        <span class="reindex-status">Not indexed yet</span>
+    }
+</form>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · HoN Reborn Stats</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="site-header__inner">
+            <a class="brand" href="/" aria-label="HoN Reborn Stats home">
+                <span class="brand__mark" aria-hidden="true">◆</span> HoN Reborn Stats
+            </a>
+            <form class="search" role="search" aria-label="Player search">
+                <input
+                    class="search__input"
+                    type="search"
+                    name="q"
+                    placeholder="Search player name…"
+                    autocomplete="off"
+                    aria-label="Player name"
+                    hx-get="/search"
+                    hx-trigger="keyup changed delay:300ms, search"
+                    hx-target="#search-results"
+                    hx-swap="innerHTML"
+                    hx-indicator="#search-indicator" />
+                <span id="search-indicator" class="htmx-indicator search__spinner" aria-hidden="true">⏳</span>
+            </form>
+        </div>
+        <div id="search-results" class="search-results" role="listbox" aria-label="Search results"></div>
+    </header>
+
+    <main id="main" class="site-main">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <p>Community project · data from juvio · not affiliated with Garena / Frostburn / Juvio.</p>
+    </footer>
+
+    <div id="match-detail-host" aria-live="polite"></div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,33 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<section class="hero">
+    <h1>HoN Reborn Stats</h1>
+    <p class="hero__lede">
+        Search any player to explore match history, see who they queue with,
+        inspect hero builds, and track K/D, wards, and win rate.
+    </p>
+    <p class="hero__hint">↑ Use the search bar at the top to find a player.</p>
+</section>
+
+<section class="feature-grid">
+    <article class="feature">
+        <h3>Match history</h3>
+        <p>Recent matches with heroes, K/D/A, duration, and a full per-match breakdown.</p>
+    </article>
+    <article class="feature">
+        <h3>Frequent teammates</h3>
+        <p>See who a player queues with most, and their shared win rate.</p>
+    </article>
+    <article class="feature">
+        <h3>Hero builds</h3>
+        <p>The items a player buys on each hero, ranked by pick frequency.</p>
+    </article>
+    <article class="feature">
+        <h3>Profile stats</h3>
+        <p>K/D/A, win rate, wards placed, MMR and rank — all in one place.</p>
+    </article>
+</section>

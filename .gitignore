@@ -1,0 +1,42 @@
+## .NET build output
+**/bin/
+**/obj/
+
+## User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+## VS / Rider / VS Code
+.vs/
+.idea/
+*.DS_Store
+
+## Test results / coverage
+[Tt]est[Rr]esult*/
+*.coverage
+*.coveragexml
+coverage/
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+## SQLite databases (runtime data, never committed)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+## Local appsettings overrides / secrets
+appsettings.*.local.json
+secrets.json
+
+## Logs
+*.log
+logs/

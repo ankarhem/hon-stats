@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\HonStats.App\HonStats.App.csproj" />
+    <ProjectReference Include="..\HonStats.Infra\HonStats.Infra.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Htmx" Version="1.12.0" />
+    <PackageReference Include="Htmx.TagHelpers" Version="1.12.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>470d7cf7-c1a9-498a-ae48-c2b8ebdc1fc2</UserSecretsId>
+  </PropertyGroup>
+</Project>
