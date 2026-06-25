@@ -31,7 +31,7 @@ public interface IInsightsAggregateStore
 
     Task ReplaceTeammatesAsync(
         Guid accountId,
-        IReadOnlyList<TeammateAggregate> teammates,
+        IReadOnlyList<Teammate> teammates,
         CancellationToken ct = default
     );
 }

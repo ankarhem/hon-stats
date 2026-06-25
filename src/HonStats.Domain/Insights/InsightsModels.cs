@@ -65,4 +65,7 @@ public sealed class Teammate
     public Guid TeammateAccountId { get; set; }
     public int GamesTogether { get; set; }
     public int WinsTogether { get; set; }
+    public string? DisplayName { get; set; }
+    public string? Username { get; set; }
+    public string? Country { get; set; }
 }

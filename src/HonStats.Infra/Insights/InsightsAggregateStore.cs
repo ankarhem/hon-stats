@@ -38,7 +38,7 @@ internal sealed class InsightsAggregateStore(IDbContextFactory<HonStatsDbContext
 
     public async Task ReplaceTeammatesAsync(
         Guid accountId,
-        IReadOnlyList<TeammateAggregate> teammates,
+        IReadOnlyList<Teammate> teammates,
         CancellationToken ct = default
     )
     {
@@ -48,15 +48,7 @@ internal sealed class InsightsAggregateStore(IDbContextFactory<HonStatsDbContext
 
         foreach (var teammate in teammates)
         {
-            db.Teammates.Add(
-                new Teammate
-                {
-                    AccountId = accountId,
-                    TeammateAccountId = teammate.TeammateAccountId,
-                    GamesTogether = teammate.GamesTogether,
-                    WinsTogether = teammate.WinsTogether,
-                }
-            );
+            db.Teammates.Add(teammate);
         }
 
         await db.SaveChangesAsync(ct);

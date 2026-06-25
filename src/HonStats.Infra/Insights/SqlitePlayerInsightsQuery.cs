@@ -1,15 +1,12 @@
 using HonStats.App.Insights;
-using HonStats.App.Players;
 using HonStats.Domain.Insights;
 using HonStats.Infra.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace HonStats.Infra.Insights;
 
-internal sealed class SqlitePlayerInsightsQuery(
-    IDbContextFactory<HonStatsDbContext> dbFactory,
-    IPlayerNameResolver names
-) : IPlayerInsightsQuery
+internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbContext> dbFactory)
+    : IPlayerInsightsQuery
 {
     public async Task<IndexedPlayer?> GetIndexedPlayerAsync(
         Guid accountId,
@@ -30,24 +27,15 @@ internal sealed class SqlitePlayerInsightsQuery(
             .Teammates.Where(t => t.AccountId == accountId)
             .OrderByDescending(t => t.GamesTogether)
             .ToListAsync(ct);
-        if (rows.Count == 0)
-            return [];
 
-        var ids = rows.Select(r => r.TeammateAccountId).Distinct().ToList();
-        var resolved = await names.ResolveAsync(ids, ct);
-
-        return rows.Select(r =>
+        return rows.Select(r => new TeammateStat
             {
-                resolved.TryGetValue(r.TeammateAccountId, out var name);
-                return new TeammateStat
-                {
-                    TeammateAccountId = r.TeammateAccountId,
-                    DisplayName = name?.DisplayName,
-                    Username = name?.Username,
-                    Country = name?.Country,
-                    GamesTogether = r.GamesTogether,
-                    WinsTogether = r.WinsTogether,
-                };
+                TeammateAccountId = r.TeammateAccountId,
+                DisplayName = r.DisplayName,
+                Username = r.Username,
+                Country = r.Country,
+                GamesTogether = r.GamesTogether,
+                WinsTogether = r.WinsTogether,
             })
             .ToList();
     }

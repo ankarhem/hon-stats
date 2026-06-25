@@ -78,4 +78,5 @@ setting `Authorization: Bearer`.
 - Stats endpoints use different id param names: profilestats=`userId`, playersummary/rank=`accountId`, recentmatches/recentplayers=`playerId`. Same UUID value.
 - gamedata `icon` fields are arrays; `translatedName` (not `name`) is the display name; entities are public (no bearer needed).
 - `getrecentmatchesforplayer` rejects a large `limit` with **400** (e.g. 200 fails; 25 works, max unknown). The indexer pages via `offset` at `Indexing:RecentMatchesLimit` (25) to ingest full history.
+- `POST auth /v1/userinfo/getuserinfo` rejects a large `accountIds` array with **400** (somewhere in (50, 200]; ≤50 works, exact max unknown). The name resolver chunks at 50 (`JuvioPlayerNameResolver`).
 - Razor Pages PageModels don't auto-associate by convention when `_ViewImports` sets `@namespace` — each page `.cshtml` needs an explicit `@model <PageModel>` or its `OnGet*` handlers silently don't run (page renders as an empty shell).
