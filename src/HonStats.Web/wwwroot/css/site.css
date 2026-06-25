@@ -78,6 +78,21 @@ p {
     border-radius: var(--radius-sm);
 }
 
+/* ---------- Primitives (reusable design-system building blocks) ---------- */
+
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.eyebrow {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+}
+
 /* ---------- Header / nav / search ---------- */
 .site-header {
     position: sticky;
@@ -156,8 +171,6 @@ p {
     list-style: none;
     margin: 0.25rem 0 0;
     padding: 0.35rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow);
 }
@@ -178,8 +191,6 @@ p {
 .search-results__empty {
     margin: 0.25rem 0 0;
     padding: 0.6rem 0.85rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--muted);
 }
@@ -250,9 +261,6 @@ p {
 }
 
 .feature {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
     padding: 1.25rem;
 }
 
@@ -269,18 +277,11 @@ p {
 
 /* ---------- Cards / stat grids ---------- */
 .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
     padding: 1.25rem;
     margin-bottom: 1.25rem;
 }
 
 .card__title {
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
     margin: 0 0 0.85rem;
 }
 
@@ -295,13 +296,6 @@ p {
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     padding: 0.85rem 1rem;
-}
-
-.stat__label {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--muted);
 }
 
 .stat__value {
@@ -396,13 +390,13 @@ p {
     margin-left: 0.25rem;
 }
 
-/* ---------- Match table ---------- */
-.match-table {
+/* ---------- Data table ---------- */
+.table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.match-table th {
+.table th {
     text-align: left;
     font-size: 0.72rem;
     text-transform: uppercase;
@@ -412,7 +406,7 @@ p {
     border-bottom: 1px solid var(--border);
 }
 
-.match-table td {
+.table td {
     padding: 0.65rem 0.6rem;
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
@@ -479,8 +473,8 @@ p {
     color: var(--muted);
 }
 
-/* ---------- Match detail modal (native <dialog> opened via showModal()) ---------- */
-dialog.match-modal {
+/* ---------- Modal primitive (native <dialog> opened via showModal()) ---------- */
+dialog.modal {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -499,11 +493,11 @@ dialog.match-modal {
     overflow: auto;
 }
 
-dialog.match-modal::backdrop {
+dialog.modal::backdrop {
     background: oklch(0% 0 0 / 0.65);
 }
 
-.match-modal__bar {
+.modal__bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -514,19 +508,19 @@ dialog.match-modal::backdrop {
     background: var(--surface);
 }
 
-.match-modal__title {
+.modal__title {
     font-weight: 700;
 }
 
-.match-modal__body {
+.modal__body {
     padding: 1.25rem;
 }
 
-.match-modal__team {
+.match-section {
     margin-bottom: 1.25rem;
 }
 
-.match-modal__team-title {
+.match-section__title {
     font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -637,15 +631,9 @@ dialog.match-modal::backdrop {
 }
 
 .hero-picker__chip[aria-current="true"] {
-    background: var(--accent);
-    color: var(--bg);
+    background: oklch(from var(--accent) l c h / 0.2);
+    color: var(--accent);
     border-color: var(--accent);
-    font-weight: 700;
-}
-
-.hero-picker__chip[aria-current="true"] .tab__count {
-    color: var(--bg);
-    opacity: 0.7;
 }
 
 /* ---------- Buttons ---------- */
@@ -730,12 +718,12 @@ li.loading-row {
         align-items: flex-start;
     }
 
-    .match-table {
+    .table {
         font-size: 0.85rem;
     }
 
-    .match-table th:nth-child(n + 5),
-    .match-table td:nth-child(n + 5) {
+    .table th:nth-child(n + 5),
+    .table td:nth-child(n + 5) {
         display: none;
     }
 }

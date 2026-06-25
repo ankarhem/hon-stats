@@ -74,7 +74,7 @@
             {
                 var games = Model.HeroBuild.First().Games;
                 var heroName = Model.Heroes.GetValueOrDefault(Model.SelectedHeroId)?.TranslatedName ?? ("Hero " + Model.SelectedHeroId);
-                <p class="card__title">Items over @games games on @heroName</p>
+                <p class="eyebrow card__title">Items over @games games on @heroName</p>
                 <ul class="grid-list">
                     @foreach (var entry in Model.HeroBuild)
                     {
@@ -99,7 +99,7 @@
         }
         else
         {
-            <table class="match-table">
+            <table class="table">
                 <thead>
                     <tr><th>Hero</th><th>Result</th><th>K/D/A</th><th>Duration</th><th>Map</th><th>Date</th></tr>
                 </thead>

@@ -6,22 +6,22 @@
 else
 {
     var d = Model.Detail;
-    <dialog class="match-modal" closedby="any" aria-label="Match details">
-        <div class="match-modal__bar">
-            <span class="match-modal__title">
+    <dialog class="modal" closedby="any" aria-label="Match details">
+        <div class="modal__bar">
+            <span class="modal__title">
                 Match #@d.GameId · @d.Map · @(d.Duration / 60)m @(d.Duration % 60)s · @d.Date.ToString("yyyy-MM-dd")
             </span>
             <form method="dialog"><button class="btn btn--ghost" type="submit">Close ✕</button></form>
         </div>
-        <div class="match-modal__body">
+        <div class="modal__body">
             @foreach (var team in d.Players.GroupBy(p => p.Team))
             {
                 var teamLower = team.Key.ToLowerInvariant();
-                <section class="match-modal__team">
-                    <p class="match-modal__team-title team--@teamLower">
+                <section class="match-section">
+                    <p class="match-section__title team--@teamLower">
                         @team.Key @(team.Key == d.WinningTeam ? "· Winner" : "")
                     </p>
-                    <table class="match-table">
+                    <table class="table">
                         <thead>
                             <tr><th>Hero</th><th>K/D/A</th><th>Wards</th><th>Net worth</th><th>Items</th></tr>
                         </thead>
