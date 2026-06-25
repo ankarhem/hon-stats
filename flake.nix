@@ -1,0 +1,64 @@
+{
+  description = ".NET development environment";
+
+  inputs = {
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # https://github.com/nixos/nixpkgs/issues/483584
+    nixpkgs.url = "github:NixOS/nixpkgs/70801e06d9730c4f1704fbd3bbf5b8e11c03a2a7";
+    git-hooks.url = "github:cachix/git-hooks.nix";
+    git-hooks.inputs.nixpkgs.follows = "nixpkgs";
+    treefmt-nix.url = "github:numtide/treefmt-nix";
+  };
+
+  outputs =
+    inputs@{ self, ... }:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        inputs.git-hooks.flakeModule
+        inputs.treefmt-nix.flakeModule
+      ];
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+        "x86_64-darwin"
+      ];
+      perSystem =
+        {
+          config,
+          lib,
+          pkgs,
+          system,
+          ...
+        }:
+        {
+          treefmt = {
+            programs.nixfmt.enable = true;
+            programs.nixfmt.package = pkgs.nixfmt;
+            programs.csharpier.enable = true;
+          };
+          pre-commit.settings.hooks = {
+            treefmt.enable = true;
+          };
+          devShells.default = pkgs.mkShell {
+            inherit (config.pre-commit) shellHook;
+            packages =
+              with pkgs;
+              [
+                dotnet
+                omnisharp-roslyn
+                nuget
+              ]
+              ++ config.pre-commit.settings.enabledPackages;
+          };
+          _module.args.pkgs = import inputs.nixpkgs {
+            inherit system;
+            overlays = lib.attrValues self.overlays;
+          };
+        };
+      flake.overlays.default = final: prev: {
+        dotnet = final.dotnet-sdk_10;
+      };
+    };
+}
