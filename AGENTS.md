@@ -14,6 +14,18 @@ semantic HTML only (`<dialog>`, popover attr, `<details>`). Razor is templating
 only — interactivity via HTMX fragments. No JS/CSS libraries without approval.
 C# formatter is **csharpier** (runs via `nix fmt` / treefmt).
 
+**CSS (single global `wwwroot/css/site.css`, no Razor CSS isolation).** Isolation
+was evaluated and rejected: this app composes UI across a shared `_Layout` + HTMX
+partials, so file-scoped `b-<hash>` cuts across component boundaries — `:root`
+tokens stop matching, shared classes (`.btn`/`.card`) only style one page,
+HTMX-injected partials don't inherit the page scope, and tag-helper elements
+(`<a asp-page>`, `<form>`) don't get the scope attribute. Keep ONE global file.
+**Color tokens are OKLCH** (`--accent: oklch(71.53% 0.1518 253.31)` etc., computed
+via `culori`, not by hand). Derive translucent variants with relative-color syntax:
+`oklch(from var(--accent) l c h / 0.18)` — NOT `var(--accent / 0.5)` (slash is
+illegal inside `var()`). Target is Chrome/Firefox (Safari `from` support skipped
+for now), so no `@supports` guards / `rgba()` fallbacks are kept.
+
 ## Architecture (4 layers)
 
 - **HonStats.Domain** — all models (mutable classes) + domain events. No deps.
@@ -35,6 +47,15 @@ C# formatter is **csharpier** (runs via `nix fmt` / treefmt).
 xUnit + **AwesomeAssertions** (fluent) + **Snapper** (snapshots). Tests in
 `tests/HonStats.App.Tests` cover App + Infra. Hand-written fakes (no mocking lib).
 Persisted model behavior validated via `Database.MigrateAsync()` + table asserts.
+
+**E2E** (`tests/HonStats.Web.E2E`, Playwright + xUnit): `E2EFixture` spawns the
+real app + headless Chromium; run via `just e2e` (separate from `just validate` —
+needs browsers + live juvio). **Locators: prefer user-facing over CSS classes** —
+`GetByRole(AriaRole.Dialog)` for the modal, `GetByRole(AriaRole.Link/Button, Name)`,
+`GetByPlaceholder` for the search box (NOTE: `<input type="search">` is role
+`searchbox`, not `textbox`), `GetByTestId(...)` (`data-testid` on `.match-row` /
+teammate rows) where role/text aren't unique. NEVER `WaitForTimeoutAsync` — use
+auto-retrying web-first assertions (`Expect(locator).ToBeVisibleAsync`).
 
 ## Notes
 

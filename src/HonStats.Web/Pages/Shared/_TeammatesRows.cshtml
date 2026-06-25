@@ -2,7 +2,7 @@
 @foreach (var t in Model.Teammates)
 {
     var winPct = t.GamesTogether > 0 ? t.WinsTogether * 100 / t.GamesTogether : 0;
-    <li class="roster__item">
+    <li class="roster__item" data-testid="teammate-row">
         <span class="flag">@ProfileModel.Flag(t.Country)</span>
         <a href="/Players/Profile/@t.TeammateAccountId" class="roster__name">
             @(t.DisplayName ?? t.Username ?? t.TeammateAccountId.ToString())

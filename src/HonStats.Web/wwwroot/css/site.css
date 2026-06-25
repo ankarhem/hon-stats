@@ -1,24 +1,24 @@
 /* HoN Reborn Stats — design system. Dark, game-stats themed. No framework. */
 
 :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --surface-2: #1c232c;
-    --surface-3: #242d38;
-    --border: #2d3744;
-    --fg: #e6edf3;
-    --muted: #8b949e;
-    --faint: #5d6b7a;
-    --accent: #58a6ff;
-    --accent-2: #79c0ff;
-    --legion: #4ade80;
-    --hellbourne: #f87171;
-    --gold: #fbbf24;
-    --win: #4ade80;
-    --loss: #f87171;
+    --bg: oklch(17.63% 0.014 258.36);
+    --surface: oklch(22.02% 0.0157 256.82);
+    --surface-2: oklch(25.34% 0.0199 254.85);
+    --surface-3: oklch(29.35% 0.0237 253.66);
+    --border: oklch(33.32% 0.0268 255.12);
+    --fg: oklch(94.25% 0.0111 243.66);
+    --muted: oklch(66.25% 0.0181 250.92);
+    --faint: oklch(52.16% 0.0292 250.2);
+    --accent: oklch(71.53% 0.1518 253.31);
+    --accent-2: oklch(78.57% 0.1153 246.66);
+    --legion: oklch(80.03% 0.1821 151.71);
+    --hellbourne: oklch(71.06% 0.1661 22.22);
+    --gold: oklch(83.69% 0.1644 84.43);
+    --win: oklch(80.03% 0.1821 151.71);
+    --loss: oklch(71.06% 0.1661 22.22);
     --radius: 10px;
     --radius-sm: 6px;
-    --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow: 0 8px 24px oklch(0% 0 0 / 0.35);
     --max-width: 76rem;
     color-scheme: dark;
 }
@@ -83,7 +83,7 @@ p {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(13, 17, 23, 0.92);
+    background: oklch(from var(--bg) l c h / 0.92);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border);
 }
@@ -135,7 +135,7 @@ p {
 .search__input:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.18);
+    box-shadow: 0 0 0 3px oklch(from var(--accent) l c h / 0.18);
 }
 
 .search__spinner {
@@ -458,12 +458,12 @@ p {
 }
 
 .result-badge--win {
-    background: rgba(74, 222, 128, 0.15);
+    background: oklch(from var(--win) l c h / 0.15);
     color: var(--win);
 }
 
 .result-badge--loss {
-    background: rgba(248, 113, 113, 0.15);
+    background: oklch(from var(--loss) l c h / 0.15);
     color: var(--loss);
 }
 
@@ -500,7 +500,7 @@ dialog.match-modal {
 }
 
 dialog.match-modal::backdrop {
-    background: rgba(0, 0, 0, 0.65);
+    background: oklch(0% 0 0 / 0.65);
 }
 
 .match-modal__bar {
@@ -668,7 +668,7 @@ dialog.match-modal::backdrop {
 .btn--primary {
     background: var(--accent);
     border-color: var(--accent);
-    color: #07101a;
+    color: oklch(16.96% 0.0253 251.15);
 }
 
 .btn--ghost {

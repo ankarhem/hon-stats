@@ -3,7 +3,7 @@
 {
     var hero = Model.Heroes.GetValueOrDefault(m.HeroId);
     var won = m.Team == m.WinningTeam;
-    <tr class="match-row"
+    <tr class="match-row" data-testid="match-row"
         hx-get="@Url.Page("/Players/Profile", "MatchDetail", new { accountId = Model.AccountId, gameId = m.GameId })"
         hx-target="#match-detail-host" hx-swap="innerHTML">
         <td>

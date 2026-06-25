@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Microsoft.Playwright;
 using Xunit;
 
@@ -7,6 +6,8 @@ namespace HonStats.Web.E2E;
 [Collection("E2E")]
 public class FlowTests
 {
+    private const string KnownPlayer = "idealpink";
+
     private readonly E2EFixture _e2e;
 
     public FlowTests(E2EFixture e2e) => _e2e = e2e;
@@ -18,31 +19,30 @@ public class FlowTests
 
         await page.GotoAsync(_e2e.BaseUrl + "/");
 
-        await page.Locator(".search__input").PressSequentiallyAsync("idealpink");
-        await page.Locator(".search-results__item a").First.ClickAsync();
+        await page.GetByPlaceholder("Search player name…").PressSequentiallyAsync(KnownPlayer);
+        await page.GetByRole(AriaRole.Link, new() { Name = KnownPlayer }).ClickAsync();
 
         await Assertions
-            .Expect(page.Locator(".profile-header__name"))
-            .ToContainTextAsync("idealpink");
+            .Expect(page.GetByRole(AriaRole.Heading, new() { Name = KnownPlayer }))
+            .ToBeVisibleAsync();
         await Assertions.Expect(page.GetByText("Wards placed")).ToBeVisibleAsync();
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Reindex" }).ClickAsync();
 
         // The tab content is static once loaded, so re-open Teammates to re-fetch
         // as background indexing completes; the roster renders once it finishes.
+        var teammatesTab = page.GetByRole(AriaRole.Button, new() { Name = "Teammates" });
+        var firstTeammate = page.GetByTestId("teammate-row").First;
         var deadline = DateTime.UtcNow.AddSeconds(240);
         while (DateTime.UtcNow < deadline)
         {
-            await page.GetByRole(AriaRole.Button, new() { Name = "Teammates" }).ClickAsync();
+            await teammatesTab.ClickAsync();
             try
             {
-                await Assertions
-                    .Expect(page.Locator(".roster__item").First)
-                    .ToBeVisibleAsync(new() { Timeout = 5000 });
+                await Assertions.Expect(firstTeammate).ToBeVisibleAsync(new() { Timeout = 5000 });
                 return;
             }
             catch (PlaywrightException) { }
-            await page.WaitForTimeoutAsync(5000);
         }
 
         throw new TimeoutException("Teammates did not populate within 240s (indexing)");

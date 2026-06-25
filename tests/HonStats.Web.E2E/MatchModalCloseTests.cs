@@ -19,7 +19,7 @@ public class MatchModalCloseTests
 
         await page.Keyboard.PressAsync("Escape");
 
-        await Assertions.Expect(page.Locator("dialog.match-modal")).ToBeHiddenAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).ToBeHiddenAsync();
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public class MatchModalCloseTests
         // makes a backdrop click dismiss the dialog (Chrome/Firefox).
         await page.Mouse.ClickAsync(5, 5);
 
-        await Assertions.Expect(page.Locator("dialog.match-modal")).ToBeHiddenAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).ToBeHiddenAsync();
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class MatchModalCloseTests
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Close ✕" }).ClickAsync();
 
-        await Assertions.Expect(page.Locator("dialog.match-modal")).ToBeHiddenAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).ToBeHiddenAsync();
     }
 
     private async Task<IPage> OpenMatchModalAsync()
@@ -49,18 +49,17 @@ public class MatchModalCloseTests
         var page = _e2e.Page;
 
         await page.GotoAsync(_e2e.BaseUrl + "/");
-        await page.Locator(".search__input").PressSequentiallyAsync(KnownPlayer);
-        await page.Locator(".search-results__item a").First.ClickAsync();
+        await page.GetByPlaceholder("Search player name…").PressSequentiallyAsync(KnownPlayer);
+        await page.GetByRole(AriaRole.Link, new() { Name = KnownPlayer }).ClickAsync();
 
         // Matches are fetched live from juvio on profile load (no indexing wait),
         // but allow for upstream latency before the rows render.
-        await Assertions
-            .Expect(page.Locator(".match-row").First)
-            .ToBeVisibleAsync(new() { Timeout = 60_000 });
+        var firstMatch = page.GetByTestId("match-row").First;
+        await Assertions.Expect(firstMatch).ToBeVisibleAsync(new() { Timeout = 60_000 });
 
-        await page.Locator(".match-row").First.ClickAsync();
+        await firstMatch.ClickAsync();
 
-        await Assertions.Expect(page.Locator("dialog.match-modal")).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
 
         return page;
     }
