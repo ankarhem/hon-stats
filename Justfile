@@ -24,6 +24,12 @@ fmt:
 build:
     dotnet build -warnaserror
 
-# Run all tests.
+# Run unit tests (fast, offline). E2E is separate — it needs Playwright
+# browsers + live juvio, so it's excluded from `validate`.
 test:
-    dotnet test -warnaserror
+    dotnet test tests/HonStats.App.Tests/HonStats.App.Tests.csproj -warnaserror
+
+# Run the Playwright E2E suite (launches the app + headless Chromium; needs
+# `node` + Chromium installed via the Playwright CLI).
+e2e:
+    dotnet test tests/HonStats.Web.E2E/HonStats.Web.E2E.csproj
