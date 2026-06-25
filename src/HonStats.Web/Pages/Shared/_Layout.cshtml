@@ -14,7 +14,7 @@
             <a class="brand" href="/" aria-label="HoN Reborn Stats home">
                 <span class="brand__mark" aria-hidden="true">◆</span> HoN Reborn Stats
             </a>
-            <form class="search" role="search" aria-label="Player search">
+            <form class="search" role="search" aria-label="Player search" action="/search" method="get">
                 <input
                     class="search__input"
                     type="search"
@@ -23,7 +23,7 @@
                     autocomplete="off"
                     aria-label="Player name"
                     hx-get="/search"
-                    hx-trigger="keyup changed delay:300ms, search"
+                    hx-trigger="keyup changed delay:300ms"
                     hx-target="#search-results"
                     hx-swap="innerHTML"
                     hx-indicator="#search-indicator" />

@@ -1,5 +1,18 @@
 @page
 @model SearchModel
 @{
-    // Fragment-only endpoint: OnGet returns the _SearchResults partial.
+    ViewData["Title"] = string.IsNullOrWhiteSpace(Model.Query) ? "Search" : $"Search: {Model.Query}";
 }
+
+<section class="search-page">
+    <h1>Player search</h1>
+    @if (string.IsNullOrWhiteSpace(Model.Query))
+    {
+        <p class="muted">Type a player name in the search box above to look up their stats.</p>
+    }
+    else
+    {
+        <p class="muted">@(Model.Results.Count > 0 ? "Exact match:" : $"No player named \"{Model.Query}\".")</p>
+        <partial name="_SearchResults" model="Model.Results" />
+    }
+</section>

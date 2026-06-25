@@ -80,3 +80,26 @@ setting `Authorization: Bearer`.
 - `getrecentmatchesforplayer` rejects a large `limit` with **400** (e.g. 200 fails; 25 works, max unknown). The indexer pages via `offset` at `Indexing:RecentMatchesLimit` (25) to ingest full history.
 - `POST auth /v1/userinfo/getuserinfo` rejects a large `accountIds` array with **400** (somewhere in (50, 200]; ≤50 works, exact max unknown). The name resolver chunks at 50 (`JuvioPlayerNameResolver`).
 - Razor Pages PageModels don't auto-associate by convention when `_ViewImports` sets `@namespace` — each page `.cshtml` needs an explicit `@model <PageModel>` or its `OnGet*` handlers silently don't run (page renders as an empty shell).
+
+## HTMX patterns (cross-checked against the JetBrains htmx+ASP.NET tutorial)
+
+Canonical pattern for every HTMX endpoint: `Request.IsHtmx() ? Partial("_Fragment") : Page()`.
+The same URL serves the full page (non-htmx / form submit / shared link) AND the
+partial fragment (htmx swap). Always set `@model` on every `.cshtml`.
+
+- **Search**: input `hx-trigger="keyup changed delay:300ms"` (typeahead) + form
+  `action="/search" method="get"` (Enter → full results page). Both go to the same
+  endpoint; `IsHtmx()` distinguishes fragment vs page.
+- **Infinite scroll**: sentinel `<tr hx-trigger="revealed" hx-swap="outerHTML">`
+  replaces itself with new rows + next sentinel. Tutorial uses `afterend` on the
+  last item; both are valid.
+- **Match-detail modal**: native `<dialog open>` swapped via HTMX into a host div;
+  closed via `<form method="dialog">` (no JS). Tutorial uses Bootstrap + `onclick`.
+- **Tabs**: each handler returns a region partial (tab bar with active class +
+  content) swapped into `#profile-region`. Active state is server-rendered (HATEOAS).
+- **Improvement**: HTMX URLs are hand-coded strings (e.g.
+  `hx-get="/Players/Profile/@id?handler=matches&offset=0"`). The Htmx.TagHelpers
+  `hx-page` / `hx-page-handler` would be type-safe but aren't used yet.
+- **Production caching**: endpoints that branch on `Request.IsHtmx()` should set
+  `Vary: HX-Request` to avoid a caching proxy serving a fragment for a full-page
+  request (or vice versa). Not set yet (app not deployed).
