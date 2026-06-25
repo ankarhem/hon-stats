@@ -83,6 +83,8 @@ setting `Authorization: Bearer`.
 
 ## HTMX patterns (cross-checked against the JetBrains htmx+ASP.NET tutorial)
 
+Reference: https://www.jetbrains.com/dotnet/guide/tutorials/htmx-aspnetcore/
+
 Canonical pattern for every HTMX endpoint: `Request.IsHtmx() ? Partial("_Fragment") : Page()`.
 The same URL serves the full page (non-htmx / form submit / shared link) AND the
 partial fragment (htmx swap). Always set `@model` on every `.cshtml`.
