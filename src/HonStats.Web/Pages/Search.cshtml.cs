@@ -13,6 +13,8 @@ public class SearchModel(IPlayerSearch search) : PageModel
 
     public async Task<IActionResult> OnGet(string q, CancellationToken ct)
     {
+        Response.Headers["Vary"] = "HX-Request";
+
         if (Request.IsHtmx())
         {
             if (string.IsNullOrWhiteSpace(q))

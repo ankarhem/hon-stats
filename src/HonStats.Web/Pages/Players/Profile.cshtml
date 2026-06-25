@@ -50,9 +50,7 @@ else
         </div>
     </div>
 
-    <div id="profile-region"
-         hx-get="/Players/Profile/@Model.AccountId?handler=matches&offset=0"
-         hx-trigger="load" hx-swap="innerHTML">
-        <p class="muted">Loading matches…</p>
+    <div id="profile-region">
+        <partial name="_ProfileRegion" model="Model" />
     </div>
 }

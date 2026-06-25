@@ -20,6 +20,7 @@ internal sealed class JuvioPlayerInsightsIndexer(
     IMatchQuery matches,
     IPlayerNameResolver names,
     IDomainEventDispatcher dispatcher,
+    IIndexProgressTracker progressTracker,
     IOptions<IndexingOptions> options,
     ILogger<JuvioPlayerInsightsIndexer> logger
 ) : IPlayerInsightsIndexer
@@ -63,7 +64,8 @@ internal sealed class JuvioPlayerInsightsIndexer(
         }
 
         var newGameIds = newMatches.Select(m => m.GameId).ToList();
-        await this.IngestSummariesAsync(db, newGameIds, ct);
+        progressTracker.Start(accountId, newGameIds.Count);
+        await this.IngestSummariesAsync(db, accountId, newGameIds, ct);
 
         var resolved = await names.ResolveAsync(new[] { accountId }, ct);
         if (resolved.TryGetValue(accountId, out var name))
@@ -83,6 +85,7 @@ internal sealed class JuvioPlayerInsightsIndexer(
             new PlayerMatchesIndexed(accountId, newGameIds.Select(g => (long)g).ToList()),
             ct
         );
+        progressTracker.Complete(accountId);
         logger.LogInformation(
             "Indexed {AccountId}: {Count} new matches",
             accountId,
@@ -92,6 +95,7 @@ internal sealed class JuvioPlayerInsightsIndexer(
 
     private async Task IngestSummariesAsync(
         HonStatsDbContext db,
+        Guid accountId,
         IReadOnlyList<int> gameIds,
         CancellationToken ct
     )
@@ -120,6 +124,7 @@ internal sealed class JuvioPlayerInsightsIndexer(
             }
         });
         await Task.WhenAll(fetches);
+        progressTracker.AddCompleted(accountId, summaries.Count);
 
         foreach (var summary in summaries)
         {

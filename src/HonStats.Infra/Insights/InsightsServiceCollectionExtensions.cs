@@ -20,6 +20,7 @@ public static class InsightsServiceCollectionExtensions
         services.Configure<IndexingOptions>(configuration.GetSection(IndexingOptions.SectionName));
 
         services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
+        services.AddSingleton<IIndexProgressTracker, IndexProgressTracker>();
         services.AddScoped<IPlayerNameResolver, JuvioPlayerNameResolver>();
         services.AddScoped<IInsightsRawQuery, InsightsRawQuery>();
         services.AddScoped<IInsightsAggregateStore, InsightsAggregateStore>();

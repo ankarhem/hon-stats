@@ -1,15 +1,16 @@
 @model ReindexButtonView
 @{
-    var rejected = Model.Result is { Outcome: ReindexOutcome.CooldownRejected };
     var indexing = Model.Indexed?.Status == IndexingStatus.Indexing;
+    var rejected = Model.Result is { Outcome: ReindexOutcome.CooldownRejected };
 }
 <form method="post"
-      hx-post="/Players/Profile/@Model.AccountId?handler=reindex"
+      hx-post="@Url.Page("/Players/Profile", "Reindex", new { accountId = Model.AccountId })"
       hx-target="this" hx-swap="outerHTML"
       hx-disabled-elt="button">
     @if (indexing)
     {
         <button class="btn" type="submit" disabled>Indexing…</button>
+        <partial name="_IndexProgress" model="new IndexProgressView(Model.AccountId, 0, 0, false, null)" />
     }
     else
     {
@@ -24,7 +25,7 @@
         }
         else
         {
-            <span class="reindex-status">Queued ✓ refresh shortly</span>
+            <span class="reindex-status">Queued ✓</span>
         }
     }
     else if (Model.Indexed?.LastReindexAt is not null)

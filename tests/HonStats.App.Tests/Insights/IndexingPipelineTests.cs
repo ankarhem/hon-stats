@@ -58,6 +58,7 @@ public class IndexingPipelineTests
                 o.MatchSummaryConcurrency = 2;
             });
             services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
+            services.AddSingleton<IIndexProgressTracker, IndexProgressTracker>();
             services.AddScoped<IInsightsRawQuery, InsightsRawQuery>();
             services.AddScoped<IInsightsAggregateStore, InsightsAggregateStore>();
             services.AddScoped<IPlayerInsightsQuery, SqlitePlayerInsightsQuery>();

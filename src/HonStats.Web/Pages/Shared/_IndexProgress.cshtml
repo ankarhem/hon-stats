@@ -1,0 +1,26 @@
+@model IndexProgressView
+@if (Model.Done)
+{
+    <span class="reindex-status">Indexed ✓</span>
+}
+else
+{
+    var pct = Model.Total > 0 ? Model.Fetched * 100 / Model.Total : 0;
+    var etaText = "";
+    if (Model.StartedAt is DateTimeOffset started && Model.Fetched > 0 && Model.Total > 0)
+    {
+        var elapsedSec = (DateTimeOffset.UtcNow - started).TotalSeconds;
+        var rate = Model.Fetched / elapsedSec;
+        if (rate > 0)
+        {
+            var remaining = Model.Total - Model.Fetched;
+            etaText = $" — ~{(int)(remaining / rate)}s left";
+        }
+    }
+    <div hx-get="@Url.Page("/Players/Profile", "IndexProgress", new { accountId = Model.AccountId })"
+         hx-trigger="every 2s" hx-target="this" hx-swap="outerHTML">
+        <span class="reindex-status">
+            @(Model.Total > 0 ? $"Indexing {Model.Fetched}/{Model.Total} ({pct}%){etaText}" : "Queued…")
+        </span>
+    </div>
+}
