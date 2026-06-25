@@ -6,7 +6,7 @@
 else
 {
     var d = Model.Detail;
-    <dialog open class="match-modal">
+    <dialog class="match-modal" closedby="any">
         <div class="match-modal__bar">
             <span class="match-modal__title">
                 Match #@d.GameId · @d.Map · @(d.Duration / 60)m @(d.Duration % 60)s · @d.Date.ToString("yyyy-MM-dd")

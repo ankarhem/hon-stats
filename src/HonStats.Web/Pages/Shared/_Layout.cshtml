@@ -41,7 +41,8 @@
         <p>Community project · data from juvio · not affiliated with Garena / Frostburn / Juvio.</p>
     </footer>
 
-    <div id="match-detail-host" aria-live="polite"></div>
+    <div id="match-detail-host" aria-live="polite"
+         hx-on::after-swap="this.querySelector('dialog:not([open])')?.showModal()"></div>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

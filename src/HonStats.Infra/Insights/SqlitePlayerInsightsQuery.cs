@@ -19,6 +19,8 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
 
     public async Task<IReadOnlyList<TeammateStat>> GetTeammatesAsync(
         Guid accountId,
+        int limit,
+        int offset,
         CancellationToken ct = default
     )
     {
@@ -26,6 +28,9 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
         var rows = await db
             .Teammates.Where(t => t.AccountId == accountId)
             .OrderByDescending(t => t.GamesTogether)
+            .ThenBy(t => t.TeammateAccountId)
+            .Skip(offset)
+            .Take(limit)
             .ToListAsync(ct);
 
         return rows.Select(r => new TeammateStat

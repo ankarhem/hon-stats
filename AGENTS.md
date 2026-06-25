@@ -83,7 +83,10 @@ setting `Authorization: Bearer`.
 
 ## HTMX patterns (cross-checked against the JetBrains htmx+ASP.NET tutorial)
 
-Reference: https://www.jetbrains.com/dotnet/guide/tutorials/htmx-aspnetcore/
+References:
+- Official docs: https://htmx.org/docs/
+- Examples gallery: https://htmx.org/examples/
+- JetBrains htmx+ASP.NET tutorial: https://www.jetbrains.com/dotnet/guide/tutorials/htmx-aspnetcore/
 
 Canonical pattern for every HTMX endpoint: `Request.IsHtmx() ? Partial("_Fragment") : Page()`.
 The same URL serves the full page (non-htmx / form submit / shared link) AND the
@@ -95,10 +98,22 @@ partial fragment (htmx swap). Always set `@model` on every `.cshtml`.
 - **Infinite scroll**: sentinel `<tr hx-trigger="revealed" hx-swap="outerHTML">`
   replaces itself with new rows + next sentinel. Tutorial uses `afterend` on the
   last item; both are valid.
-- **Match-detail modal**: native `<dialog open>` swapped via HTMX into a host div;
-  closed via `<form method="dialog">` (no JS). Tutorial uses Bootstrap + `onclick`.
-- **Tabs**: each handler returns a region partial (tab bar with active class +
-  content) swapped into `#profile-region`. Active state is server-rendered (HATEOAS).
+- **Match-detail modal**: native `<dialog class="match-modal" closedby="any">`
+  (no `open` attr) swapped via HTMX into `#match-detail-host`. The host carries
+  `hx-on::after-swap="this.querySelector('dialog:not([open])')?.showModal()"` — the
+  ONE sanctioned JS exception, because Esc-to-close, `::backdrop` click-outside,
+  focus trap and `aria-modal` only work on a modal opened via `showModal()`, and
+  HTML has no "open as modal" attribute. `closedby="any"` enables click-outside
+  dismissal (Chrome 134+/Firefox 141+; NO Safari yet — polyfill later if needed).
+  Close paths: Esc, backdrop click, and the `<form method="dialog">` button — all
+  fire the native `close` event. The closed `<dialog>` stays in the DOM (just
+  `display:none`); reopening re-fires `showModal()` via the `:not([open])` guard.
+  Covered by `tests/HonStats.Web.E2E/MatchModalCloseTests.cs`.
+- **Tabs**: each handler returns a region partial (tab bar + content) swapped
+  into `#profile-region`. Active state is server-rendered (HATEOAS). Mark the
+  selected tab/pill with `aria-current="true"` (`null` when inactive), NOT an
+  `--active` modifier class — `site.css` styles active state via `[aria-current]`
+  selectors, so `--active` classes silently render nothing.
 - **Improvement**: HTMX URLs are hand-coded strings (e.g.
   `hx-get="/Players/Profile/@id?handler=matches&offset=0"`). The Htmx.TagHelpers
   `hx-page` / `hx-page-handler` would be type-safe but aren't used yet.

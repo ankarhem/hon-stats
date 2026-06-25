@@ -1,22 +1,16 @@
 @model ProfileModel
-@{
-    var matchesClass = Model.Tab == "matches" ? "tab tab--active" : "tab";
-    var teammatesClass = Model.Tab == "teammates" ? "tab tab--active" : "tab";
-    var buildsClass = Model.Tab == "heroBuilds" ? "tab tab--active" : "tab";
-}
-
 <nav class="tabs" aria-label="Profile sections">
-    <button class="@matchesClass"
+    <button class="tab" aria-current="@(Model.Tab == "matches" ? "true" : null)"
             hx-get="@Url.Page("/Players/Profile", null, new { accountId = Model.AccountId, tab = "matches" })"
             hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
         Matches
     </button>
-    <button class="@teammatesClass"
+    <button class="tab" aria-current="@(Model.Tab == "teammates" ? "true" : null)"
             hx-get="@Url.Page("/Players/Profile", null, new { accountId = Model.AccountId, tab = "teammates" })"
             hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
         Teammates
     </button>
-    <button class="@buildsClass"
+    <button class="tab" aria-current="@(Model.Tab == "heroBuilds" ? "true" : null)"
             hx-get="@Url.Page("/Players/Profile", null, new { accountId = Model.AccountId, tab = "heroBuilds" })"
             hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
         Hero Builds
@@ -40,18 +34,7 @@
         else
         {
             <ul class="roster">
-                @foreach (var t in Model.Teammates)
-                {
-                    var winPct = t.GamesTogether > 0 ? t.WinsTogether * 100 / t.GamesTogether : 0;
-                    <li class="roster__item">
-                        <span class="flag">@ProfileModel.Flag(t.Country)</span>
-                        <a href="/Players/Profile/@t.TeammateAccountId" class="roster__name">
-                            @(t.DisplayName ?? t.Username ?? t.TeammateAccountId.ToString())
-                        </a>
-                        <span class="muted">@t.GamesTogether games · @t.WinsTogether W (@winPct%)</span>
-                        <span class="roster__games">@t.GamesTogether</span>
-                    </li>
-                }
+                <partial name="_TeammatesRows" model="new TeammatesView(Model.AccountId, Model.Teammates, 0, ProfileModel.PageSize, Model.HasMoreTeammates)" />
             </ul>
         }
         break;
@@ -75,8 +58,7 @@
                 {
                     var hero = Model.Heroes.GetValueOrDefault(kv.Key);
                     var isActive = kv.Key == Model.SelectedHeroId;
-                    var chipClass = isActive ? "hero-picker__chip hero-picker__chip--active" : "hero-picker__chip";
-                    <a class="@chipClass"
+                    <a class="hero-picker__chip" aria-current="@(isActive ? "true" : null)"
                        hx-get="@Url.Page("/Players/Profile", null, new { accountId = Model.AccountId, tab = "heroBuilds", heroId = kv.Key })"
                        hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
                         @(hero?.TranslatedName ?? ("Hero " + kv.Key)) <span class="tab__count">(@kv.Value)</span>

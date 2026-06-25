@@ -8,6 +8,8 @@ public interface IPlayerInsightsQuery
 
     Task<IReadOnlyList<TeammateStat>> GetTeammatesAsync(
         Guid accountId,
+        int limit,
+        int offset,
         CancellationToken ct = default
     );
 

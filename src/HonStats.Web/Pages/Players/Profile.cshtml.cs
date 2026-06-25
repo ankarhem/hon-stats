@@ -34,6 +34,7 @@ public class ProfileModel(
     public IReadOnlyList<PlayerMatch> RecentMatches { get; set; } = [];
     public bool HasMoreMatches { get; set; }
     public IReadOnlyList<TeammateStat> Teammates { get; set; } = [];
+    public bool HasMoreTeammates { get; set; }
     public IReadOnlyDictionary<int, int> HeroGames { get; set; } = new Dictionary<int, int>();
     public IReadOnlyList<HeroBuildEntry> HeroBuild { get; set; } = [];
     public Dictionary<int, Item> Items { get; set; } = new();
@@ -60,7 +61,8 @@ public class ProfileModel(
         switch (tab)
         {
             case "teammates":
-                this.Teammates = await insights.GetTeammatesAsync(accountId, ct);
+                this.Teammates = await insights.GetTeammatesAsync(accountId, PageSize, 0, ct);
+                this.HasMoreTeammates = this.Teammates.Count == PageSize;
                 break;
             case "heroBuilds":
                 this.Items = (await reference.GetItemsAsync(ct)).ToDictionary(i => i.Id);
@@ -104,6 +106,19 @@ public class ProfileModel(
         return Partial(
             "_MatchesRows",
             new MatchesView(accountId, recent, heroes, offset, PageSize, recent.Count == PageSize)
+        );
+    }
+
+    public async Task<IActionResult> OnGetTeammatesMore(
+        Guid accountId,
+        int offset,
+        CancellationToken ct = default
+    )
+    {
+        var teammates = await insights.GetTeammatesAsync(accountId, PageSize, offset, ct);
+        return Partial(
+            "_TeammatesRows",
+            new TeammatesView(accountId, teammates, offset, PageSize, teammates.Count == PageSize)
         );
     }
 
@@ -153,6 +168,14 @@ public record MatchesView(
     Guid AccountId,
     IReadOnlyList<PlayerMatch> Matches,
     Dictionary<int, Hero> Heroes,
+    int Offset,
+    int PageSize,
+    bool HasMore
+);
+
+public record TeammatesView(
+    Guid AccountId,
+    IReadOnlyList<TeammateStat> Teammates,
     int Offset,
     int PageSize,
     bool HasMore

@@ -120,7 +120,7 @@ public class IndexingPipelineTests
                     }
                 );
 
-            var teammates = await query.GetTeammatesAsync(PlayerA);
+            var teammates = await query.GetTeammatesAsync(PlayerA, limit: 25, offset: 0);
             teammates
                 .Should()
                 .ContainSingle(t => t.TeammateAccountId == PlayerB)
