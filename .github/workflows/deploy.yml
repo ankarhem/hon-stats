@@ -1,0 +1,62 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hon-stats
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Configure SSH for deploy
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.HON_STATS_DEPLOY_SSH_KEY }}" > ~/.ssh/id_hon_stats_deploy
+          chmod 600 ~/.ssh/id_hon_stats_deploy
+          cat >> ~/.ssh/config <<'EOF'
+          Host homelab
+            User root
+            IdentityFile ~/.ssh/id_hon_stats_deploy
+            IdentitiesOnly yes
+            StrictHostKeyChecking accept-new
+          EOF
+          chmod 600 ~/.ssh/config
+
+      - name: Wait for homelab over Tailscale
+        run: |
+          for i in $(seq 1 10); do
+            if ssh -o BatchMode=yes -o ConnectTimeout=5 homelab true 2>/dev/null; then
+              echo "homelab reachable"; exit 0
+            fi
+            echo "attempt $i: homelab not reachable yet, retrying..."; sleep 3
+          done
+          echo "::error::homelab not reachable over Tailscale"; exit 1
+
+      - name: Deploy hon-stats to homelab
+        run: nix run .#deploy -- .#homelab.hon-stats
