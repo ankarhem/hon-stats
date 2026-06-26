@@ -1,4 +1,5 @@
 using HonStats.App.ReferenceData;
+using HonStats.App.Search;
 using HonStats.Domain.ReferenceData;
 using Htmx;
 using Microsoft.AspNetCore.Mvc;
@@ -42,9 +43,7 @@ public class HeroesModel(IReferenceDataQuery reference) : PageModel
 
     public bool IsDimmed(Hero h)
     {
-        var nameMatch =
-            string.IsNullOrWhiteSpace(Query)
-            || h.TranslatedName.Contains(Query, StringComparison.OrdinalIgnoreCase);
+        var nameMatch = SearchMatcher.Matches(Query, h.TranslatedName);
         var roleMatch = ActiveRoles.Count == 0 || ActiveRoles.Any(h.MatchesRole);
         return !(nameMatch && roleMatch);
     }

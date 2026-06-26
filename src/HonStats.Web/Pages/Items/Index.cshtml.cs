@@ -1,4 +1,5 @@
 using HonStats.App.ReferenceData;
+using HonStats.App.Search;
 using HonStats.Domain.ReferenceData;
 using Htmx;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +51,5 @@ public class ItemsModel(IReferenceDataQuery reference) : PageModel
             : Page();
     }
 
-    public bool IsDimmed(Item i) =>
-        !string.IsNullOrWhiteSpace(Query)
-        && !i.DisplayName.Contains(Query, StringComparison.OrdinalIgnoreCase);
+    public bool IsDimmed(Item i) => !SearchMatcher.Matches(Query, i.DisplayName);
 }
