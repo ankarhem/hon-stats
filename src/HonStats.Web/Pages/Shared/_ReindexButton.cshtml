@@ -3,6 +3,7 @@
     var status = Model.Indexed?.Status;
     var indexing = status == IndexingStatus.Indexing;
     var failed = status == IndexingStatus.Failed;
+    var queued = Model.Result is { Outcome: ReindexOutcome.Enqueued };
     var cooldown = TimeSpan.FromMinutes(15);
     var lastReindex = Model.Indexed?.LastReindexAt;
     var onCooldown = lastReindex is DateTimeOffset lr && DateTimeOffset.UtcNow - lr < cooldown;
@@ -11,7 +12,7 @@
         : TimeSpan.Zero;
 }
 
-@if (indexing)
+@if (indexing || queued)
 {
     var total = Model.Total;
     var fetched = Model.Fetched;
@@ -49,7 +50,6 @@ else if (failed)
           hx-disabled-elt="button">
         <button class="btn btn--sm" type="submit">Retry</button>
     </form>
-    <span class="reindex-status reindex-status--error">Indexing failed</span>
 }
 else if (onCooldown)
 {

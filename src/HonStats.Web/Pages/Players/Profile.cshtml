@@ -28,12 +28,6 @@ else
                 <span> · @p.Overview.MatchesPlayed games</span>
                 <span> · last played @p.Overview.LastPlayed.ToString("yyyy-MM-dd")</span>
             </p>
-            @if (Model.Indexed?.LastReindexAt is not null)
-            {
-                <p class="profile-header__meta muted">
-                    Last indexed @Model.Indexed.LastReindexAt.Value.ToString("yyyy-MM-dd HH:mm")
-                </p>
-            }
         </div>
         @if (p.Rank is not null)
         {
@@ -43,6 +37,10 @@ else
         }
         <partial name="_ReindexButton" model="new ReindexButtonView(Model.AccountId, null, Model.Indexed)" />
     </div>
+    @if (Model.Indexed?.LastReindexAt is not null)
+    {
+        <p class="profile-indexed-row muted">Last indexed @Model.Indexed.LastReindexAt.Value.ToString("yyyy-MM-dd HH:mm")</p>
+    }
 
     <div class="panel card">
         <p class="eyebrow card__title">Profile stats</p>

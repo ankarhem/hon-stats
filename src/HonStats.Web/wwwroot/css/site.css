@@ -360,6 +360,11 @@ p {
     font-size: 0.9rem;
 }
 
+.profile-indexed-row {
+    font-size: 0.82rem;
+    margin: 0 0 1.5rem;
+}
+
 /* ---------- Detail header (heroes/items) ---------- */
 .detail-header {
     display: flex;
@@ -765,6 +770,15 @@ dialog.modal::backdrop {
 
 .btn:hover {
     border-color: var(--accent);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.btn:disabled:hover {
+    border-color: var(--border);
 }
 
 .btn--primary {
