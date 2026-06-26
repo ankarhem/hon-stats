@@ -63,7 +63,10 @@ public static class JuvioServiceCollectionExtensions
             sp.GetRequiredService<IMemoryCache>()
         ));
 
-        services.AddScoped<IPlayerSearch, JuvioPlayerSearch>();
+        services.AddScoped<IPlayerSearch>(sp => new CachedPlayerSearch(
+            ActivatorUtilities.CreateInstance<JuvioPlayerSearch>(sp),
+            sp.GetRequiredService<IMemoryCache>()
+        ));
         services.AddScoped<IPlayerProfileQuery, JuvioPlayerProfileQuery>();
         services.AddScoped<IMatchQuery, JuvioMatchQuery>();
 
