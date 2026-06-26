@@ -1,6 +1,7 @@
 using HonStats.App.Matches;
 using HonStats.App.Players;
 using HonStats.Infra.Juvio.Adapters;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
@@ -53,6 +54,14 @@ public static class JuvioServiceCollectionExtensions
             )
             .AddPolicyHandler(retry)
             .AddHttpMessageHandler<AuthenticatingHandler>();
+
+        services.AddMemoryCache();
+
+        services.AddScoped<JuvioPlayerNameResolver>();
+        services.AddScoped<IPlayerNameResolver>(sp => new CachedPlayerNameResolver(
+            sp.GetRequiredService<JuvioPlayerNameResolver>(),
+            sp.GetRequiredService<IMemoryCache>()
+        ));
 
         services.AddScoped<IPlayerSearch, JuvioPlayerSearch>();
         services.AddScoped<IPlayerProfileQuery, JuvioPlayerProfileQuery>();

@@ -43,6 +43,7 @@ internal sealed class JuvioPlayerNameResolver(IHttpClientFactory httpClientFacto
                     DisplayName = user.DisplayName,
                     Username = user.Username,
                     Country = user.Country,
+                    CreatedAt = user.CreatedAt,
                 };
             }
         }

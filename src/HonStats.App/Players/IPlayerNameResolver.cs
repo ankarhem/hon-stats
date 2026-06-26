@@ -6,6 +6,7 @@ public sealed class ResolvedName
     public string? DisplayName { get; init; }
     public string? Username { get; init; }
     public string? Country { get; init; }
+    public DateTimeOffset? CreatedAt { get; init; }
 }
 
 public interface IPlayerNameResolver

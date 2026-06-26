@@ -5,8 +5,10 @@ using HonStats.Domain.Players;
 
 namespace HonStats.Infra.Juvio.Adapters;
 
-internal sealed class JuvioPlayerProfileQuery(IHttpClientFactory httpClientFactory)
-    : IPlayerProfileQuery
+internal sealed class JuvioPlayerProfileQuery(
+    IHttpClientFactory httpClientFactory,
+    IPlayerNameResolver nameResolver
+) : IPlayerProfileQuery
 {
     public async Task<PlayerProfile?> GetAsync(Guid accountId, CancellationToken ct = default)
     {
@@ -30,31 +32,17 @@ internal sealed class JuvioPlayerProfileQuery(IHttpClientFactory httpClientFacto
 
     private async Task<PlayerIdentity?> GetIdentityAsync(Guid accountId, CancellationToken ct)
     {
-        var client = httpClientFactory.CreateClient(JuvioHttpClients.Auth);
-        using var response = await client.PostAsJsonAsync(
-            "/v1/userinfo/getuserinfo",
-            new { accountIds = new[] { accountId } },
-            cancellationToken: ct
-        );
-        response.EnsureSuccessStatusCode();
-
-        await using var stream = await response.Content.ReadAsStreamAsync(ct);
-        var dto = await JsonSerializer.DeserializeAsync<UserInfoCollectionDto>(
-            stream,
-            JuvioJson.Options,
-            ct
-        );
-        var user = dto?.UsersValue.FirstOrDefault();
-        if (user is null)
+        var resolved = await nameResolver.ResolveAsync([accountId], ct);
+        if (!resolved.TryGetValue(accountId, out var name))
             return null;
 
         return new PlayerIdentity
         {
             AccountId = accountId,
-            DisplayName = user.DisplayName ?? user.Username ?? accountId.ToString(),
-            Username = user.Username ?? string.Empty,
-            Country = user.Country,
-            CreatedAt = user.CreatedAt,
+            DisplayName = name.DisplayName ?? name.Username ?? accountId.ToString(),
+            Username = name.Username ?? string.Empty,
+            Country = name.Country,
+            CreatedAt = name.CreatedAt,
         };
     }
 
