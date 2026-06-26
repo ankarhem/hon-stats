@@ -33,3 +33,9 @@ test:
 # `node` + Chromium installed via the Playwright CLI).
 e2e:
     dotnet test tests/HonStats.Web.E2E/HonStats.Web.E2E.csproj
+
+# Regenerate the NuGet dependency lock file (needed when packages are added/updated).
+update-nuget-deps:
+    nix build .#hon-stats.fetch-deps --print-out-paths && ./result /tmp/nuget-deps.raw.json && rm result
+    nix run nixpkgs#jq -- 'map(select(.pname != "dotnet-ef"))' /tmp/nuget-deps.raw.json > nuget-deps.json
+    rm /tmp/nuget-deps.raw.json
