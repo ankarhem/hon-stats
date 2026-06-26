@@ -800,6 +800,409 @@ li.loading-row {
     padding: 1rem 0;
 }
 
+/* ---------- Game-text markup (ability/item descriptions) ---------- */
+.gold {
+    color: var(--gold);
+}
+
+.gt {
+    font-weight: 600;
+}
+
+.gt-o {
+    color: var(--gold);
+}
+
+.gt-y {
+    color: oklch(88% 0.16 95);
+}
+
+.gt-r {
+    color: var(--loss);
+}
+
+.gt-g {
+    color: var(--win);
+}
+
+.gt-b,
+.gt-t {
+    color: var(--accent-2);
+}
+
+.gt-p {
+    color: oklch(70% 0.16 320);
+}
+
+/* ---------- Heroes filter ---------- */
+.hero-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.hero-filter__search {
+    width: 100%;
+    max-width: 22rem;
+}
+
+.hero-filter__roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.role-toggle {
+    cursor: pointer;
+}
+
+.role-toggle input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.role-toggle span {
+    display: inline-block;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.role-toggle:hover span {
+    border-color: var(--accent);
+    color: var(--fg);
+}
+
+.role-toggle input:checked + span {
+    background: oklch(from var(--accent) l c h / 0.2);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.role-toggle input:focus-visible + span {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ---------- Heroes 3-column grid ---------- */
+.hero-columns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.hero-column__title {
+    margin-bottom: 0.75rem;
+}
+
+.hero-column__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 0.4rem;
+}
+
+.hero-tile {
+    position: relative;
+}
+
+.hero-tile__icon {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    background: var(--surface-3);
+    display: block;
+    transition: filter 0.15s, opacity 0.15s;
+}
+
+.hero-tile--dimmed .hero-tile__icon {
+    filter: grayscale(1);
+    opacity: 0.4;
+}
+
+/* ---------- Hover tooltips (heroes/items) ---------- */
+.hero-tooltip,
+.item-tooltip {
+    position: absolute;
+    bottom: calc(100% + 0.4rem);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    width: 16rem;
+    padding: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.12s;
+}
+
+.hero-tile:hover .hero-tooltip,
+.item-tile:hover .item-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.hero-tooltip__head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.hero-tooltip__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+}
+
+.hero-tooltip__name {
+    font-weight: 700;
+}
+
+.hero-tooltip__attr {
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.hero-tooltip__stats {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.82rem;
+    display: grid;
+    gap: 0.15rem;
+}
+
+.hero-tooltip__stats li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.hero-tooltip__abilities {
+    display: flex;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+}
+
+.item-tooltip {
+    width: 18rem;
+}
+
+.item-tooltip__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.item-tooltip__name {
+    font-weight: 700;
+}
+
+.item-tooltip__desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
+.item-tooltip__tier {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.item-tooltip__section {
+    margin-top: 0.6rem;
+}
+
+.item-tooltip__section .eyebrow {
+    margin-bottom: 0.25rem;
+}
+
+.item-stat-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.82rem;
+    display: grid;
+    gap: 0.1rem;
+}
+
+.item-stat-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.item-bonus-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.85rem;
+    display: grid;
+    gap: 0.15rem;
+}
+
+.item-tile {
+    position: relative;
+}
+
+.item-tile--dimmed .grid-list__icon {
+    filter: grayscale(1);
+    opacity: 0.4;
+}
+
+.capitalize {
+    text-transform: capitalize;
+}
+
+/* ---------- Hero detail: combat stats + attributes ---------- */
+.combat-stats {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: 0.75rem;
+}
+
+.combat-stats li {
+    display: flex;
+    flex-direction: column;
+}
+
+.attr-boxes {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.attr-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.6rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+}
+
+.attr-box--primary {
+    border-color: var(--accent);
+    background: oklch(from var(--accent) l c h / 0.12);
+}
+
+.attr-box strong {
+    font-size: 1.3rem;
+}
+
+/* ---------- Ability cards ---------- */
+.ability-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.ability-card {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.ability-card__head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.ability-card__name {
+    font-size: 1rem;
+    margin: 0;
+    color: var(--gold);
+}
+
+.ability-card__mana {
+    font-size: 0.8rem;
+    color: var(--accent-2);
+}
+
+.ability-card__desc {
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.ability-card__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+/* ---------- Item recipe tree ---------- */
+.recipe {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.recipe__components {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.recipe__component {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--fg);
+    font-size: 0.82rem;
+}
+
+.recipe__component:hover {
+    text-decoration: none;
+    color: var(--accent);
+}
+
+.recipe__component--recipe {
+    justify-content: flex-end;
+    color: var(--muted);
+}
+
+.recipe__total {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    font-weight: 700;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 640px) {
     .site-header__inner {

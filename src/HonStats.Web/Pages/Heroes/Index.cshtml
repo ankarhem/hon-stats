@@ -5,14 +5,31 @@
 }
 
 <h1>Heroes</h1>
-<ul class="grid-list">
-    @foreach (var hero in Model.Heroes)
-    {
-        <li class="grid-list__item">
-            <a href="/heroes/@hero.Slug">
-                <img class="grid-list__icon" src="@hero.IconUrl" alt="" loading="lazy" />
-                <div class="grid-list__name">@hero.TranslatedName</div>
-            </a>
-        </li>
-    }
-</ul>
+
+<form class="hero-filter"
+      hx-get="/heroes"
+      hx-target="#hero-grid"
+      hx-swap="innerHTML"
+      hx-trigger="input changed delay:80ms, change">
+    <input class="search__input hero-filter__search"
+           type="search"
+           name="q"
+           value="@Model.Query"
+           placeholder="Search hero name…"
+           autocomplete="off"
+           aria-label="Hero name" />
+    <div class="hero-filter__roles" role="group" aria-label="Filter by role">
+        @foreach (var (role, label) in HeroesModel.Roles)
+        {
+            <label class="role-toggle">
+                <input type="checkbox" name="roles" value="@role"
+                       checked="@(Model.ActiveRoles.Contains(role))" />
+                <span>@label</span>
+            </label>
+        }
+    </div>
+</form>
+
+<div id="hero-grid">
+    <partial name="_HeroGrid" model="Model" />
+</div>

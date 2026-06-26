@@ -1,0 +1,67 @@
+@model ItemsModel
+<ul class="grid-list">
+    @foreach (var item in Model.Items)
+    {
+        <li class="grid-list__item item-tile @(Model.IsDimmed(item) ? "item-tile--dimmed" : null)">
+            <a href="/items/@item.Slug">
+                <img class="grid-list__icon" src="@item.IconUrl" alt="@item.DisplayName" loading="lazy" />
+                <div class="grid-list__name">@item.DisplayName</div>
+                @if (item.TotalCost > 0)
+                {
+                    <div class="grid-list__meta gold">@item.TotalCost</div>
+                }
+            </a>
+            <div class="item-tooltip" role="tooltip">
+                <div class="item-tooltip__head">
+                    <div>
+                        <span class="item-tooltip__name">@item.DisplayName</span>
+                        @if (item.Tier is not null)
+                        {
+                            <span class="item-tooltip__tier">@item.Tier</span>
+                        }
+                    </div>
+                    @if (item.TotalCost > 0)
+                    {
+                        <span class="gold">Value: @item.TotalCost</span>
+                    }
+                </div>
+                @if (!string.IsNullOrEmpty(item.Description))
+                {
+                    <div class="item-tooltip__desc">@GameText.Render(item.Description)</div>
+                }
+                @if (item.IsActive)
+                {
+                    <div class="item-tooltip__section">
+                        <p class="eyebrow">Activation</p>
+                        <ul class="item-stat-list">
+                            @if (item.Range is > 0)
+                            {
+                                <li><span class="muted">Range</span> @item.Range</li>
+                            }
+                            @if (item.ManaCost is > 0)
+                            {
+                                <li><span class="muted">Mana cost</span> @item.ManaCost</li>
+                            }
+                            @if (item.Cooldown is > 0)
+                            {
+                                <li><span class="muted">Cooldown</span> @item.Cooldown s</li>
+                            }
+                        </ul>
+                    </div>
+                }
+                @if (item.PassiveBonuses.Count > 0)
+                {
+                    <div class="item-tooltip__section">
+                        <p class="eyebrow">Passive Bonuses</p>
+                        <ul class="item-bonus-list">
+                            @foreach (var bonus in item.PassiveBonuses)
+                            {
+                                <li>@bonus</li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        </li>
+    }
+</ul>

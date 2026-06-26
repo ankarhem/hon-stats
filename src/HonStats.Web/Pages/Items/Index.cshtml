@@ -5,18 +5,21 @@
 }
 
 <h1>Items</h1>
-<ul class="grid-list">
-    @foreach (var item in Model.Items)
-    {
-        <li class="grid-list__item">
-            <a href="/items/@item.Slug">
-                <img class="grid-list__icon" src="@item.IconUrl" alt="" loading="lazy" />
-                <div class="grid-list__name">@item.TranslatedName</div>
-                @if (item.Cost > 0)
-                {
-                    <div class="grid-list__meta">@item.Cost gold</div>
-                }
-            </a>
-        </li>
-    }
-</ul>
+
+<form class="hero-filter"
+      hx-get="/items"
+      hx-target="#item-grid"
+      hx-swap="innerHTML"
+      hx-trigger="input changed delay:80ms">
+    <input class="search__input hero-filter__search"
+           type="search"
+           name="q"
+           value="@Model.Query"
+           placeholder="Search item name…"
+           autocomplete="off"
+           aria-label="Item name" />
+</form>
+
+<div id="item-grid">
+    <partial name="_ItemGrid" model="Model" />
+</div>

@@ -51,7 +51,7 @@ else
                                             {
                                                 var item = Model.Items.GetValueOrDefault(itemId);
                                                 var iconUrl = item?.IconUrl ?? $"https://gamestorage.juvio.com/items/{itemId}/icon.webp";
-                                                <img class="item-icon" src="@iconUrl" alt="@item?.TranslatedName" loading="lazy" />
+                                                <img class="item-icon" src="@iconUrl" alt="@item?.DisplayName" loading="lazy" />
                                             }
                                         </div>
                                     </td>

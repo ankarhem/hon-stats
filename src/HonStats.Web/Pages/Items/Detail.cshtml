@@ -1,7 +1,7 @@
 @page "/items/{slug}"
 @model ItemDetailModel
 @{
-    ViewData["Title"] = Model.Item?.TranslatedName ?? "Item";
+    ViewData["Title"] = Model.Item?.DisplayName ?? "Item";
 }
 
 @if (Model.Item is null)
@@ -17,15 +17,16 @@ else
     <div class="detail-header">
         <img class="detail-header__icon detail-header__icon--sm" src="@i.IconUrl" alt="" loading="lazy" />
         <div>
-            <h1 class="detail-header__name">@i.TranslatedName</h1>
+            <h1 class="detail-header__name">@i.DisplayName</h1>
             <p class="detail-header__meta">
-                @if (i.Cost > 0)
+                @if (i.Tier is not null)
                 {
-                    <span>@i.Cost gold</span>
+                    <span>@i.Tier · </span>
                 }
+                <span class="gold">Value: @i.TotalCost</span>
                 @if (i.ShopCategories.Count > 0)
                 {
-                    <span> · @string.Join(", ", i.ShopCategories)</span>
+                    <span class="capitalize"> · @string.Join(", ", i.ShopCategories)</span>
                 }
             </p>
         </div>
@@ -35,7 +36,71 @@ else
     {
         <div class="panel card">
             <p class="eyebrow card__title">Description</p>
-            <p>@i.Description</p>
+            <div>@GameText.Render(i.Description)</div>
+        </div>
+    }
+
+    @if (i.IsActive)
+    {
+        <div class="panel card">
+            <p class="eyebrow card__title">Activation</p>
+            <ul class="combat-stats">
+                @if (i.Range is > 0)
+                {
+                    <li><span class="muted">Range</span><strong>@i.Range</strong></li>
+                }
+                @if (i.ManaCost is > 0)
+                {
+                    <li><span class="muted">Mana cost</span><strong>@i.ManaCost</strong></li>
+                }
+                @if (i.Cooldown is > 0)
+                {
+                    <li><span class="muted">Cooldown</span><strong>@i.Cooldown s</strong></li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (i.PassiveBonuses.Count > 0)
+    {
+        <div class="panel card">
+            <p class="eyebrow card__title">Passive Bonuses</p>
+            <ul class="item-bonus-list">
+                @foreach (var bonus in i.PassiveBonuses)
+                {
+                    <li>@bonus</li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (i.Components.Count > 0)
+    {
+        <div class="panel card">
+            <p class="eyebrow card__title">Recipe</p>
+            <div class="recipe">
+                <div class="recipe__components">
+                    @foreach (var c in i.Components)
+                    {
+                        <a class="recipe__component" href="/items/@c.Slug">
+                            <img class="item-icon item-icon--lg" src="@c.IconUrl" alt="" loading="lazy" />
+                            <span class="recipe__name">@c.DisplayName</span>
+                            <span class="gold">@c.TotalCost</span>
+                        </a>
+                    }
+                    @if (i.Cost is > 0)
+                    {
+                        <div class="recipe__component recipe__component--recipe">
+                            <span class="recipe__name">Recipe</span>
+                            <span class="gold">@i.Cost</span>
+                        </div>
+                    }
+                </div>
+                <div class="recipe__total">
+                    <span class="recipe__name">@i.DisplayName</span>
+                    <span class="gold">@i.TotalCost</span>
+                </div>
+            </div>
         </div>
     }
 }

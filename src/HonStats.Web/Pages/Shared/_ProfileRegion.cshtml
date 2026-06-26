@@ -83,7 +83,7 @@
                         var pickPct = games > 0 ? entry.Frequency * 100 / games : 0;
                         <li class="grid-list__item">
                             <img class="grid-list__icon" src="@iconUrl" alt="" loading="lazy" />
-                            <div class="grid-list__name">@(item?.TranslatedName ?? ("Item " + entry.ItemId))</div>
+                            <div class="grid-list__name">@(item?.DisplayName ?? ("Item " + entry.ItemId))</div>
                             <div class="grid-list__meta">@entry.Frequency/@games · @pickPct%</div>
                         </li>
                     }

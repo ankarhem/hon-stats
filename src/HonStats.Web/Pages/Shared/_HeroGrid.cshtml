@@ -1,0 +1,52 @@
+@model HeroesModel
+@{
+    var columns = new[]
+    {
+        (Attr: 1, Title: "Agility"),
+        (Attr: 2, Title: "Intelligence"),
+        (Attr: 0, Title: "Strength"),
+    };
+}
+<div class="hero-columns">
+    @foreach (var col in columns)
+    {
+        <section class="hero-column">
+            <h2 class="eyebrow hero-column__title">@col.Title</h2>
+            <div class="hero-column__grid">
+                @foreach (var h in Model.ByAttribute(col.Attr))
+                {
+                    <div class="hero-tile @(Model.IsDimmed(h) ? "hero-tile--dimmed" : null)">
+                        <a class="hero-tile__link" href="/heroes/@h.Slug" aria-label="@h.TranslatedName">
+                            <img class="hero-tile__icon" src="@h.IconUrl" alt="@h.TranslatedName" loading="lazy" />
+                        </a>
+                        <div class="hero-tooltip" role="tooltip">
+                            <div class="hero-tooltip__head">
+                                <img class="hero-tooltip__icon" src="@h.IconUrl" alt="" loading="lazy" />
+                                <div>
+                                    <div class="hero-tooltip__name">@h.TranslatedName</div>
+                                    <div class="hero-tooltip__attr capitalize">@h.PrimaryAttributeName · @(h.AttackType ?? "")</div>
+                                </div>
+                            </div>
+                            <ul class="hero-tooltip__stats">
+                                <li><span class="muted">Damage</span> @h.DisplayDamageMin–@h.DisplayDamageMax</li>
+                                <li><span class="muted">Atk Range</span> @h.AttackRange</li>
+                                <li><span class="muted">Atk Speed</span> @h.AttackSpeed.ToString("0.00")</li>
+                                <li><span class="muted">Move Speed</span> @h.MoveSpeed</li>
+                                <li><span class="muted">STR/AGI/INT</span> @h.Strength / @h.Agility / @h.Intelligence</li>
+                            </ul>
+                            @if (h.Abilities.Count > 0)
+                            {
+                                <div class="hero-tooltip__abilities">
+                                    @foreach (var a in h.Abilities)
+                                    {
+                                        <img class="ability-icon ability-icon--sm" src="@a.IconUrl" alt="@a.TranslatedName" title="@a.TranslatedName" loading="lazy" />
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+</div>

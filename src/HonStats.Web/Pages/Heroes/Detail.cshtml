@@ -18,40 +18,78 @@ else
         <img class="detail-header__icon" src="@h.IconUrl" alt="" loading="lazy" />
         <div>
             <h1 class="detail-header__name">@h.TranslatedName</h1>
-            <p class="detail-header__meta">
-                <span>@(h.AttackType ?? "Unknown") attack</span>
-                <span> · STR @h.Strength / AGI @h.Agility / INT @h.Intelligence</span>
-            </p>
+            <p class="detail-header__meta">@h.PrimaryAttributeName · <span class="capitalize">@(h.AttackType ?? "")</span></p>
         </div>
     </div>
 
-    @if (!string.IsNullOrEmpty(h.Description))
+    <div class="panel card">
+        <ul class="combat-stats">
+            <li><span class="muted">Damage</span><strong>@h.DisplayDamageMin–@h.DisplayDamageMax</strong></li>
+            <li><span class="muted">Atk Range</span><strong>@h.AttackRange</strong></li>
+            <li><span class="muted">Atk Speed</span><strong>@h.AttackSpeed.ToString("0.00")</strong></li>
+            <li><span class="muted">Move Speed</span><strong>@h.MoveSpeed</strong></li>
+        </ul>
+        <div class="attr-boxes">
+            <div class="attr-box @(h.PrimaryAttribute == 0 ? "attr-box--primary" : null)">
+                <span class="muted">STR</span><strong>@h.Strength</strong>
+            </div>
+            <div class="attr-box @(h.PrimaryAttribute == 1 ? "attr-box--primary" : null)">
+                <span class="muted">AGI</span><strong>@h.Agility</strong>
+            </div>
+            <div class="attr-box @(h.PrimaryAttribute == 2 ? "attr-box--primary" : null)">
+                <span class="muted">INT</span><strong>@h.Intelligence</strong>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(h.RoleDescription))
     {
         <div class="panel card">
-            <p class="eyebrow card__title">Description</p>
-            <p>@h.Description</p>
+            <p class="eyebrow card__title">Hero Role</p>
+            <p>@h.RoleDescription</p>
         </div>
     }
 
     @if (h.Abilities.Count > 0)
     {
-        <div class="panel card">
-            <p class="eyebrow card__title">Abilities</p>
-            <ul class="ability-list">
-                @foreach (var ability in h.Abilities)
-                {
-                    <li class="ability-list__item">
-                        <img class="ability-icon" src="@ability.IconUrl" alt="" loading="lazy" />
+        <div class="ability-cards">
+            @foreach (var a in h.Abilities)
+            {
+                <article class="panel ability-card">
+                    <header class="ability-card__head">
+                        <img class="ability-icon" src="@a.IconUrl" alt="" loading="lazy" />
                         <div>
-                            <div class="ability-list__name">@ability.TranslatedName</div>
-                            @if (!string.IsNullOrEmpty(ability.Description))
+                            <h3 class="ability-card__name">@a.TranslatedName</h3>
+                            @if (a.ManaCost.Any(m => m > 0))
                             {
-                                <p class="muted">@ability.Description</p>
+                                <div class="ability-card__mana">Mana: @string.Join("/", a.ManaCost)</div>
                             }
                         </div>
-                    </li>
-                }
-            </ul>
+                    </header>
+                    @if (!string.IsNullOrEmpty(a.Description))
+                    {
+                        <div class="ability-card__desc">@GameText.Render(a.Description)</div>
+                    }
+                    <footer class="ability-card__foot">
+                        @if (a.Range > 0)
+                        {
+                            <span>Range: @a.Range</span>
+                        }
+                        @if (a.Cooldown.Any(c => c > 0))
+                        {
+                            <span>CD: @string.Join("/", a.Cooldown)s</span>
+                        }
+                    </footer>
+                </article>
+            }
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(h.Description))
+    {
+        <div class="panel card">
+            <p class="eyebrow card__title">Lore</p>
+            <p class="muted">@h.Description</p>
         </div>
     }
 }

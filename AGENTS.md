@@ -90,10 +90,11 @@ setting `Authorization: Bearer`.
 - Match detail: `GET stats /v1/stats/getmatchsummary?gameId=<int>` → players[10] with `inventory48Id`–`inventory64Id` (item ids), `wardOfSight/RevelationPlaced`, netWorth, RoleIndex.
 - Teammates: `GET stats /v1/stats/getrecentplayers?playerId=<uuid>` → flat `{playerId,matchId}[]`, aggregate by count, exclude self, resolve names via getuserinfo.
 - Hero builds: filter recent matches by heroId → getmatchsummary each → aggregate inventory ids → map via gamedata items.
-- Heroes: `GET gamedata /entities/heroes` (PUBLIC, 102 heroes; `translatedName`=display). Hero `inventory0`–`inventory4` are ability NAME strings (e.g. `Ability_Blacksmith1`) that JOIN to `/entities/abilities`.
-- Abilities: `GET gamedata /entities/abilities` (PUBLIC, 536 abilities; some have duplicate `name` — use `DistinctBy`).
-- Items: `GET gamedata /entities/items` (PUBLIC, 210 items).
-- Strings (tooltips/descriptions): `GET gamedata /strings` (PUBLIC, ~9k keys). Flat `Dictionary<string,string>` keyed by `{EntityName}_{suffix}` convention: `Ability_X_description2`, `Item_X_description_simple`, `Hero_X_description`. **GamedataClient joins all three endpoints** — heroes come back enriched with `List<Ability>` (each with description from strings), items come back with `Description`.
+- Heroes: `GET gamedata /entities/heroes` (PUBLIC, 102 heroes; `translatedName`=display). Hero `inventory0`–`inventory4` are ability NAME strings (e.g. `Ability_Blacksmith1`, each a 1-element array) that JOIN to `/entities/abilities`. Combat stats live here: `attackDamageMin/Max` (BASE — display damage = base + primary-attribute value; `primaryAttribute` 0=str/1=agi/2=int), `attackRange`, `attackCooldown` (ms → atk speed = `1000/cooldown`), `moveSpeed`, base `strength/agility/intelligence`. Role ratings `carry/mid/hardSupport/softSupport/offLane/jungleRating` (0-5, plain ints not arrays) drive the role filter. **Stat growth (`strengthPerLevel` etc.) is NOT usable: the field exists in the schema but only ~17/102 heroes have it, as inconsistently-rounded INTEGERS (e.g. Chronos real agi-gain 2.8 → API `3`); 94 heroes have nothing; the detail endpoint `/entities/heroes/{id}` returns null for everything. Real decimal growth lives only in local `.entity` files (`heroes/<name>/hero.entity` inside `resources0.s2z`, attr `strengthperlevel` etc.) or hon.fandom.com — ship a static table if ever needed. The official client reads growth locally, NOT from the API.** `Ability_AttributeBoost` (the generic stat-boost) is filtered out of hero abilities in `MapHero`.
+- Abilities: `GET gamedata /entities/abilities` (PUBLIC, 536 abilities; some have duplicate `name` — use `DistinctBy`). Per-level arrays: `manaCost`, `cooldownTime` (ms), `range`, `targetRadius`.
+- Items: `GET gamedata /entities/items` (PUBLIC, 210 items). **`cost` is the RECIPE cost only** — total value = `cost + recursive sum of component costs`. `components` is a 1-element array holding a **space-separated string** of component `Item_X` names (e.g. `["Item_Slayer Item_AlacrityBand Item_Halberd"]`); resolve by name (2-pass: map all items, then link components). `Item.TotalCost` recurses; Savage Mace = 400 recipe + 2200 + 1200 + 1000 = 4800. Item **stat fields are per-level arrays** (e.g. Nullfire Blade `strength:[3,5,7]`) — render slash-joined. An item's own stat fields are ALREADY the final aggregate (do NOT sum components — that double-counts); magic-armor/resistance bonuses come from a HoN "Modifier" not exposed as numeric fields, so they can't render. Percent stats (`castSpeed`, `manaRegenMultiplier`) are fractions (1 = 100%). Active items have `manaCost`/`cooldownTime`(ms)/`range`. **Tiered item NAMES carry markup**: `translatedName` like `"Phoenix's Talon\n^vTier IV^*"` — split on literal `\n` (`HonText.NameOnly`/`TierOnly`) and slug via `HonText.Slugify` (strips `^X`/`^*`, non-alphanumeric→hyphen) or the slug 404s.
+- Strings (tooltips/descriptions): `GET gamedata /strings` (PUBLIC, ~9k keys). Flat `Dictionary<string,string>` keyed by `{EntityName}_{suffix}`: `Ability_X_description_simple`/`_description2`/`_description`, `Item_X_description`(+`_description2`), `Hero_X_role` (gameplay) + `Hero_X_description` (lore). **GamedataClient joins all endpoints** — heroes enriched with combat stats + `List<Ability>`, items with `Description` + components.
+- **Description markup** uses HoN codes: `^X ... ^*` color spans (X=letter; `^*` resets), `{a,b,c,d}` per-level values, literal `\n` (backslash-n, not a newline) line breaks. `HonStats.Web.Rendering.GameText.Render(raw)` parses this to XSS-safe `IHtmlContent` (text HTML-encoded, only generated `<span class="gt gt-X">`/`<br>` are raw). CSS colors via `.gt-o/-y/-r/-g/-b/-t/-p`.
 
 **Image CDN** (public, predictable): `https://gamestorage.juvio.com/heroes/{id}/icon.webp` and `.../items/{id}/icon.webp`.
 
@@ -131,6 +132,21 @@ partial fragment (htmx swap). Always set `@model` on every `.cshtml`.
 - **Infinite scroll**: sentinel `<tr hx-trigger="revealed" hx-swap="outerHTML">`
   replaces itself with new rows + next sentinel. Tutorial uses `afterend` on the
   last item; both are valid.
+- **Heroes/Items filter**: `/heroes` is a 3-column grid by primary attribute
+  (Agility/Intelligence/Strength); `/items` is a flat grid. The filter `<form>`
+  (search input + role checkbox toggles for heroes) carries
+  `hx-get hx-target="#hero-grid"/"#item-grid" hx-trigger="input changed delay:80ms, change"`
+  → server re-renders `_HeroGrid`/`_ItemGrid` with a `--dimmed` (grayscale) class
+  on non-matching entries (name-contains AND, for heroes, active-role rating > 0).
+  Debounce is short (80ms) since reference data is cached in-memory. The form lives
+  OUTSIDE the grid target, so checkbox state survives swaps; the `:checked` toggle
+  visual is pure CSS (no server round-trip). Hover tooltips (hero combat
+  stats/abilities; item value+tier+description+activation+passive bonuses) are pure
+  CSS `:hover` panels — no JS. Ability/item descriptions render via
+  `GameText.Render` (HoN `^X...^*`/`{a,b,c,d}`/`\n` markup → XSS-safe HTML). Display
+  text from `translatedName` uses `DisplayName`/`HonText.Strip` (markup removed);
+  lowercase source values (attack type "melee"/"ranged", shop categories) get
+  `text-transform: capitalize` via `.capitalize`.
 - **Match-detail modal**: native `<dialog class="modal" closedby="any">`
   (no `open` attr) swapped via HTMX into `#match-detail-host`. The host carries
   `hx-on::after-swap="this.querySelector('dialog:not([open])')?.showModal()"` — the

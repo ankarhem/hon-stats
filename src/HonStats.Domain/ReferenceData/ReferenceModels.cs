@@ -10,13 +10,70 @@ public sealed class Hero
     public string Team { get; set; } = string.Empty;
 
     public string? Description { get; set; }
+    public string? RoleDescription { get; set; }
     public int Strength { get; set; }
     public int Agility { get; set; }
     public int Intelligence { get; set; }
     public string? AttackType { get; set; }
+
+    public int AttackDamageMin { get; set; }
+    public int AttackDamageMax { get; set; }
+    public int AttackRange { get; set; }
+    public double AttackSpeed { get; set; }
+    public int MoveSpeed { get; set; }
+
+    public int CarryRating { get; set; }
+    public int MidRating { get; set; }
+    public int HardSupportRating { get; set; }
+    public int SoftSupportRating { get; set; }
+    public int OffLaneRating { get; set; }
+    public int JungleRating { get; set; }
+
     public List<Ability> Abilities { get; set; } = [];
 
-    public string Slug => TranslatedName.ToLowerInvariant().Replace(' ', '-');
+    public string DisplayName => HonText.Strip(TranslatedName);
+    public string Slug => HonText.Slugify(TranslatedName);
+
+    public string PrimaryAttributeName =>
+        PrimaryAttribute switch
+        {
+            0 => "Strength",
+            1 => "Agility",
+            _ => "Intelligence",
+        };
+
+    private int PrimaryAttributeValue =>
+        PrimaryAttribute switch
+        {
+            0 => Strength,
+            1 => Agility,
+            _ => Intelligence,
+        };
+
+    public int DisplayDamageMin => AttackDamageMin + PrimaryAttributeValue;
+    public int DisplayDamageMax => AttackDamageMax + PrimaryAttributeValue;
+
+    public bool MatchesRole(HeroRole role) =>
+        role switch
+        {
+            HeroRole.Carry => CarryRating > 0,
+            HeroRole.Mid => MidRating > 0,
+            HeroRole.Offlane => OffLaneRating > 0,
+            HeroRole.SoftSupport => SoftSupportRating > 0,
+            HeroRole.HardSupport => HardSupportRating > 0,
+            HeroRole.Jungle => JungleRating > 0,
+            _ => false,
+        };
+}
+
+public enum HeroRole
+{
+    Carry,
+    Mid,
+    Offlane,
+    SoftSupport,
+    HardSupport,
+    Jungle,
 }
 
 public sealed class Item
@@ -29,8 +86,60 @@ public sealed class Item
     public List<string> ShopCategories { get; set; } = [];
 
     public string? Description { get; set; }
+    public List<Item> Components { get; set; } = [];
+    public Dictionary<string, List<double>> Stats { get; set; } = new();
 
-    public string Slug => TranslatedName.ToLowerInvariant().Replace(' ', '-');
+    public int? ManaCost { get; set; }
+    public int? Cooldown { get; set; }
+    public int? Range { get; set; }
+
+    public string DisplayName => HonText.NameOnly(TranslatedName);
+    public string? Tier => HonText.TierOnly(TranslatedName);
+    public string Slug => HonText.Slugify(TranslatedName);
+    public bool IsActive => ManaCost is > 0 || Cooldown is > 0 || Range is > 0;
+
+    public int TotalCost => (Cost ?? 0) + Components.Sum(c => c.TotalCost);
+
+    // Percent stats are stored as a fraction (1 = 100%, e.g. castSpeed); flat stats
+    // render as-is. An item's own stat fields are already the final aggregate, so
+    // bonuses come straight from Stats (no component recursion). Unmapped stats are
+    // omitted rather than rendered as misleading raw numbers.
+    private static readonly IReadOnlyList<(string Key, string Label, bool Percent)> StatFormats =
+    [
+        ("strength", "Strength", false),
+        ("agility", "Agility", false),
+        ("intelligence", "Intelligence", false),
+        ("damage", "Damage", false),
+        ("armor", "Armor", false),
+        ("magicArmor", "Magic Armor", false),
+        ("maxHealth", "Max Health", false),
+        ("maxMana", "Max Mana", false),
+        ("healthRegen", "Health Regen", false),
+        ("manaRegen", "Mana Regen", false),
+        ("manaRegenMultiplier", "Mana Regeneration", true),
+        ("moveSpeed", "Movement Speed", false),
+        ("attackRange", "Attack Range", false),
+        ("castSpeed", "Cast Speed", true),
+    ];
+
+    public IReadOnlyList<string> PassiveBonuses
+    {
+        get
+        {
+            var lines = new List<string>();
+            foreach (var (key, label, percent) in StatFormats)
+            {
+                if (!Stats.TryGetValue(key, out var values) || values.Count == 0)
+                    continue;
+                var sign = values[0] > 0 ? "+" : "";
+                var rendered = percent
+                    ? string.Join("/", values.Select(v => $"{v * 100:0}")) + "%"
+                    : string.Join("/", values.Select(v => $"{v:0.##}"));
+                lines.Add($"{sign}{rendered} {label}");
+            }
+            return lines;
+        }
+    }
 }
 
 public sealed class Ability
@@ -40,4 +149,8 @@ public sealed class Ability
     public string TranslatedName { get; set; } = string.Empty;
     public string IconUrl { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public List<int> ManaCost { get; set; } = [];
+    public List<int> Cooldown { get; set; } = [];
+    public int Range { get; set; }
+    public int TargetRadius { get; set; }
 }
