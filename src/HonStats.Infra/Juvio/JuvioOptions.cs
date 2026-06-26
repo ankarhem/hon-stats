@@ -8,8 +8,16 @@ public sealed class JuvioOptions
     public string Password { get; set; } = "";
     public string ClientName { get; set; } = "hon-stats";
 
+    public List<JuvioAccount> Accounts { get; set; } = [];
+
     public string AuthBaseUrl { get; set; } = "https://auth.juvio.com";
     public string GameDataBaseUrl { get; set; } = "https://gamedata.juvio.com";
     public string StatsBaseUrl { get; set; } = "https://stats.juvio.com";
     public string EconomyBaseUrl { get; set; } = "https://economy.juvio.com";
+}
+
+public sealed class JuvioAccount
+{
+    public string Username { get; set; } = "";
+    public string Password { get; set; } = "";
 }

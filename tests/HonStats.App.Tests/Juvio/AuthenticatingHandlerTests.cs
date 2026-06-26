@@ -8,11 +8,11 @@ namespace HonStats.App.Tests.Juvio;
 public class AuthenticatingHandlerTests
 {
     [Fact]
-    public async Task AttachesBearerTokenFromProvider()
+    public async Task AttachesBearerTokenFromPool()
     {
-        var provider = new FakeTokenProvider("tok-1");
+        var pool = new FakeTokenPool("tok-1");
         var inner = new RecordingHandler(_ => Ok());
-        using var handler = WithInner(new AuthenticatingHandler(provider), inner);
+        using var handler = WithInner(new AuthenticatingHandler(pool), inner);
         using var invoker = new HttpMessageInvoker(handler);
 
         using var request = new HttpRequestMessage(HttpMethod.Get, "https://stats.juvio.com/x");
@@ -26,9 +26,9 @@ public class AuthenticatingHandlerTests
     [Fact]
     public async Task RetriesOnceWithFreshToken_OnUnauthorized()
     {
-        var provider = new FakeTokenProvider("tok-1");
+        var pool = new FakeTokenPool("tok-1");
         var inner = new RecordingHandler(call => call == 1 ? Unauthorized() : Ok());
-        using var handler = WithInner(new AuthenticatingHandler(provider), inner);
+        using var handler = WithInner(new AuthenticatingHandler(pool), inner);
         using var invoker = new HttpMessageInvoker(handler);
 
         using var request = new HttpRequestMessage(HttpMethod.Get, "https://stats.juvio.com/x");
@@ -36,7 +36,7 @@ public class AuthenticatingHandlerTests
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         inner.CallCount.Should().Be(2);
-        provider.InvalidateCallCount.Should().BeGreaterThanOrEqualTo(1);
+        pool.InvalidateCallCount.Should().BeGreaterThanOrEqualTo(1);
     }
 
     private static HttpResponseMessage Ok() => new(HttpStatusCode.OK);
@@ -49,18 +49,18 @@ public class AuthenticatingHandlerTests
         return outer;
     }
 
-    private sealed class FakeTokenProvider : ITokenProvider
+    private sealed class FakeTokenPool : ITokenPool
     {
         private readonly string token;
 
-        public FakeTokenProvider(string token) => this.token = token;
+        public FakeTokenPool(string token) => this.token = token;
 
         public int InvalidateCallCount { get; private set; }
 
         public Task<string> GetTokenAsync(CancellationToken ct = default) =>
             Task.FromResult(this.token);
 
-        public void Invalidate() => this.InvalidateCallCount++;
+        public void Invalidate(string token) => this.InvalidateCallCount++;
     }
 
     private sealed class RecordingHandler : HttpMessageHandler
