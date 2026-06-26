@@ -16,7 +16,7 @@
         <td class="kda">@m.Kills/@m.Deaths/@m.Assists</td>
         <td class="muted">@(m.Duration / 60)m</td>
         <td class="muted">@m.Map</td>
-        <td class="muted">@m.Date.ToString("yyyy-MM-dd")</td>
+        <td class="muted">@TimeDisplay.Relative(m.Date)</td>
     </tr>
 }
 @if (Model.HasMore)

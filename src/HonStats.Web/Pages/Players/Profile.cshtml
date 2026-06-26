@@ -26,7 +26,7 @@ else
                     <span>@@@p.Identity.Username</span>
                 }
                 <span> · @p.Overview.MatchesPlayed games</span>
-                <span> · last played @p.Overview.LastPlayed.ToString("yyyy-MM-dd")</span>
+                <span> · last played @TimeDisplay.Relative(p.Overview.LastPlayed)</span>
             </p>
         </div>
         @if (p.Rank is not null)
@@ -38,7 +38,7 @@ else
         <partial name="_ReindexButton" model="new ReindexButtonView(Model.AccountId, null, Model.Indexed)" />
     </div>
     <p id="last-indexed" class="profile-indexed-row muted">
-        Last indexed @(Model.Indexed?.LastReindexAt?.ToString("yyyy-MM-dd HH:mm") ?? "—")
+        Last indexed @TimeDisplay.Relative(Model.Indexed?.LastReindexAt)
     </p>
 
     <div class="panel card">

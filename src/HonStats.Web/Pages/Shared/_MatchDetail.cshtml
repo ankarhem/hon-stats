@@ -9,7 +9,7 @@ else
     <dialog class="modal" closedby="any" aria-label="Match details">
         <div class="modal__bar">
             <span class="modal__title">
-                Match #@d.GameId · @d.Map · @(d.Duration / 60)m @(d.Duration % 60)s · @d.Date.ToString("yyyy-MM-dd")
+                Match #@d.GameId · @d.Map · @(d.Duration / 60)m @(d.Duration % 60)s · @TimeDisplay.Relative(d.Date)
             </span>
             <form method="dialog"><button class="btn btn--ghost" type="submit">Close ✕</button></form>
         </div>

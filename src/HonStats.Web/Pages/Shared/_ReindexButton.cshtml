@@ -54,7 +54,7 @@ else if (failed)
     @if (showOob)
     {
         <p id="last-indexed" hx-swap-oob="true" class="profile-indexed-row muted">
-            Last indexed @(lastReindex?.ToString("yyyy-MM-dd HH:mm") ?? "—")
+            Last indexed @TimeDisplay.Relative(lastReindex)
         </p>
     }
 }
@@ -64,7 +64,7 @@ else if (onCooldown)
     @if (showOob)
     {
         <p id="last-indexed" hx-swap-oob="true" class="profile-indexed-row muted">
-            Last indexed @(lastReindex?.ToString("yyyy-MM-dd HH:mm") ?? "—")
+            Last indexed @TimeDisplay.Relative(lastReindex)
         </p>
     }
 }
@@ -79,7 +79,7 @@ else
     @if (showOob)
     {
         <p id="last-indexed" hx-swap-oob="true" class="profile-indexed-row muted">
-            Last indexed @(lastReindex?.ToString("yyyy-MM-dd HH:mm") ?? "—")
+            Last indexed @TimeDisplay.Relative(lastReindex)
         </p>
     }
 }
