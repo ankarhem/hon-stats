@@ -54,7 +54,7 @@
             projectFile = "src/HonStats.Web/HonStats.Web.csproj";
             nugetDeps = ./nuget-deps.json;
             dotnet-sdk = pkgs.dotnet-sdk_10;
-            dotnet-runtime = pkgs.dotnet-runtime_10;
+            dotnet-runtime = pkgs.dotnet-aspnetcore_10;
             runtimeDeps = [ pkgs.sqlite.out ];
             postPatch = "rm -f .config/dotnet-tools.json";
           };
