@@ -77,6 +77,7 @@ internal sealed class ItemDto
     public List<double>? MoveSpeed { get; set; }
     public List<double>? AttackRange { get; set; }
     public List<double>? CastSpeed { get; set; }
+    public List<string>? TargetScheme { get; set; }
 }
 
 internal sealed class GetAllAbilitiesDto
@@ -103,12 +104,37 @@ internal sealed class StringsDto
     public Dictionary<string, string>? Strings { get; set; }
 }
 
+internal sealed class EntityOverridesDto
+{
+    public Dictionary<string, Dictionary<string, double>> Heroes { get; set; } = new();
+    public Dictionary<string, ItemOverrideDto> Items { get; set; } = new();
+}
+
+internal sealed class ItemOverrideDto
+{
+    public Dictionary<string, double> Stats { get; set; } = new();
+    public Dictionary<string, Dictionary<string, double>> Modifiers { get; set; } = new();
+}
+
 // Fetches heroes, items, abilities + strings from the public gamedata service.
 // Heroes are enriched with their abilities (resolved via inventory0-4 name refs
 // joined to /entities/abilities) and descriptions (from /strings). Stateless,
 // safe as a singleton.
 internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
 {
+    private static readonly EntityOverridesDto EntityOverrides = LoadEntityOverrides();
+
+    private static EntityOverridesDto LoadEntityOverrides()
+    {
+        var asm = typeof(GamedataClient).Assembly;
+        var name = $"{asm.GetName().Name}.ReferenceData.entity-overrides.json";
+        using var stream = asm.GetManifestResourceStream(name);
+        if (stream is null)
+            return new EntityOverridesDto();
+        return JsonSerializer.Deserialize<EntityOverridesDto>(stream, GamedataJson.Options)
+            ?? new EntityOverridesDto();
+    }
+
     public async Task<IReadOnlyList<Hero>> GetHeroesAsync(CancellationToken ct)
     {
         var heroesTask = Get<GetAllHeroesDto>("/entities/heroes", ct);
@@ -199,6 +225,7 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
             .ToList();
 
         var attackCooldown = FirstInt(h.AttackCooldown);
+        EntityOverrides.Heroes.TryGetValue(h.Name, out var heroOverride);
 
         return new Hero
         {
@@ -221,6 +248,15 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
             AttackRange = FirstInt(h.AttackRange),
             AttackSpeed = attackCooldown > 0 ? Math.Round(1000.0 / attackCooldown, 2) : 0,
             MoveSpeed = FirstInt(h.MoveSpeed),
+            StrengthPerLevel = GetOverride(heroOverride, "strengthPerLevel"),
+            AgilityPerLevel = GetOverride(heroOverride, "agilityPerLevel"),
+            IntelligencePerLevel = GetOverride(heroOverride, "intelligencePerLevel"),
+            Armor = GetOverride(heroOverride, "armor"),
+            MagicArmor = GetOverride(heroOverride, "magicArmor"),
+            HealthRegen = GetOverride(heroOverride, "healthRegen"),
+            ManaRegen = GetOverride(heroOverride, "manaRegen"),
+            SightRangeDay = (int)GetOverride(heroOverride, "sightRangeDay"),
+            SightRangeNight = (int)GetOverride(heroOverride, "sightRangeNight"),
             CarryRating = h.CarryRating,
             MidRating = h.MidRating,
             HardSupportRating = h.HardSupportRating,
@@ -230,6 +266,9 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
             Abilities = heroAbilities,
         };
     }
+
+    private static double GetOverride(Dictionary<string, double>? overrides, string key) =>
+        overrides is not null && overrides.TryGetValue(key, out var value) ? value : 0;
 
     private static Item MapItem(ItemDto i, Dictionary<string, string> strings)
     {
@@ -249,6 +288,21 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
         AddStat(stats, "attackRange", i.AttackRange);
         AddStat(stats, "castSpeed", i.CastSpeed);
 
+        EntityOverrides.Items.TryGetValue(i.Name, out var itemOverride);
+
+        if (itemOverride is not null)
+        {
+            foreach (var (key, value) in itemOverride.Stats)
+                stats[key] = [value];
+        }
+
+        var conditionalStats = new Dictionary<string, Dictionary<string, double>>();
+        if (itemOverride?.Modifiers is { Count: > 0 })
+        {
+            foreach (var (condition, modStats) in itemOverride.Modifiers)
+                conditionalStats[condition] = new Dictionary<string, double>(modStats);
+        }
+
         var cooldown = FirstInt(i.CooldownTime);
         return new Item
         {
@@ -258,13 +312,15 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
                 ? i.Name
                 : i.TranslatedName,
             Cost = i.Cost,
-            IconUrl = FirstIcon(i.Icon),
+            IconUrl = ResolveIcon(i.Icon, i.Id),
             ShopCategories = i.ShopCategories ?? [],
-            Description = JoinDescription(
-                strings.GetValueOrDefault($"{i.Name}_description"),
-                strings.GetValueOrDefault($"{i.Name}_description2")
-            ),
+            Description = strings.GetValueOrDefault($"{i.Name}_description"),
+            Description2 = strings.GetValueOrDefault($"{i.Name}_description2"),
+            ImpactEffect = ResolveImpactEffect(i.Name, strings),
+            AttackImpactEffect = ResolveAttackImpactEffect(i.Name, strings),
+            TargetType = MapTargetScheme(i.TargetScheme),
             Stats = stats,
+            ConditionalStats = conditionalStats,
             ManaCost = FirstInt(i.ManaCost) is var m && m > 0 ? m : null,
             Cooldown = cooldown > 0 ? cooldown / 1000 : null,
             Range = FirstInt(i.Range) is var r && r > 0 ? r : null,
@@ -281,10 +337,62 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
             stats[key] = values;
     }
 
-    private static string? JoinDescription(string? primary, string? secondary)
+    // IMPACT_effect = active cast effect text. Prefer the exact key (no colon
+    // suffix); fall back to any colon variant that isn't a _shopdescription.
+    private static string? ResolveImpactEffect(string itemName, Dictionary<string, string> strings)
     {
-        var parts = new[] { primary, secondary }.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
-        return parts.Count == 0 ? null : string.Join("\\n\\n", parts);
+        var baseKey = $"{itemName}_IMPACT_effect";
+        if (strings.TryGetValue(baseKey, out var exact))
+            return exact;
+        return strings
+            .Keys.Where(k => k.StartsWith($"{baseKey}:", StringComparison.Ordinal))
+            .Where(k => !k.EndsWith("_shopdescription", StringComparison.OrdinalIgnoreCase))
+            .Select(k => strings[k])
+            .FirstOrDefault();
+    }
+
+    // ATTACK_IMPACT_effect = on-hit combat text. Same resolution strategy as above.
+    private static string? ResolveAttackImpactEffect(
+        string itemName,
+        Dictionary<string, string> strings
+    )
+    {
+        var baseKey = $"{itemName}_ATTACK_IMPACT_effect";
+        if (strings.TryGetValue(baseKey, out var exact))
+            return exact;
+        return strings
+            .Keys.Where(k => k.StartsWith($"{baseKey}:", StringComparison.Ordinal))
+            .Where(k => !k.EndsWith("_shopdescription", StringComparison.OrdinalIgnoreCase))
+            .Select(k => strings[k])
+            .FirstOrDefault();
+    }
+
+    // targetScheme is per-level (array); take the most permissive (last/highest level).
+    private static string? MapTargetScheme(List<string>? scheme)
+    {
+        if (scheme is null || scheme.Count == 0)
+            return null;
+        var value = scheme[^1];
+        return value switch
+        {
+            "self" => "Self",
+            "enemy_units" => "Enemy Units",
+            "enemy_units_and_self" => "Self / Enemy Units",
+            "enemy_and_willing_heroes" => "Enemy / Willing Heroes",
+            "enemy_nonhero_nonboss_nonboss_units_and_trees_and_gadgets" =>
+                "Enemy Non-Boss Units, Trees & Gadgets",
+            "enemy_nonboss_npc_units" => "Enemy Non-Boss Units",
+            "ally_units" => "Ally Units",
+            "ally_heroes" => "Ally Heroes",
+            "ally_mana_units" => "Ally Mana Units",
+            "other_ally_units" => "Other Ally Units",
+            "other_ally_heroes" => "Other Ally Heroes",
+            "other_heroes" => "Other Heroes",
+            "all_units" => "All Units",
+            "all_heroes" => "All Heroes",
+            "trees" => "Trees",
+            _ => null,
+        };
     }
 
     private static Ability MapAbility(AbilityDto a, Dictionary<string, string> strings) =>
@@ -308,6 +416,14 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
 
     private static string FirstIcon(List<string>? icons) =>
         icons is { Count: > 0 } ? icons[0] : string.Empty;
+
+    private static string ResolveIcon(List<string>? icons, int id)
+    {
+        var icon = FirstIcon(icons);
+        return !string.IsNullOrEmpty(icon)
+            ? icon
+            : $"https://gamestorage.juvio.com/items/{id}/icon.webp";
+    }
 
     private static int FirstInt(List<int>? values) => values is { Count: > 0 } ? values[0] : 0;
 }

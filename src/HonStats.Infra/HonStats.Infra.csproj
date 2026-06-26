@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <EmbeddedResource Include="ReferenceData\entity-overrides.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="HonStats.App.Tests" />
   </ItemGroup>
 

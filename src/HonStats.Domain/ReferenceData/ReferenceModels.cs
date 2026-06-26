@@ -22,6 +22,16 @@ public sealed class Hero
     public double AttackSpeed { get; set; }
     public int MoveSpeed { get; set; }
 
+    public double StrengthPerLevel { get; set; }
+    public double AgilityPerLevel { get; set; }
+    public double IntelligencePerLevel { get; set; }
+    public double Armor { get; set; }
+    public double MagicArmor { get; set; }
+    public double HealthRegen { get; set; }
+    public double ManaRegen { get; set; }
+    public int SightRangeDay { get; set; }
+    public int SightRangeNight { get; set; }
+
     public int CarryRating { get; set; }
     public int MidRating { get; set; }
     public int HardSupportRating { get; set; }
@@ -86,8 +96,13 @@ public sealed class Item
     public List<string> ShopCategories { get; set; } = [];
 
     public string? Description { get; set; }
+    public string? Description2 { get; set; }
+    public string? ImpactEffect { get; set; }
+    public string? AttackImpactEffect { get; set; }
+    public string? TargetType { get; set; }
     public List<Item> Components { get; set; } = [];
     public Dictionary<string, List<double>> Stats { get; set; } = new();
+    public Dictionary<string, Dictionary<string, double>> ConditionalStats { get; set; } = new();
 
     public int? ManaCost { get; set; }
     public int? Cooldown { get; set; }
@@ -120,6 +135,8 @@ public sealed class Item
         ("moveSpeed", "Movement Speed", false),
         ("attackRange", "Attack Range", false),
         ("castSpeed", "Cast Speed", true),
+        ("attackSpeed", "Attack Speed", true),
+        ("evasion", "Evasion", true),
     ];
 
     public IReadOnlyList<string> PassiveBonuses
@@ -127,15 +144,34 @@ public sealed class Item
         get
         {
             var lines = new List<string>();
+            var conditionalKeys = ConditionalStats.Values.SelectMany(d => d.Keys).ToHashSet();
+
             foreach (var (key, label, percent) in StatFormats)
             {
+                if (conditionalKeys.Contains(key))
+                {
+                    var parts = new List<string>();
+                    foreach (var (condition, modStats) in ConditionalStats)
+                    {
+                        if (!modStats.TryGetValue(key, out var value) || value == 0)
+                            continue;
+                        var sign = value > 0 ? "+" : "";
+                        var rendered = percent ? $"{value * 100:0}%" : $"{value:0.##}";
+                        var condLabel = char.ToUpper(condition[0]) + condition[1..];
+                        parts.Add($"{sign}{rendered} {label} ({condLabel})");
+                    }
+                    if (parts.Count > 0)
+                        lines.Add(string.Join(" / ", parts));
+                    continue;
+                }
+
                 if (!Stats.TryGetValue(key, out var values) || values.Count == 0)
                     continue;
-                var sign = values[0] > 0 ? "+" : "";
-                var rendered = percent
+                var s = values[0] > 0 ? "+" : "";
+                var flat = percent
                     ? string.Join("/", values.Select(v => $"{v * 100:0}")) + "%"
                     : string.Join("/", values.Select(v => $"{v:0.##}"));
-                lines.Add($"{sign}{rendered} {label}");
+                lines.Add($"{s}{flat} {label}");
             }
             return lines;
         }

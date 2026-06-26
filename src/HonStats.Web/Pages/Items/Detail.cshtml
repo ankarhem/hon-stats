@@ -40,11 +40,22 @@ else
         </div>
     }
 
+    @if (!string.IsNullOrEmpty(i.Description2))
+    {
+        <div class="panel card">
+            <div class="item-tooltip__note">@GameText.Render(i.Description2)</div>
+        </div>
+    }
+
     @if (i.IsActive)
     {
         <div class="panel card">
             <p class="eyebrow card__title">Activation</p>
             <ul class="combat-stats">
+                @if (!string.IsNullOrEmpty(i.TargetType))
+                {
+                    <li><span class="muted">Target</span><strong>@i.TargetType</strong></li>
+                }
                 @if (i.Range is > 0)
                 {
                     <li><span class="muted">Range</span><strong>@i.Range</strong></li>
@@ -58,6 +69,10 @@ else
                     <li><span class="muted">Cooldown</span><strong>@i.Cooldown s</strong></li>
                 }
             </ul>
+            @if (!string.IsNullOrEmpty(i.ImpactEffect))
+            {
+                <div class="item-tooltip__prose">@GameText.Render(i.ImpactEffect)</div>
+            }
         </div>
     }
 
@@ -71,6 +86,14 @@ else
                     <li>@bonus</li>
                 }
             </ul>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(i.AttackImpactEffect))
+    {
+        <div class="panel card">
+            <p class="eyebrow card__title">On Attack Impact</p>
+            <div class="item-tooltip__prose">@GameText.Render(i.AttackImpactEffect)</div>
         </div>
     }
 
@@ -91,6 +114,9 @@ else
                     @if (i.Cost is > 0)
                     {
                         <div class="recipe__component recipe__component--recipe">
+                            <span class="recipe-scroll">
+                                <img class="recipe-scroll__overlay" src="@i.IconUrl" alt="" loading="lazy" />
+                            </span>
                             <span class="recipe__name">Recipe</span>
                             <span class="gold">@i.Cost</span>
                         </div>

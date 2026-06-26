@@ -1,0 +1,1817 @@
+{
+  "heroes": {
+    "Hero_Accursed": {
+      "agilityPerLevel": 1.5,
+      "armor": 1.12,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.7
+    },
+    "Hero_Aluna": {
+      "agilityPerLevel": 1.8,
+      "armor": 1.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_AmunRa": {
+      "agilityPerLevel": 1.5,
+      "armor": -0.1,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.0
+    },
+    "Hero_Andromeda": {
+      "agilityPerLevel": 2.2,
+      "armor": 0.32,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 1.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.5
+    },
+    "Hero_Arachna": {
+      "agilityPerLevel": 3.2,
+      "armor": -1.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.9
+    },
+    "Hero_Armadon": {
+      "agilityPerLevel": 1.9,
+      "armor": 0.62,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.2,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.5
+    },
+    "Hero_Behemoth": {
+      "agilityPerLevel": 1.4,
+      "armor": 1.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.5
+    },
+    "Hero_Blacksmith": {
+      "agilityPerLevel": 1.5,
+      "armor": 0.7,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.1,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.0
+    },
+    "Hero_BloodHunter": {
+      "agilityPerLevel": 3.0,
+      "armor": 0.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.7,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_Bombardier": {
+      "agilityPerLevel": 1.4,
+      "armor": 0.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.7,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.9
+    },
+    "Hero_Bubbles": {
+      "agilityPerLevel": 1.7,
+      "armor": -0.56,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.7
+    },
+    "Hero_Bushwack": {
+      "agilityPerLevel": 3.0,
+      "armor": -0.5,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 1.3,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.6
+    },
+    "Hero_Chipper": {
+      "agilityPerLevel": 1.5,
+      "armor": -0.5,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.6
+    },
+    "Hero_Chronos": {
+      "agilityPerLevel": 3.0,
+      "armor": -0.3,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.5
+    },
+    "Hero_CorruptedDisciple": {
+      "agilityPerLevel": 2.8,
+      "armor": -0.98,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 1.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.9
+    },
+    "Hero_Cthulhuphant": {
+      "agilityPerLevel": 1.5,
+      "armor": 1.76,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.0
+    },
+    "Hero_Dampeer": {
+      "agilityPerLevel": 2.9,
+      "armor": -0.68,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.4,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_Deadwood": {
+      "agilityPerLevel": 1.5,
+      "armor": 0.5,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.7
+    },
+    "Hero_Defiler": {
+      "agilityPerLevel": 1.4,
+      "armor": -0.5,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.8
+    },
+    "Hero_DementedShaman": {
+      "agilityPerLevel": 1.8,
+      "armor": 0.5,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.8
+    },
+    "Hero_Devourer": {
+      "agilityPerLevel": 1.5,
+      "armor": 0.24,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.0
+    },
+    "Hero_DoctorRepulsor": {
+      "agilityPerLevel": 1.5,
+      "armor": 0.02,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.5
+    },
+    "Hero_DrunkenMaster": {
+      "agilityPerLevel": 2.0,
+      "armor": 0.2,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.0,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.0
+    },
+    "Hero_Electrician": {
+      "agilityPerLevel": 2.0,
+      "armor": 0.68,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.4
+    },
+    "Hero_Ellonia": {
+      "agilityPerLevel": 1.6,
+      "armor": -0.74,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.2,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.7
+    },
+    "Hero_EmeraldWarden": {
+      "agilityPerLevel": 2.8,
+      "armor": -1.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.3,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.7
+    },
+    "Hero_Empath": {
+      "agilityPerLevel": 1.5,
+      "armor": 0.4,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.7
+    },
+    "Hero_Engineer": {
+      "agilityPerLevel": 3.0,
+      "armor": 0.8,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.1,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_Fayde": {
+      "agilityPerLevel": 2.1,
+      "armor": 1.48,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.3,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.2
+    },
+    "Hero_FlintBeastwood": {
+      "agilityPerLevel": 2.9,
+      "armor": -0.94,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.6,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.7
+    },
+    "Hero_Flux": {
+      "agilityPerLevel": 2.0,
+      "armor": 0.2,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 1.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.2
+    },
+    "Hero_ForsakenArcher": {
+      "agilityPerLevel": 2.5,
+      "armor": -1.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.9
+    },
+    "Hero_Gauntlet": {
+      "agilityPerLevel": 1.4,
+      "armor": 0.5,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.9
+    },
+    "Hero_Gemini": {
+      "agilityPerLevel": 2.6,
+      "armor": 0.01,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.6,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.6
+    },
+    "Hero_Geomancer": {
+      "agilityPerLevel": 1.2,
+      "armor": 0.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_Glacius": {
+      "agilityPerLevel": 1.6,
+      "armor": 0.12,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.6
+    },
+    "Hero_Gladiator": {
+      "agilityPerLevel": 1.2,
+      "armor": 1.5,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.0
+    },
+    "Hero_Gunblade": {
+      "agilityPerLevel": 2.8,
+      "armor": -0.1,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 1.7,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.2
+    },
+    "Hero_Hammerstorm": {
+      "agilityPerLevel": 2.0,
+      "armor": 0.7,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.8
+    },
+    "Hero_Hellbringer": {
+      "agilityPerLevel": 1.4,
+      "armor": 0.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.2
+    },
+    "Hero_Jeraziah": {
+      "agilityPerLevel": 1.5,
+      "armor": 2.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.7,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.5
+    },
+    "Hero_KeeperOfTheForest": {
+      "agilityPerLevel": 1.7,
+      "armor": 0.6,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.3
+    },
+    "Hero_Kinesis": {
+      "agilityPerLevel": 1.5,
+      "armor": 0.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.6
+    },
+    "Hero_KingKlout": {
+      "agilityPerLevel": 1.5,
+      "armor": 1.04,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.5
+    },
+    "Hero_Kraken": {
+      "agilityPerLevel": 1.5,
+      "armor": 1.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.8
+    },
+    "Hero_Legionnaire": {
+      "agilityPerLevel": 2.2,
+      "armor": 1.2,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.7
+    },
+    "Hero_Lodestone": {
+      "agilityPerLevel": 1.2,
+      "armor": 1.62,
+      "healthRegen": 1.5,
+      "intelligencePerLevel": 1.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.2
+    },
+    "Hero_LordSalforis": {
+      "agilityPerLevel": 1.2,
+      "armor": 1.5,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.6
+    },
+    "Hero_Madman": {
+      "agilityPerLevel": 2.8,
+      "armor": 0.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.1
+    },
+    "Hero_Magebane": {
+      "agilityPerLevel": 1.6,
+      "armor": -0.02,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.5
+    },
+    "Hero_Magmus": {
+      "agilityPerLevel": 2.1,
+      "armor": -0.66,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.5
+    },
+    "Hero_Maliken": {
+      "agilityPerLevel": 1.5,
+      "armor": -1.6,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.7,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.2
+    },
+    "Hero_Martyr": {
+      "agilityPerLevel": 1.4,
+      "armor": 0.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.5
+    },
+    "Hero_MasterOfArms": {
+      "agilityPerLevel": 2.2,
+      "armor": 0.92,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.4,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_Midas": {
+      "agilityPerLevel": 1.2,
+      "armor": 1.3,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_Monarch": {
+      "agilityPerLevel": 1.6,
+      "armor": 0.9,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.3,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.7
+    },
+    "Hero_MonkeyKing": {
+      "agilityPerLevel": 2.5,
+      "armor": 0.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.9
+    },
+    "Hero_MoonQueen": {
+      "agilityPerLevel": 3.2,
+      "armor": 0.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 1.9,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.2
+    },
+    "Hero_Moraxus": {
+      "agilityPerLevel": 1.3,
+      "armor": 1.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.7,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.8
+    },
+    "Hero_Myrmidon": {
+      "agilityPerLevel": 1.2,
+      "armor": 2.4,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.9,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.8
+    },
+    "Hero_NightHound": {
+      "agilityPerLevel": 2.5,
+      "armor": -0.86,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.3,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_Nomad": {
+      "agilityPerLevel": 3.0,
+      "armor": -0.5,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.2,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_Nymphora": {
+      "agilityPerLevel": 1.2,
+      "armor": -1.02,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.7,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.7
+    },
+    "Hero_Ophelia": {
+      "agilityPerLevel": 2.0,
+      "armor": 0.4,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.8
+    },
+    "Hero_Pandamonium": {
+      "agilityPerLevel": 1.7,
+      "armor": 1.12,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.0
+    },
+    "Hero_Pearl": {
+      "agilityPerLevel": 1.8,
+      "armor": 1.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.7
+    },
+    "Hero_Pebbles": {
+      "agilityPerLevel": 1.0,
+      "armor": -0.26,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.6,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.0
+    },
+    "Hero_Pestilence": {
+      "agilityPerLevel": 2.0,
+      "armor": 0.82,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.6
+    },
+    "Hero_Pharaoh": {
+      "agilityPerLevel": 1.2,
+      "armor": 0.38,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.0
+    },
+    "Hero_PlagueRider": {
+      "agilityPerLevel": 1.8,
+      "armor": 1.4,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.3,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.6
+    },
+    "Hero_PollywogPriest": {
+      "agilityPerLevel": 1.6,
+      "armor": 0.56,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_Predator": {
+      "agilityPerLevel": 1.8,
+      "armor": -1.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.5
+    },
+    "Hero_Prophet": {
+      "agilityPerLevel": 2.0,
+      "armor": 1.12,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.8
+    },
+    "Hero_PuppetMaster": {
+      "agilityPerLevel": 2.0,
+      "armor": 0.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.1,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.9
+    },
+    "Hero_Pyromancer": {
+      "agilityPerLevel": 1.5,
+      "armor": -0.7,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.2,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.5
+    },
+    "Hero_Rampage": {
+      "agilityPerLevel": 1.9,
+      "armor": 1.12,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.5
+    },
+    "Hero_Ravenor": {
+      "agilityPerLevel": 1.5,
+      "armor": -0.38,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 3.0
+    },
+    "Hero_Revenant": {
+      "agilityPerLevel": 2.0,
+      "armor": 1.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.7,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.8
+    },
+    "Hero_Rhapsody": {
+      "agilityPerLevel": 1.7,
+      "armor": 1.5,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.4,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.8
+    },
+    "Hero_Riftwalker": {
+      "agilityPerLevel": 1.2,
+      "armor": 0.5,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.1
+    },
+    "Hero_Riptide": {
+      "agilityPerLevel": 2.0,
+      "armor": 0.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_SandWraith": {
+      "agilityPerLevel": 2.0,
+      "armor": -1.22,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.9,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.5
+    },
+    "Hero_Scout": {
+      "agilityPerLevel": 3.0,
+      "armor": -0.44,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.6,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.7
+    },
+    "Hero_ShadowBlade": {
+      "agilityPerLevel": 2.2,
+      "armor": 1.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.2,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.2
+    },
+    "Hero_Silhouette": {
+      "agilityPerLevel": 2.8,
+      "armor": -0.5,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.8
+    },
+    "Hero_SirBenzington": {
+      "agilityPerLevel": 2.7,
+      "armor": -0.05,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_Slither": {
+      "agilityPerLevel": 2.6,
+      "armor": 1.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 1.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.9
+    },
+    "Hero_Solstice": {
+      "agilityPerLevel": 2.0,
+      "armor": 0.2,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.6,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.8
+    },
+    "Hero_SoulReaper": {
+      "agilityPerLevel": 1.7,
+      "armor": 0.76,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.5,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_Soulstealer": {
+      "agilityPerLevel": 3.2,
+      "armor": 0.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.2
+    },
+    "Hero_Swiftblade": {
+      "agilityPerLevel": 3.0,
+      "armor": 1.1,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.3,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.9
+    },
+    "Hero_Tempest": {
+      "agilityPerLevel": 1.6,
+      "armor": 2.24,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.4
+    },
+    "Hero_Thunderbringer": {
+      "agilityPerLevel": 1.2,
+      "armor": -0.04,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.0
+    },
+    "Hero_Torturer": {
+      "agilityPerLevel": 1.5,
+      "armor": 0.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.8
+    },
+    "Hero_Tundra": {
+      "agilityPerLevel": 1.6,
+      "armor": 0.68,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.9,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.7
+    },
+    "Hero_Valkyrie": {
+      "agilityPerLevel": 2.6,
+      "armor": 0.0,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 1.6,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.9
+    },
+    "Hero_Vindicator": {
+      "agilityPerLevel": 2.2,
+      "armor": 0.46,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.8
+    },
+    "Hero_VoodooJester": {
+      "agilityPerLevel": 1.4,
+      "armor": 0.86,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 3.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.8
+    },
+    "Hero_WarBeast": {
+      "agilityPerLevel": 1.4,
+      "armor": -1.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 1.6,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 2.7
+    },
+    "Hero_WitchSlayer": {
+      "agilityPerLevel": 1.5,
+      "armor": 0.26,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.7
+    },
+    "Hero_WretchedHag": {
+      "agilityPerLevel": 2.5,
+      "armor": -0.82,
+      "healthRegen": 0.25,
+      "intelligencePerLevel": 2.8,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.7
+    },
+    "Hero_Zephyr": {
+      "agilityPerLevel": 2.4,
+      "armor": 0.0,
+      "healthRegen": 1.0,
+      "intelligencePerLevel": 2.0,
+      "magicArmor": 5.0,
+      "manaRegen": 0.01,
+      "sightRangeDay": 1800.0,
+      "sightRangeNight": 800.0,
+      "strengthPerLevel": 1.8
+    }
+  },
+  "items": {
+    "Item_AbyssalFlower": {
+      "stats": {
+        "attackspeed": 0.2,
+        "damage": 24.0,
+        "intelligence": 12.0
+      }
+    },
+    "Item_AbyssalSkull": {
+      "stats": {
+        "armor": 2.0
+      }
+    },
+    "Item_AlchemistsBones": {
+      "stats": {
+        "attackspeed": 0.3
+      }
+    },
+    "Item_AmuletOfExile": {
+      "stats": {
+        "agility": 3.0,
+        "intelligence": 6.0,
+        "strength": 3.0
+      }
+    },
+    "Item_Arcana": {
+      "stats": {
+        "attackspeed": 0.1,
+        "damage": 12.0,
+        "intelligence": 6.0
+      }
+    },
+    "Item_ArmorOfTheMadMage": {
+      "stats": {
+        "armor": 8.0,
+        "healthregen": 8.0,
+        "intelligence": 20.0
+      }
+    },
+    "Item_AssassinsShroud": {
+      "stats": {
+        "attackspeed": 0.1,
+        "damage": 30.0
+      }
+    },
+    "Item_Astrolabe": {
+      "stats": {
+        "agility": 5.0,
+        "intelligence": 5.0,
+        "magicarmor": 1.0,
+        "strength": 8.0
+      }
+    },
+    "Item_BarbedArmor": {
+      "stats": {
+        "damage": 15.0,
+        "strength": 12.0
+      }
+    },
+    "Item_BarrierIdol": {
+      "stats": {
+        "healthregen": 12.0,
+        "maxhealth": 200.0
+      }
+    },
+    "Item_BehemothsHeart": {
+      "stats": {
+        "maxhealth": 350.0,
+        "strength": 35.0
+      }
+    },
+    "Item_BeltOfVitality": {
+      "stats": {
+        "healthregen": 3.0,
+        "maxhealth": 200.0
+      }
+    },
+    "Item_BloodChalice": {
+      "stats": {
+        "intelligence": 3.0,
+        "strength": 3.0
+      }
+    },
+    "Item_Brutalizer": {
+      "stats": {
+        "damage": 35.0,
+        "strength": 10.0
+      }
+    },
+    "Item_ChargedHammer": {
+      "stats": {
+        "attackspeed": 0.9
+      }
+    },
+    "Item_CorruptedSword": {
+      "stats": {
+        "damage": 70.0
+      }
+    },
+    "Item_CrownGreaves": {
+      "stats": {
+        "agility": 4.0,
+        "armor": 8.0,
+        "intelligence": 4.0,
+        "strength": 4.0
+      }
+    },
+    "Item_DaemonicBreastplate": {
+      "stats": {
+        "armor": 10.0,
+        "attackspeed": 0.3
+      }
+    },
+    "Item_Dawnbringer": {
+      "stats": {
+        "agility": 20.0,
+        "attackspeed": 0.25,
+        "damage": 15.0,
+        "intelligence": 20.0,
+        "strength": 20.0
+      }
+    },
+    "Item_DesertScream": {
+      "stats": {
+        "intelligence": 25.0
+      }
+    },
+    "Item_DevourersGauntlet": {
+      "stats": {
+        "agility": 3.0,
+        "healthregen": 3.0,
+        "intelligence": 3.0,
+        "magicarmor": 1.0,
+        "strength": 6.0
+      }
+    },
+    "Item_DoomBringer": {
+      "stats": {
+        "damage": 300.0
+      }
+    },
+    "Item_Dreamcatcher": {
+      "stats": {
+        "agility": 5.0,
+        "intelligence": 5.0,
+        "maxhealth": 250.0,
+        "movespeed": 20.0,
+        "strength": 5.0
+      }
+    },
+    "Item_ElderParasite": {
+      "stats": {
+        "attackspeed": 0.15,
+        "damage": 5.0
+      }
+    },
+    "Item_Energizer": {
+      "stats": {
+        "agility": 4.0,
+        "intelligence": 4.0,
+        "movespeed": 20.0,
+        "strength": 4.0
+      }
+    },
+    "Item_FauxBow": {
+      "modifiers": {
+        "melee": {
+          "attackrange": 50.0
+        },
+        "ranged": {
+          "attackrange": 100.0
+        }
+      },
+      "stats": {
+        "agility": 6.0,
+        "attackspeed": 0.3,
+        "damage": 4.0
+      }
+    },
+    "Item_Firebrand": {
+      "stats": {
+        "agility": 16.0,
+        "attackspeed": 0.15
+      }
+    },
+    "Item_FlameBelcher": {
+      "modifiers": {
+        "melee": {
+          "armor": 5.0,
+          "attackrange": 75.0
+        },
+        "ranged": {
+          "attackrange": 150.0
+        }
+      },
+      "stats": {
+        "agility": 7.0,
+        "attackspeed": 0.3,
+        "damage": 55.0
+      }
+    },
+    "Item_Flayer": {
+      "stats": {
+        "damage": 75.0
+      }
+    },
+    "Item_FortifiedBracer": {
+      "stats": {
+        "agility": 3.0,
+        "intelligence": 3.0,
+        "magicarmor": 1.0,
+        "strength": 6.0
+      }
+    },
+    "Item_Frostburn": {
+      "stats": {
+        "agility": 16.0,
+        "attackspeed": 0.2,
+        "damage": 10.0,
+        "strength": 16.0
+      }
+    },
+    "Item_FrostfieldPlate": {
+      "stats": {
+        "agility": 3.0,
+        "armor": 14.0,
+        "intelligence": 35.0,
+        "strength": 3.0
+      }
+    },
+    "Item_FrostwolfsSkull": {
+      "stats": {
+        "agility": 10.0,
+        "damage": 15.0,
+        "intelligence": 10.0,
+        "strength": 26.0
+      }
+    },
+    "Item_Frozenlight": {
+      "stats": {
+        "damage": 10.0,
+        "intelligence": 16.0,
+        "strength": 16.0
+      }
+    },
+    "Item_Genjuro": {
+      "stats": {
+        "agility": 30.0,
+        "attackspeed": 0.1,
+        "damage": 30.0
+      }
+    },
+    "Item_GeometersBane": {
+      "stats": {
+        "agility": 26.0,
+        "attackspeed": 0.25,
+        "intelligence": 10.0,
+        "strength": 10.0
+      }
+    },
+    "Item_GhostMarchers": {
+      "stats": {
+        "damage": 22.0
+      }
+    },
+    "Item_GrimoireOfPower": {
+      "stats": {
+        "agility": 10.0,
+        "intelligence": 30.0,
+        "strength": 10.0
+      }
+    },
+    "Item_HarkonsBlade": {
+      "stats": {
+        "attackspeed": 0.15,
+        "damage": 20.0,
+        "intelligence": 35.0
+      }
+    },
+    "Item_Hellflower": {
+      "stats": {
+        "attackspeed": 0.35,
+        "damage": 40.0,
+        "intelligence": 20.0
+      }
+    },
+    "Item_HelmOfTheBlackLegion": {
+      "stats": {
+        "healthregen": 7.0,
+        "maxhealth": 250.0
+      }
+    },
+    "Item_Hypercrown": {
+      "stats": {
+        "attackspeed": 0.9
+      }
+    },
+    "Item_Icebrand": {
+      "stats": {
+        "damage": 10.0,
+        "strength": 16.0
+      }
+    },
+    "Item_IconOfTheGoddess": {
+      "stats": {
+        "healthregen": 3.0,
+        "maxhealth": 450.0
+      }
+    },
+    "Item_ImmortalPride": {
+      "stats": {
+        "armor": 6.0,
+        "attackspeed": 0.3,
+        "damage": 15.0,
+        "healthregen": 10.0,
+        "maxhealth": 250.0
+      }
+    },
+    "Item_InquisitorsFlail": {
+      "stats": {
+        "damage": 12.0,
+        "strength": 8.0
+      }
+    },
+    "Item_Insanitarius": {
+      "stats": {
+        "armor": 5.0,
+        "attackspeed": 0.25,
+        "damage": 10.0,
+        "healthregen": 5.0
+      }
+    },
+    "Item_IronShield": {
+      "stats": {
+        "agility": 8.0
+      }
+    },
+    "Item_KuldrasSheepstick": {
+      "stats": {
+        "intelligence": 50.0
+      }
+    },
+    "Item_LexTalionis": {
+      "stats": {
+        "armor": 3.0,
+        "damage": 5.0,
+        "intelligence": 3.0
+      }
+    },
+    "Item_Lightbrand": {
+      "stats": {
+        "intelligence": 16.0
+      }
+    },
+    "Item_Madfreds_BrassKnuckles": {
+      "stats": {
+        "agility": 6.0,
+        "attackspeed": 0.05,
+        "damage": 10.0,
+        "intelligence": 3.0,
+        "strength": 3.0
+      }
+    },
+    "Item_MastersLegacy": {
+      "stats": {
+        "agility": 15.0,
+        "intelligence": 15.0,
+        "maxhealth": 200.0,
+        "strength": 15.0
+      }
+    },
+    "Item_MockOfBrilliance": {
+      "stats": {
+        "damage": 70.0,
+        "evasion": 0.15
+      }
+    },
+    "Item_NomesWisdom": {
+      "stats": {
+        "armor": 2.0,
+        "damage": 10.0
+      }
+    },
+    "Item_NullStone": {
+      "stats": {
+        "agility": 15.0,
+        "damage": 15.0,
+        "healthregen": 6.0,
+        "intelligence": 15.0,
+        "strength": 15.0
+      }
+    },
+    "Item_NullfireBlade": {
+      "stats": {
+        "attackspeed": 0.05
+      }
+    },
+    "Item_OblivionHammer": {
+      "stats": {
+        "damage": 50.0,
+        "healthregen": 10.0,
+        "maxhealth": 300.0,
+        "strength": 15.0
+      }
+    },
+    "Item_ObsidianBell": {
+      "stats": {
+        "intelligence": 40.0
+      }
+    },
+    "Item_PhantasmalTreads": {
+      "stats": {
+        "agility": 8.0,
+        "damage": 45.0
+      }
+    },
+    "Item_PlatedGreaves": {
+      "stats": {
+        "agility": 3.0,
+        "armor": 6.0,
+        "intelligence": 3.0,
+        "strength": 3.0
+      }
+    },
+    "Item_PowerSupply": {
+      "stats": {
+        "agility": 3.0,
+        "intelligence": 3.0,
+        "strength": 3.0
+      }
+    },
+    "Item_ProtectiveTalisman": {
+      "stats": {
+        "armor": 2.0
+      }
+    },
+    "Item_PsionicHood": {
+      "stats": {
+        "healthregen": 5.0,
+        "maxhealth": 250.0
+      }
+    },
+    "Item_RefreshingOrnament": {
+      "stats": {
+        "agility": 2.0,
+        "intelligence": 2.0,
+        "strength": 2.0
+      }
+    },
+    "Item_RestorationStone": {
+      "stats": {
+        "attackspeed": 0.15,
+        "damage": 20.0,
+        "healthregen": 5.0,
+        "intelligence": 10.0
+      }
+    },
+    "Item_RingOfSorcery": {
+      "stats": {
+        "agility": 3.0,
+        "intelligence": 6.0,
+        "strength": 3.0
+      }
+    },
+    "Item_RingOfTheTeacher": {
+      "stats": {
+        "armor": 2.0,
+        "damage": 5.0
+      }
+    },
+    "Item_RunedCleaver": {
+      "stats": {
+        "damage": 50.0,
+        "healthregen": 6.0
+      }
+    },
+    "Item_SacrificialStone": {
+      "stats": {
+        "agility": 7.0,
+        "intelligence": 7.0,
+        "strength": 7.0
+      }
+    },
+    "Item_SandScepter": {
+      "stats": {
+        "intelligence": 20.0
+      }
+    },
+    "Item_SavageMace": {
+      "stats": {
+        "attackspeed": 0.3,
+        "damage": 60.0
+      }
+    },
+    "Item_Searinglight": {
+      "stats": {
+        "agility": 16.0,
+        "attackspeed": 0.2,
+        "intelligence": 16.0
+      }
+    },
+    "Item_ShamansHeaddress": {
+      "stats": {
+        "healthregen": 5.0,
+        "maxhealth": 200.0
+      }
+    },
+    "Item_ShieldOfTheFive": {
+      "stats": {
+        "agility": 2.0,
+        "armor": 4.0,
+        "intelligence": 2.0,
+        "strength": 2.0
+      }
+    },
+    "Item_ShrunkenHead": {
+      "stats": {
+        "damage": 24.0,
+        "strength": 10.0
+      }
+    },
+    "Item_SinnersInscription": {
+      "stats": {
+        "armor": 5.0,
+        "damage": 10.0,
+        "intelligence": 12.0
+      }
+    },
+    "Item_SolsBulwark": {
+      "stats": {
+        "armor": 4.0
+      }
+    },
+    "Item_SorceryBoots": {
+      "stats": {
+        "agility": 3.0,
+        "intelligence": 6.0,
+        "strength": 3.0
+      }
+    },
+    "Item_SoulscreamRing": {
+      "stats": {
+        "agility": 6.0,
+        "attackspeed": 0.05,
+        "intelligence": 3.0,
+        "strength": 3.0
+      }
+    },
+    "Item_Soultrap": {
+      "stats": {
+        "agility": 3.0,
+        "intelligence": 3.0,
+        "strength": 3.0
+      }
+    },
+    "Item_SpellShards": {
+      "stats": {
+        "intelligence": 8.0
+      }
+    },
+    "Item_SpellSunder": {
+      "stats": {
+        "maxhealth": 200.0
+      }
+    },
+    "Item_SpikedBola": {
+      "stats": {
+        "agility": 30.0,
+        "intelligence": 8.0,
+        "magicarmor": 1.0,
+        "strength": 12.0
+      }
+    },
+    "Item_StaffOfTheMaster": {
+      "stats": {
+        "agility": 10.0,
+        "intelligence": 10.0,
+        "maxhealth": 200.0,
+        "strength": 10.0
+      }
+    },
+    "Item_StarscribeBoots": {
+      "stats": {
+        "agility": 11.0,
+        "intelligence": 14.0,
+        "magicarmor": 1.0,
+        "strength": 14.0
+      }
+    },
+    "Item_Steamboots": {
+      "stats": {
+        "attackspeed": 0.2
+      }
+    },
+    "Item_StormLance": {
+      "stats": {
+        "agility": 4.0,
+        "damage": 12.0,
+        "movespeed": 20.0
+      }
+    },
+    "Item_Stormspirit": {
+      "stats": {
+        "intelligence": 16.0,
+        "movespeed": 25.0
+      }
+    },
+    "Item_Sustainer": {
+      "stats": {
+        "damage": 5.0,
+        "healthregen": 5.0
+      }
+    },
+    "Item_SymbolOfRage": {
+      "stats": {
+        "armor": 5.0,
+        "damage": 10.0,
+        "healthregen": 3.0,
+        "strength": 25.0
+      }
+    },
+    "Item_TabletOfCommand": {
+      "stats": {
+        "armor": 3.0,
+        "damage": 10.0,
+        "intelligence": 12.0
+      }
+    },
+    "Item_Thunderclaw": {
+      "stats": {
+        "attackspeed": 0.45
+      }
+    },
+    "Item_TwinBlades": {
+      "stats": {
+        "attackspeed": 0.1,
+        "damage": 30.0,
+        "intelligence": 10.0
+      }
+    },
+    "Item_UltorsHeavyPlate": {
+      "stats": {
+        "agility": 2.0,
+        "armor": 5.0,
+        "healthregen": 8.0,
+        "intelligence": 2.0,
+        "maxhealth": 275.0,
+        "strength": 2.0
+      }
+    },
+    "Item_VoidTalisman": {
+      "stats": {
+        "agility": 5.0,
+        "intelligence": 5.0,
+        "strength": 5.0
+      }
+    },
+    "Item_WarsteamBoots": {
+      "stats": {
+        "agility": 12.0,
+        "attackspeed": 0.25,
+        "intelligence": 12.0,
+        "strength": 12.0
+      }
+    },
+    "Item_WhisperingHelm": {
+      "stats": {
+        "armor": 5.0,
+        "healthregen": 3.0
+      }
+    },
+    "Item_Wingbow": {
+      "modifiers": {
+        "melee": {
+          "attackrange": 75.0,
+          "evasion": 0.35,
+          "movespeed": 25.0
+        },
+        "ranged": {
+          "agility": 33.0,
+          "attackrange": 150.0,
+          "evasion": 0.2
+        }
+      },
+      "stats": {
+        "agility": 33.0,
+        "attackspeed": 0.3,
+        "damage": 30.0
+      }
+    }
+  }
+}

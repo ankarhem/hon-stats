@@ -32,7 +32,12 @@
                                 <li><span class="muted">Atk Range</span> @h.AttackRange</li>
                                 <li><span class="muted">Atk Speed</span> @h.AttackSpeed.ToString("0.00")</li>
                                 <li><span class="muted">Move Speed</span> @h.MoveSpeed</li>
-                                <li><span class="muted">STR/AGI/INT</span> @h.Strength / @h.Agility / @h.Intelligence</li>
+                                <li><span class="muted">Armor</span> @h.Armor.ToString("0.#") / @h.MagicArmor.ToString("0") magic</li>
+                                <li>
+                                    <span class="muted">STR/AGI/INT</span>
+                                    @h.Strength/@h.Agility/@h.Intelligence
+                                    <span class="muted">(+@h.StrengthPerLevel.ToString("0.#")/+@h.AgilityPerLevel.ToString("0.#")/+@h.IntelligencePerLevel.ToString("0.#"))</span>
+                                </li>
                             </ul>
                             @if (h.Abilities.Count > 0)
                             {

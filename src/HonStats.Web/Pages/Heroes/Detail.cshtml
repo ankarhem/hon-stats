@@ -28,16 +28,22 @@ else
             <li><span class="muted">Atk Range</span><strong>@h.AttackRange</strong></li>
             <li><span class="muted">Atk Speed</span><strong>@h.AttackSpeed.ToString("0.00")</strong></li>
             <li><span class="muted">Move Speed</span><strong>@h.MoveSpeed</strong></li>
+            <li><span class="muted">Armor</span><strong>@h.Armor.ToString("0.#")</strong></li>
+            <li><span class="muted">Magic Armor</span><strong>@h.MagicArmor.ToString("0.#")</strong></li>
+            <li><span class="muted">Sight D/N</span><strong>@h.SightRangeDay / @h.SightRangeNight</strong></li>
         </ul>
         <div class="attr-boxes">
             <div class="attr-box @(h.PrimaryAttribute == 0 ? "attr-box--primary" : null)">
                 <span class="muted">STR</span><strong>@h.Strength</strong>
+                <span class="attr-box__growth">+@h.StrengthPerLevel.ToString("0.#")</span>
             </div>
             <div class="attr-box @(h.PrimaryAttribute == 1 ? "attr-box--primary" : null)">
                 <span class="muted">AGI</span><strong>@h.Agility</strong>
+                <span class="attr-box__growth">+@h.AgilityPerLevel.ToString("0.#")</span>
             </div>
             <div class="attr-box @(h.PrimaryAttribute == 2 ? "attr-box--primary" : null)">
                 <span class="muted">INT</span><strong>@h.Intelligence</strong>
+                <span class="attr-box__growth">+@h.IntelligencePerLevel.ToString("0.#")</span>
             </div>
         </div>
     </div>

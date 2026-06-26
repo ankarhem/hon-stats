@@ -641,6 +641,12 @@ dialog.modal::backdrop {
     background: var(--surface-3);
 }
 
+.item-icon--lg {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+}
+
 /* ---------- Hero/item grids ---------- */
 .grid-list {
     list-style: none;
@@ -830,6 +836,10 @@ li.loading-row {
     color: var(--accent-2);
 }
 
+.gt-c {
+    color: oklch(75% 0.13 195);
+}
+
 .gt-p {
     color: oklch(70% 0.16 320);
 }
@@ -999,37 +1009,93 @@ li.loading-row {
 }
 
 .item-tooltip {
-    width: 18rem;
+    width: 22rem;
+    padding: 0;
+    text-align: left;
 }
 
 .item-tooltip__head {
     display: flex;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-bottom: 0.4rem;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.item-tooltip__head-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.item-tooltip__head-text {
+    flex: 1;
+    min-width: 0;
 }
 
 .item-tooltip__name {
     font-weight: 700;
-}
-
-.item-tooltip__desc {
-    font-size: 0.82rem;
-    color: var(--muted);
+    font-size: 0.95rem;
 }
 
 .item-tooltip__tier {
     display: block;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     color: var(--muted);
 }
 
+.item-tooltip__value {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.item-tooltip__body {
+    padding: 0.6rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.item-tooltip__desc {
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.item-tooltip__note {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--muted);
+    font-style: italic;
+    padding-left: 0.6rem;
+    border-left: 2px solid var(--border);
+}
+
 .item-tooltip__section {
-    margin-top: 0.6rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.5rem;
+}
+
+.item-tooltip__section:first-child {
+    border-top: none;
+    padding-top: 0;
 }
 
 .item-tooltip__section .eyebrow {
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--faint);
+}
+
+.item-tooltip__prose {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    margin-top: 0.35rem;
 }
 
 .item-stat-list {
@@ -1038,7 +1104,7 @@ li.loading-row {
     padding: 0;
     font-size: 0.82rem;
     display: grid;
-    gap: 0.1rem;
+    gap: 0.15rem;
 }
 
 .item-stat-list li {
@@ -1047,13 +1113,22 @@ li.loading-row {
     gap: 0.5rem;
 }
 
+.item-stat-list .highlight {
+    color: var(--accent-2);
+    font-weight: 600;
+}
+
 .item-bonus-list {
     list-style: none;
     margin: 0;
     padding: 0;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     display: grid;
     gap: 0.15rem;
+}
+
+.item-bonus-list li {
+    color: var(--accent-2);
 }
 
 .item-tile {
@@ -1107,6 +1182,12 @@ li.loading-row {
 
 .attr-box strong {
     font-size: 1.3rem;
+}
+
+.attr-box__growth {
+    font-size: 0.78rem;
+    color: var(--accent-2);
+    font-weight: 600;
 }
 
 /* ---------- Ability cards ---------- */
@@ -1187,8 +1268,25 @@ li.loading-row {
 }
 
 .recipe__component--recipe {
-    justify-content: flex-end;
     color: var(--muted);
+}
+
+.recipe-scroll {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url("/img/recipe-scroll.webp") center / contain no-repeat;
+}
+
+.recipe-scroll__overlay {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    mask-image: radial-gradient(circle, black 0%, rgba(0,0,0,0.85) 40%, transparent 75%);
+    -webkit-mask-image: radial-gradient(circle, black 0%, rgba(0,0,0,0.85) 40%, transparent 75%);
 }
 
 .recipe__total {
