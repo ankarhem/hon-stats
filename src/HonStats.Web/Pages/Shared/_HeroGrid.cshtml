@@ -15,7 +15,7 @@
             <div class="hero-column__grid">
                 @foreach (var h in Model.ByAttribute(col.Attr))
                 {
-                    <div class="hero-tile @(Model.IsDimmed(h) ? "hero-tile--dimmed" : null)">
+                    <div class="hero-tile @(Model.IsDimmed(h) ? "hero-tile--dimmed" : null)" style="--a: --h@(h.Id)">
                         <a class="hero-tile__link" href="/heroes/@h.Slug" aria-label="@h.TranslatedName">
                             <img class="hero-tile__icon" src="@h.IconUrl" alt="@h.TranslatedName" loading="lazy" />
                         </a>
