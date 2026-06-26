@@ -11,6 +11,7 @@
     var cooldownLeft = onCooldown && lastReindex is DateTimeOffset lr2
         ? cooldown - (DateTimeOffset.UtcNow - lr2)
         : TimeSpan.Zero;
+    var showOob = Context.Request.Headers.ContainsKey("HX-Request");
 }
 
 @if (polling)
@@ -50,16 +51,22 @@ else if (failed)
           hx-disabled-elt="button">
         <button class="btn btn--sm" type="submit">Retry</button>
     </form>
-    <p id="last-indexed" hx-swap-oob="true" class="profile-indexed-row muted">
-        Last indexed @(lastReindex?.ToString("yyyy-MM-dd HH:mm") ?? "—")
-    </p>
+    @if (showOob)
+    {
+        <p id="last-indexed" hx-swap-oob="true" class="profile-indexed-row muted">
+            Last indexed @(lastReindex?.ToString("yyyy-MM-dd HH:mm") ?? "—")
+        </p>
+    }
 }
 else if (onCooldown)
 {
     <button class="btn btn--sm" disabled>Cooldown ~@(Math.Max(1, (int)Math.Ceiling(cooldownLeft.TotalMinutes)))m</button>
-    <p id="last-indexed" hx-swap-oob="true" class="profile-indexed-row muted">
-        Last indexed @(lastReindex?.ToString("yyyy-MM-dd HH:mm") ?? "—")
-    </p>
+    @if (showOob)
+    {
+        <p id="last-indexed" hx-swap-oob="true" class="profile-indexed-row muted">
+            Last indexed @(lastReindex?.ToString("yyyy-MM-dd HH:mm") ?? "—")
+        </p>
+    }
 }
 else
 {
@@ -69,7 +76,10 @@ else
           hx-disabled-elt="button">
         <button class="btn btn--sm" type="submit">@(lastReindex is null ? "Index" : "Reindex")</button>
     </form>
-    <p id="last-indexed" hx-swap-oob="true" class="profile-indexed-row muted">
-        Last indexed @(lastReindex?.ToString("yyyy-MM-dd HH:mm") ?? "—")
-    </p>
+    @if (showOob)
+    {
+        <p id="last-indexed" hx-swap-oob="true" class="profile-indexed-row muted">
+            Last indexed @(lastReindex?.ToString("yyyy-MM-dd HH:mm") ?? "—")
+        </p>
+    }
 }
