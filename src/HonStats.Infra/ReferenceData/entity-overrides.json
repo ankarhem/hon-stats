@@ -1813,5 +1813,28 @@
         "damage": 30.0
       }
     }
-  }
+  },
+  "phoenixRewards": [
+    "Item_BrimstonePlate",
+    "Item_BurningTemper",
+    "Item_Chaosbrand",
+    "Item_CrimsonGuard",
+    "Item_EmberstoneBracers",
+    "Item_FlamekeeperOath",
+    "Item_FluffyFleetingFeather",
+    "Item_FluffyFletchingArrows",
+    "Item_GoldenReach",
+    "Item_HeartOfFire",
+    "Item_HelmOfTheFirelands",
+    "Item_HolyHandGrenade",
+    "Item_LagunaOrb",
+    "Item_LastWail",
+    "Item_MagmaGauntlet",
+    "Item_ObsidianSpear",
+    "Item_PhoenixTalon",
+    "Item_PhoenixVeil",
+    "Item_Phoenix_ItemToken",
+    "Item_ShieldOfHonor",
+    "Item_TwinTikiMask"
+  ]
 }

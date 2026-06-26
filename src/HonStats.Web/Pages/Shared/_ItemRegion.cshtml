@@ -1,0 +1,29 @@
+@model ItemsModel
+
+<input id="active-cat" type="hidden" name="cat" value="@Model.Category" />
+
+<nav class="tabs" aria-label="Item categories">
+    <button class="tab"
+            aria-current="@(Model.Category is null ? "true" : null)"
+            hx-get="/items"
+            hx-include="#item-search"
+            hx-target="#item-region"
+            hx-push-url="true">
+        All
+    </button>
+    @foreach (var (token, label) in ItemsModel.Categories)
+    {
+        <button class="tab"
+                aria-current="@(Model.Category == token ? "true" : null)"
+                hx-get="/items?cat=@token"
+                hx-include="#item-search"
+                hx-target="#item-region"
+                hx-push-url="true">
+            @label
+        </button>
+    }
+</nav>
+
+<div id="item-grid">
+    <partial name="_ItemGrid" model="Model" />
+</div>

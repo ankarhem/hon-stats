@@ -26,6 +26,7 @@ OUTPUT = REPO_ROOT / "src" / "HonStats.Infra" / "ReferenceData" / "entity-overri
 
 HERO_GLOB = "heroes/*/base/hero.entity"
 ITEM_GLOB = "items/recipes/*/item.entity"
+PHOENIX_GLOB = "items/phoenix_rewards/*/item.entity"
 
 ITEM_STAT_KEYS = {
     "attackspeed", "evasion", "movespeed", "attackrange",
@@ -36,7 +37,7 @@ ITEM_STAT_KEYS = {
 
 def extract_entities(jz_path: str, dest: Path) -> None:
     result = subprocess.run(
-        ["7zz", "x", jz_path, HERO_GLOB, ITEM_GLOB, f"-o{dest}", "-y"],
+        ["7zz", "x", jz_path, HERO_GLOB, ITEM_GLOB, PHOENIX_GLOB, f"-o{dest}", "-y"],
         capture_output=True,
         text=True,
     )
@@ -83,6 +84,17 @@ def parse_hero(path: Path) -> dict | None:
             data[out_key] = val
 
     return {name: data} if data else None
+
+
+def parse_phoenix(path: Path) -> str | None:
+    try:
+        root = ET.parse(path).getroot()
+    except ET.ParseError:
+        return None
+    if root.tag != "item":
+        return None
+    name = root.attrib.get("name", "")
+    return name if name.startswith("Item_") else None
 
 
 def to_camel(snake: str) -> str:
@@ -158,10 +170,19 @@ def main() -> None:
             if result:
                 items.update(result)
 
-    output = {"heroes": heroes, "items": items}
+        phoenix_rewards = sorted(
+            name
+            for path in sorted(tmp_path.glob(PHOENIX_GLOB))
+            if (name := parse_phoenix(path))
+        )
+
+    output = {"heroes": heroes, "items": items, "phoenixRewards": phoenix_rewards}
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(output, indent=2, sort_keys=True) + "\n")
-    print(f"Wrote {len(heroes)} heroes, {len(items)} items to {OUTPUT}")
+    print(
+        f"Wrote {len(heroes)} heroes, {len(items)} items, "
+        f"{len(phoenix_rewards)} phoenix rewards to {OUTPUT}"
+    )
 
 
 if __name__ == "__main__":

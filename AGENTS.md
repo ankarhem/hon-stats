@@ -67,6 +67,12 @@ auto-retrying web-first assertions (`Expect(locator).ToBeVisibleAsync`).
   nix shell. `HonStatsDbContextDesignFactory` lets `dotnet ef` run with
   `--project src/HonStats.Infra --startup-project src/HonStats.Infra`.
 - Solution is `HonStats.slnx` (.NET 10 XML format).
+- **Local `resources0.jz`** (Zstd-compressed zip, the `.s2z` successor; game data
+  the API doesn't expose lives in `.entity` files inside it): on this machine at
+  `~/Applications/Sikarugir/HonReborn.app/Contents/SharedSupport/prefix/drive_c/users/Sikarugir/AppData/Local/Juvio/heroes of newerth/resources0.jz`.
+  Extract via `scripts/extract_entity_data.py <path-to-resources0.jz>` (needs
+  `7zz` on PATH — `nix shell nixpkgs#python3 nixpkgs#_7zz`). List/extract other
+  globs directly with `7zz x <path> '<glob>'`.
 
 ## Juvio API integration map (validated)
 

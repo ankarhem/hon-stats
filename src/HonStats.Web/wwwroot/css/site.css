@@ -886,8 +886,8 @@ li.loading-row {
     color: oklch(70% 0.16 320);
 }
 
-/* ---------- Heroes filter ---------- */
-.hero-filter {
+/* ---------- Reference data filter bar (heroes / items) ---------- */
+.filter-bar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -895,29 +895,29 @@ li.loading-row {
     margin-bottom: 1.5rem;
 }
 
-.hero-filter__search {
+.filter-bar__search {
     width: 100%;
     max-width: 22rem;
 }
 
-.hero-filter__roles {
+.filter-bar__group {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
 }
 
-.role-toggle {
+.filter-toggle {
     cursor: pointer;
 }
 
-.role-toggle input {
+.filter-toggle input {
     position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-.role-toggle span {
+.filter-toggle span {
     display: inline-block;
     padding: 0.35rem 0.7rem;
     border-radius: 999px;
@@ -928,18 +928,18 @@ li.loading-row {
     font-weight: 600;
 }
 
-.role-toggle:hover span {
+.filter-toggle:hover span {
     border-color: var(--accent);
     color: var(--fg);
 }
 
-.role-toggle input:checked + span {
+.filter-toggle input:checked + span {
     background: oklch(from var(--accent) l c h / 0.2);
     border-color: var(--accent);
     color: var(--accent);
 }
 
-.role-toggle input:focus-visible + span {
+.filter-toggle input:focus-visible + span {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }

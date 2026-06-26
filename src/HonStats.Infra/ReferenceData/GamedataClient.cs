@@ -108,6 +108,7 @@ internal sealed class EntityOverridesDto
 {
     public Dictionary<string, Dictionary<string, double>> Heroes { get; set; } = new();
     public Dictionary<string, ItemOverrideDto> Items { get; set; } = new();
+    public List<string> PhoenixRewards { get; set; } = [];
 }
 
 internal sealed class ItemOverrideDto
@@ -303,6 +304,13 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
                 conditionalStats[condition] = new Dictionary<string, double>(modStats);
         }
 
+        var shopCategories = (i.ShopCategories ?? [])
+            .SelectMany(s => s.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            .Distinct()
+            .ToList();
+        if (EntityOverrides.PhoenixRewards.Contains(i.Name))
+            shopCategories.Add("phoenix_rewards");
+
         var cooldown = FirstInt(i.CooldownTime);
         return new Item
         {
@@ -313,7 +321,7 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
                 : i.TranslatedName,
             Cost = i.Cost,
             IconUrl = ResolveIcon(i.Icon, i.Id),
-            ShopCategories = i.ShopCategories ?? [],
+            ShopCategories = shopCategories,
             Description = strings.GetValueOrDefault($"{i.Name}_description"),
             Description2 = strings.GetValueOrDefault($"{i.Name}_description2"),
             ImpactEffect = ResolveImpactEffect(i.Name, strings),

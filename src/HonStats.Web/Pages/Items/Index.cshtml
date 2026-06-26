@@ -6,12 +6,13 @@
 
 <h1>Items</h1>
 
-<form class="hero-filter"
+<form class="filter-bar"
       hx-get="/items"
       hx-target="#item-grid"
-      hx-swap="innerHTML"
-      hx-trigger="input changed delay:80ms">
-    <input class="search__input hero-filter__search"
+      hx-trigger="input changed delay:80ms"
+      hx-include="#active-cat">
+    <input id="item-search"
+           class="search__input filter-bar__search"
            type="search"
            name="q"
            value="@Model.Query"
@@ -20,6 +21,6 @@
            aria-label="Item name" />
 </form>
 
-<div id="item-grid">
-    <partial name="_ItemGrid" model="Model" />
+<div id="item-region">
+    <partial name="_ItemRegion" model="Model" />
 </div>

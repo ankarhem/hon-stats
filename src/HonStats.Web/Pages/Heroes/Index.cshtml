@@ -6,22 +6,22 @@
 
 <h1>Heroes</h1>
 
-<form class="hero-filter"
+<form class="filter-bar"
       hx-get="/heroes"
       hx-target="#hero-grid"
       hx-swap="innerHTML"
       hx-trigger="input changed delay:80ms, change">
-    <input class="search__input hero-filter__search"
+    <input class="search__input filter-bar__search"
            type="search"
            name="q"
            value="@Model.Query"
            placeholder="Search hero name…"
            autocomplete="off"
            aria-label="Hero name" />
-    <div class="hero-filter__roles" role="group" aria-label="Filter by role">
+    <div class="filter-bar__group" role="group" aria-label="Filter by role">
         @foreach (var (role, label) in HeroesModel.Roles)
         {
-            <label class="role-toggle">
+            <label class="filter-toggle">
                 <input type="checkbox" name="roles" value="@role"
                        checked="@(Model.ActiveRoles.Contains(role))" />
                 <span>@label</span>
