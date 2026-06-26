@@ -37,10 +37,6 @@ else
         }
         <partial name="_ReindexButton" model="new ReindexButtonView(Model.AccountId, null, Model.Indexed)" />
     </div>
-    @if (Model.Indexed?.LastReindexAt is not null)
-    {
-        <p class="profile-indexed-row muted">Last indexed @Model.Indexed.LastReindexAt.Value.ToString("yyyy-MM-dd HH:mm")</p>
-    }
 
     <div class="panel card">
         <p class="eyebrow card__title">Profile stats</p>

@@ -4,63 +4,73 @@
     var indexing = status == IndexingStatus.Indexing;
     var failed = status == IndexingStatus.Failed;
     var queued = Model.Result is { Outcome: ReindexOutcome.Enqueued };
+    var polling = indexing || queued;
     var cooldown = TimeSpan.FromMinutes(15);
     var lastReindex = Model.Indexed?.LastReindexAt;
     var onCooldown = lastReindex is DateTimeOffset lr && DateTimeOffset.UtcNow - lr < cooldown;
     var cooldownLeft = onCooldown && lastReindex is DateTimeOffset lr2
         ? cooldown - (DateTimeOffset.UtcNow - lr2)
         : TimeSpan.Zero;
-}
 
-@if (indexing || queued)
-{
-    var total = Model.Total;
-    var fetched = Model.Fetched;
-    var label = total > 0 && fetched < total
-        ? $"Gathering {fetched}/{total}"
-        : total > 0 && fetched >= total
-            ? "Processing"
-            : "Gathering matches";
-
-    if (total > 0 && fetched < total && Model.ProgressStartedAt is DateTimeOffset started && fetched > 0)
+    string? label = null;
+    if (polling)
     {
-        var elapsed = (DateTimeOffset.UtcNow - started).TotalSeconds;
-        var rate = fetched / elapsed;
-        if (rate > 0)
+        var total = Model.Total;
+        var fetched = Model.Fetched;
+        label = total > 0 && fetched < total
+            ? $"Gathering {fetched}/{total}"
+            : total > 0 && fetched >= total
+                ? "Processing"
+                : "Gathering matches";
+
+        if (total > 0 && fetched < total && Model.ProgressStartedAt is DateTimeOffset started && fetched > 0)
         {
-            var remaining = (int)((total - fetched) / rate);
-            label += $" — ~{remaining}s left";
+            var elapsed = (DateTimeOffset.UtcNow - started).TotalSeconds;
+            var rate = fetched / elapsed;
+            if (rate > 0)
+            {
+                var remaining = (int)((total - fetched) / rate);
+                label += $" — ~{remaining}s left";
+            }
         }
     }
+}
 
-    <div class="reindex-btn"
-         hx-get="?handler=IndexProgress&accountId=@Model.AccountId"
-         hx-trigger="every 1.5s" hx-target="this" hx-swap="outerHTML">
+<div class="reindex-wrapper"
+     hx-get="?handler=IndexProgress&accountId=@Model.AccountId"
+     hx-trigger="@(polling ? "every 1.5s" : "none")"
+     hx-target="this" hx-swap="outerHTML">
+    @if (polling)
+    {
         <button class="btn btn--sm" disabled>
             <span class="btn__spinner"></span>
             <span>@label</span>
         </button>
-    </div>
-}
-else if (failed)
-{
-    <form method="post"
-          hx-post="?handler=Reindex&accountId=@Model.AccountId"
-          hx-target="this" hx-swap="outerHTML"
-          hx-disabled-elt="button">
-        <button class="btn btn--sm" type="submit">Retry</button>
-    </form>
-}
-else if (onCooldown)
-{
-    <button class="btn btn--sm" disabled>Cooldown ~@(Math.Max(1, (int)Math.Ceiling(cooldownLeft.TotalMinutes)))m</button>
-}
-else
-{
-    <form method="post"
-          hx-post="?handler=Reindex&accountId=@Model.AccountId"
-          hx-target="this" hx-swap="outerHTML"
-          hx-disabled-elt="button">
-        <button class="btn btn--sm" type="submit">@(lastReindex is null ? "Index" : "Reindex")</button>
-    </form>
-}
+    }
+    else if (failed)
+    {
+        <form method="post"
+              hx-post="?handler=Reindex&accountId=@Model.AccountId"
+              hx-target="this" hx-swap="outerHTML"
+              hx-disabled-elt="button">
+            <button class="btn btn--sm" type="submit">Retry</button>
+        </form>
+    }
+    else if (onCooldown)
+    {
+        <button class="btn btn--sm" disabled>Cooldown ~@(Math.Max(1, (int)Math.Ceiling(cooldownLeft.TotalMinutes)))m</button>
+    }
+    else
+    {
+        <form method="post"
+              hx-post="?handler=Reindex&accountId=@Model.AccountId"
+              hx-target="this" hx-swap="outerHTML"
+              hx-disabled-elt="button">
+            <button class="btn btn--sm" type="submit">@(lastReindex is null ? "Index" : "Reindex")</button>
+        </form>
+    }
+    @if (!polling && lastReindex is not null)
+    {
+        <p class="profile-indexed-row muted">Last indexed @lastReindex.Value.ToString("yyyy-MM-dd HH:mm")</p>
+    }
+</div>
