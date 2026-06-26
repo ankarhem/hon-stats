@@ -15,11 +15,12 @@
             <div class="hero-column__grid">
                 @foreach (var h in Model.ByAttribute(col.Attr))
                 {
-                    <div class="hero-tile @(Model.IsDimmed(h) ? "hero-tile--dimmed" : null)" style="--a: --h@(h.Id)">
+                    <div class="hero-tile @(Model.IsDimmed(h) ? "hero-tile--dimmed" : null)" style="anchor-name: --h@(h.Id)">
                         <a class="hero-tile__link" href="/heroes/@h.Slug" aria-label="@h.TranslatedName">
                             <img class="hero-tile__icon" src="@h.IconUrl" alt="@h.TranslatedName" loading="lazy" />
                         </a>
-                        <div class="hero-tooltip" role="tooltip">
+                        <div class="hero-tooltip" role="tooltip"
+                             style="position-anchor: --h@(h.Id); bottom: anchor(top); left: anchor(center); translate: -50% 0; position-try-fallbacks: flip-block">
                             <div class="hero-tooltip__head">
                                 <img class="hero-tooltip__icon" src="@h.IconUrl" alt="" loading="lazy" />
                                 <div>

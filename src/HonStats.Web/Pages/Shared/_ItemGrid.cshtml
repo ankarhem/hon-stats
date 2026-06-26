@@ -3,7 +3,7 @@
 <ul class="grid-list">
     @foreach (var item in Model.Items)
     {
-        <li class="grid-list__item item-tile @(Model.IsDimmed(item) ? "item-tile--dimmed" : null)" style="--a: --i@(item.Id)">
+        <li class="grid-list__item item-tile @(Model.IsDimmed(item) ? "item-tile--dimmed" : null)" style="anchor-name: --i@(item.Id)">
             <a href="/items/@item.Slug">
                 <img class="grid-list__icon" src="@item.IconUrl" alt="@item.DisplayName" loading="lazy" />
                 <div class="grid-list__name">@item.DisplayName</div>
@@ -12,7 +12,8 @@
                     <div class="grid-list__meta gold">@item.TotalCost</div>
                 }
             </a>
-            <div class="item-tooltip" role="tooltip">
+            <div class="item-tooltip" role="tooltip"
+                 style="position-anchor: --i@(item.Id); bottom: anchor(top); left: anchor(center); translate: -50% 0; position-try-fallbacks: flip-block">
                 <div class="item-tooltip__head">
                     <img class="item-tooltip__head-icon" src="@item.IconUrl" alt="" loading="lazy" />
                     <div class="item-tooltip__head-text">
