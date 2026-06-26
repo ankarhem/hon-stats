@@ -4,7 +4,7 @@
     var winPct = t.GamesTogether > 0 ? t.WinsTogether * 100 / t.GamesTogether : 0;
     <li class="roster__item" data-testid="teammate-row">
         <span class="flag">@ProfileModel.Flag(t.Country)</span>
-        <a href="/Players/Profile/@t.TeammateAccountId" class="roster__name">
+        <a href="/players/@(t.Username ?? t.TeammateAccountId.ToString())" class="roster__name">
             @(t.DisplayName ?? t.Username ?? t.TeammateAccountId.ToString())
         </a>
         <span class="muted">@t.GamesTogether games · @t.WinsTogether W (@winPct%)</span>
@@ -15,7 +15,7 @@
 {
     var next = Model.Offset + Model.PageSize;
     <li class="roster__item loading-row"
-        hx-get="@Url.Page("/Players/Profile", "TeammatesMore", new { accountId = Model.AccountId, offset = next })"
+        hx-get="?handler=TeammatesMore&accountId=@Model.AccountId&offset=@next"
         hx-trigger="revealed" hx-target="this" hx-swap="outerHTML">
         <span class="muted">Loading more…</span>
     </li>

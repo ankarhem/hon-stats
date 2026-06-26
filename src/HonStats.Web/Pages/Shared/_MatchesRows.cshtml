@@ -4,7 +4,7 @@
     var hero = Model.Heroes.GetValueOrDefault(m.HeroId);
     var won = m.Team == m.WinningTeam;
     <tr class="match-row" data-testid="match-row"
-        hx-get="@Url.Page("/Players/Profile", "MatchDetail", new { accountId = Model.AccountId, gameId = m.GameId })"
+        hx-get="?handler=MatchDetail&accountId=@Model.AccountId&gameId=@m.GameId"
         hx-target="#match-detail-host" hx-swap="innerHTML">
         <td>
             <div class="match-row__hero">
@@ -23,7 +23,7 @@
 {
     var next = Model.Offset + Model.PageSize;
     <tr class="loading-row"
-        hx-get="@Url.Page("/Players/Profile", "MatchesMore", new { accountId = Model.AccountId, offset = next })"
+        hx-get="?handler=MatchesMore&accountId=@Model.AccountId&offset=@next"
         hx-trigger="revealed" hx-target="this" hx-swap="outerHTML">
         <td colspan="6">Loading more…</td>
     </tr>

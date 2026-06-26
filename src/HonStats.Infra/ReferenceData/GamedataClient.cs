@@ -23,6 +23,15 @@ internal sealed class HeroDto
     public int PrimaryAttribute { get; set; }
     public string? Team { get; set; }
     public List<string>? Icon { get; set; }
+    public int? Strength { get; set; }
+    public int? Agility { get; set; }
+    public int? Intelligence { get; set; }
+    public List<string>? AttackType { get; set; }
+    public List<string>? Inventory0 { get; set; }
+    public List<string>? Inventory1 { get; set; }
+    public List<string>? Inventory2 { get; set; }
+    public List<string>? Inventory3 { get; set; }
+    public List<string>? Inventory4 { get; set; }
 }
 
 internal sealed class GetAllItemsDto
@@ -41,19 +50,59 @@ internal sealed class ItemDto
     public List<string>? ShopCategories { get; set; }
 }
 
-// Fetches heroes + items from the public gamedata service. Stateless, safe as a singleton.
+internal sealed class GetAllAbilitiesDto
+{
+    public List<AbilityDto>? Abilities { get; set; }
+    public List<AbilityDto> AbilitiesValue => this.Abilities ?? [];
+}
+
+internal sealed class AbilityDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? TranslatedName { get; set; }
+    public List<string>? Icon { get; set; }
+}
+
+internal sealed class StringsDto
+{
+    public string? Language { get; set; }
+    public Dictionary<string, string>? Strings { get; set; }
+}
+
+// Fetches heroes, items, abilities + strings from the public gamedata service.
+// Heroes are enriched with their abilities (resolved via inventory0-4 name refs
+// joined to /entities/abilities) and descriptions (from /strings). Stateless,
+// safe as a singleton.
 internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
 {
     public async Task<IReadOnlyList<Hero>> GetHeroesAsync(CancellationToken ct)
     {
-        var dto = await this.Get<GetAllHeroesDto>("/entities/heroes", ct);
-        return (dto?.HeroesValue ?? []).Select(MapHero).ToList();
+        var heroesTask = Get<GetAllHeroesDto>("/entities/heroes", ct);
+        var abilitiesTask = Get<GetAllAbilitiesDto>("/entities/abilities", ct);
+        var stringsTask = GetStrings(ct);
+        await Task.WhenAll(heroesTask, abilitiesTask, stringsTask);
+
+        var abilitiesByName = (abilitiesTask.Result?.AbilitiesValue ?? [])
+            .Where(a => !string.IsNullOrEmpty(a.Name))
+            .DistinctBy(a => a.Name)
+            .ToDictionary(a => a.Name, a => a);
+        var strings = stringsTask.Result;
+
+        return (heroesTask.Result?.HeroesValue ?? [])
+            .Select(h => MapHero(h, abilitiesByName, strings))
+            .ToList();
     }
 
     public async Task<IReadOnlyList<Item>> GetItemsAsync(CancellationToken ct)
     {
-        var dto = await this.Get<GetAllItemsDto>("/entities/items", ct);
-        return (dto?.ItemsValue ?? []).Select(MapItem).ToList();
+        var itemsTask = Get<GetAllItemsDto>("/entities/items", ct);
+        var stringsTask = GetStrings(ct);
+        await Task.WhenAll(itemsTask, stringsTask);
+
+        var strings = stringsTask.Result;
+
+        return (itemsTask.Result?.ItemsValue ?? []).Select(i => MapItem(i, strings)).ToList();
     }
 
     private async Task<T?> Get<T>(string relativeUri, CancellationToken ct)
@@ -65,8 +114,37 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
         return await JsonSerializer.DeserializeAsync<T>(stream, GamedataJson.Options, ct);
     }
 
-    private static Hero MapHero(HeroDto h) =>
-        new()
+    private async Task<Dictionary<string, string>> GetStrings(CancellationToken ct)
+    {
+        var dto = await Get<StringsDto>("/strings", ct);
+        return dto?.Strings ?? new Dictionary<string, string>();
+    }
+
+    private static Hero MapHero(
+        HeroDto h,
+        Dictionary<string, AbilityDto> abilitiesByName,
+        Dictionary<string, string> strings
+    )
+    {
+        var abilityNames = new[]
+        {
+            h.Inventory0,
+            h.Inventory1,
+            h.Inventory2,
+            h.Inventory3,
+            h.Inventory4,
+        }
+            .Where(list => list is { Count: > 0 })
+            .Select(list => list![0])
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .ToList();
+
+        var heroAbilities = abilityNames
+            .Where(name => abilitiesByName.ContainsKey(name))
+            .Select(name => MapAbility(abilitiesByName[name], strings))
+            .ToList();
+
+        return new Hero
         {
             Id = h.Id,
             Name = h.Name,
@@ -76,9 +154,16 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
             IconUrl = FirstIcon(h.Icon),
             PrimaryAttribute = h.PrimaryAttribute,
             Team = h.Team ?? string.Empty,
+            Description = strings.GetValueOrDefault($"{h.Name}_description"),
+            Strength = h.Strength ?? 0,
+            Agility = h.Agility ?? 0,
+            Intelligence = h.Intelligence ?? 0,
+            AttackType = h.AttackType is { Count: > 0 } ? h.AttackType[0] : null,
+            Abilities = heroAbilities,
         };
+    }
 
-    private static Item MapItem(ItemDto i) =>
+    private static Item MapItem(ItemDto i, Dictionary<string, string> strings) =>
         new()
         {
             Id = i.Id,
@@ -89,6 +174,23 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
             Cost = i.Cost,
             IconUrl = FirstIcon(i.Icon),
             ShopCategories = i.ShopCategories ?? [],
+            Description =
+                strings.GetValueOrDefault($"{i.Name}_description_simple")
+                ?? strings.GetValueOrDefault($"{i.Name}_description"),
+        };
+
+    private static Ability MapAbility(AbilityDto a, Dictionary<string, string> strings) =>
+        new()
+        {
+            Id = a.Id,
+            Name = a.Name,
+            TranslatedName = string.IsNullOrWhiteSpace(a.TranslatedName)
+                ? a.Name
+                : a.TranslatedName,
+            IconUrl = FirstIcon(a.Icon),
+            Description =
+                strings.GetValueOrDefault($"{a.Name}_description2")
+                ?? strings.GetValueOrDefault($"{a.Name}_description"),
         };
 
     private static string FirstIcon(List<string>? icons) =>

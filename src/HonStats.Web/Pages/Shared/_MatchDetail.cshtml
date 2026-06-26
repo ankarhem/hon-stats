@@ -29,11 +29,17 @@ else
                             @foreach (var pl in team)
                             {
                                 var hero = Model.Heroes.GetValueOrDefault(pl.HeroId);
+                                var name = Model.Names.GetValueOrDefault(pl.AccountId);
                                 <tr>
                                     <td>
                                         <div class="match-row__hero">
                                             <img class="hero-icon" src="@hero?.IconUrl" alt="" loading="lazy" />
-                                            <span class="hero-name">@(hero?.TranslatedName ?? pl.HeroId.ToString())</span>
+                                            <div>
+                                                <span class="hero-name">@(hero?.TranslatedName ?? pl.HeroId.ToString())</span>
+                                                <a class="match-row__player" href="/players/@(name?.Username ?? pl.AccountId.ToString())">
+                                                    <span class="flag">@ProfileModel.Flag(name?.Country)</span>@(name?.DisplayName ?? name?.Username ?? pl.AccountId.ToString())
+                                                </a>
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="kda">@pl.Kills/@pl.Deaths/@pl.Assists</td>

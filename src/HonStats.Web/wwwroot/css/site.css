@@ -162,16 +162,23 @@ p {
 }
 
 .search-results {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    padding: 0 1.25rem;
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    right: 0;
+    z-index: 200;
+}
+
+.search-results:empty {
+    display: none;
 }
 
 .search-results__list {
     list-style: none;
-    margin: 0.25rem 0 0;
-    padding: 0.35rem;
-    border-radius: var(--radius-sm);
+    margin: 0;
+    padding: 0.3rem;
+    max-height: 20rem;
+    overflow-y: auto;
     box-shadow: var(--shadow);
 }
 
@@ -189,13 +196,28 @@ p {
 }
 
 .search-results__empty {
-    margin: 0.25rem 0 0;
+    margin: 0;
     padding: 0.6rem 0.85rem;
-    border-radius: var(--radius-sm);
     color: var(--muted);
 }
 
 /* ---------- Layout ---------- */
+.site-nav {
+    display: flex;
+    gap: 1rem;
+}
+
+.site-nav a {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.site-nav a:hover {
+    color: var(--fg);
+    text-decoration: none;
+}
+
 .site-main {
     max-width: var(--max-width);
     margin: 0 auto;
@@ -330,6 +352,73 @@ p {
     font-size: 0.9rem;
 }
 
+/* ---------- Detail header (heroes/items) ---------- */
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.detail-header__icon {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius);
+    object-fit: cover;
+    background: var(--surface-3);
+    flex-shrink: 0;
+}
+
+.detail-header__icon--sm {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+}
+
+.detail-header__name {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.detail-header__meta {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* ---------- Ability list ---------- */
+.ability-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ability-list__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.ability-list__item:last-child {
+    border-bottom: none;
+}
+
+.ability-list__name {
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+}
+
+.ability-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    background: var(--surface-3);
+    flex-shrink: 0;
+}
+
 .flag {
     display: inline-block;
     font-size: 1.1rem;
@@ -437,6 +526,17 @@ p {
 
 .hero-name {
     font-weight: 600;
+}
+
+.match-row__player {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--muted);
+}
+
+.match-row__player:hover {
+    color: var(--accent);
 }
 
 .kda {

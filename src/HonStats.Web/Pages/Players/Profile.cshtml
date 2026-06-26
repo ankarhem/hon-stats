@@ -1,4 +1,4 @@
-@page "{accountId:guid}"
+@page "/players/{username}"
 @model ProfileModel
 @{
     ViewData["Title"] = Model.Profile?.Identity.DisplayName ?? "Player";

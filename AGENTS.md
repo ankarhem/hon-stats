@@ -62,9 +62,10 @@ auto-retrying web-first assertions (`Expect(locator).ToBeVisibleAsync`).
 - EF Core 10.0.9 + SQLite. **`SQLitePCLRaw.bundle_e_sqlite3` pinned to 3.0.3**
   in Infra (transitive 2.1.11 from EF has GHSA-2m69-gcr7-jv3q → NU1903 fails the
   `-warnaserror` gate; 3.0.3 is patched and EF-compatible).
-- `dotnet ef` is a **local tool** (`.config/dotnet-tools.json`, v10.0.9) — run
-  `dotnet tool restore` before migrations. `HonStatsDbContextDesignFactory` lets
-  `dotnet ef` run with `--project src/HonStats.Infra --startup-project src/HonStats.Infra`.
+- `dotnet ef` is in `flake.nix` (devShell package) AND a local tool
+  (`.config/dotnet-tools.json`, v10.0.9) — run `dotnet tool restore` or enter the
+  nix shell. `HonStatsDbContextDesignFactory` lets `dotnet ef` run with
+  `--project src/HonStats.Infra --startup-project src/HonStats.Infra`.
 - Solution is `HonStats.slnx` (.NET 10 XML format).
 
 ## Juvio API integration map (validated)
@@ -89,15 +90,17 @@ setting `Authorization: Bearer`.
 - Match detail: `GET stats /v1/stats/getmatchsummary?gameId=<int>` → players[10] with `inventory48Id`–`inventory64Id` (item ids), `wardOfSight/RevelationPlaced`, netWorth, RoleIndex.
 - Teammates: `GET stats /v1/stats/getrecentplayers?playerId=<uuid>` → flat `{playerId,matchId}[]`, aggregate by count, exclude self, resolve names via getuserinfo.
 - Hero builds: filter recent matches by heroId → getmatchsummary each → aggregate inventory ids → map via gamedata items.
-- Heroes: `GET gamedata /entities/heroes` (PUBLIC, 102 heroes; `translatedName`=display, `icon` is an **array** take [0]).
-- Items: `GET gamedata /entities/items` (PUBLIC, 210 items; same icon-array quirk).
+- Heroes: `GET gamedata /entities/heroes` (PUBLIC, 102 heroes; `translatedName`=display). Hero `inventory0`–`inventory4` are ability NAME strings (e.g. `Ability_Blacksmith1`) that JOIN to `/entities/abilities`.
+- Abilities: `GET gamedata /entities/abilities` (PUBLIC, 536 abilities; some have duplicate `name` — use `DistinctBy`).
+- Items: `GET gamedata /entities/items` (PUBLIC, 210 items).
+- Strings (tooltips/descriptions): `GET gamedata /strings` (PUBLIC, ~9k keys). Flat `Dictionary<string,string>` keyed by `{EntityName}_{suffix}` convention: `Ability_X_description2`, `Item_X_description_simple`, `Hero_X_description`. **GamedataClient joins all three endpoints** — heroes come back enriched with `List<Ability>` (each with description from strings), items come back with `Description`.
 
 **Image CDN** (public, predictable): `https://gamestorage.juvio.com/heroes/{id}/icon.webp` and `.../items/{id}/icon.webp`.
 
 **Known dead ends:**
 - `auth /v1/userinfo/getusernamebyid` has no documented params → always empty. Use POST getuserinfo instead.
 - Stats endpoints use different id param names: profilestats=`userId`, playersummary/rank=`accountId`, recentmatches/recentplayers=`playerId`. Same UUID value.
-- gamedata `icon` fields are arrays; `translatedName` (not `name`) is the display name; entities are public (no bearer needed).
+- gamedata entities are public (no bearer needed). **MANY fields are single-element arrays** (not just `icon`): `attackType`, `inventory0-4`, `moveSpeed`, `maxHealth`, `maxMana`, `magicArmor`, `attackRange`, `attackDamageMin/Max`, `sightRangeDay/Night`, etc. Always check the actual JSON — assume arrays, use `[0]`. `translatedName` (not `name`) is the display name.
 - `getrecentmatchesforplayer` rejects a large `limit` with **400** (e.g. 200 fails; 25 works, max unknown). The indexer pages via `offset` at `Indexing:RecentMatchesLimit` (25) to ingest full history.
 - `POST auth /v1/userinfo/getuserinfo` rejects a large `accountIds` array with **400** (somewhere in (50, 200]; ≤50 works, exact max unknown). The name resolver chunks at 50 (`JuvioPlayerNameResolver`).
 - Razor Pages PageModels don't auto-associate by convention when `_ViewImports` sets `@namespace` — each page `.cshtml` needs an explicit `@model <PageModel>` or its `OnGet*` handlers silently don't run (page renders as an empty shell).
@@ -113,13 +116,22 @@ Canonical pattern for every HTMX endpoint: `Request.IsHtmx() ? Partial("_Fragmen
 The same URL serves the full page (non-htmx / form submit / shared link) AND the
 partial fragment (htmx swap). Always set `@model` on every `.cshtml`.
 
-- **Search**: input `hx-trigger="keyup changed delay:300ms"` (typeahead) + form
-  `action="/search" method="get"` (Enter → full results page). Both go to the same
-  endpoint; `IsHtmx()` distinguishes fragment vs page.
+- **URL scheme**: Profile uses `@page "/players/{username}"` (absolute route
+  override — bypasses folder-based routing). OnGet resolves username→accountId
+  via `IPlayerSearch` (one `getidbyusername` call per page load). HTMX requests
+  use **relative URLs** (`?tab=teammates`, `?handler=MatchesMore&accountId=...`)
+  so `username` stays in the path automatically. Heroes/Items use
+  `@page "/heroes"`, `@page "/heroes/{slug}"`, `@page "/items"`,
+  `@page "/items/{slug}"` — slug is `TranslatedName.ToLowerInvariant().Replace(' ', '-')`.
+- **Search**: dropdown positioned absolutely inside `.search` (which is
+  `position: relative`). `#search-results` lives INSIDE the form; `:empty` hides
+  it. Enter submits the form → non-HTMX branch redirects to
+  `/players/{firstResult.Username}`. HTMX typeahead still returns `_SearchResults`
+  partial.
 - **Infinite scroll**: sentinel `<tr hx-trigger="revealed" hx-swap="outerHTML">`
   replaces itself with new rows + next sentinel. Tutorial uses `afterend` on the
   last item; both are valid.
-- **Match-detail modal**: native `<dialog class="match-modal" closedby="any">`
+- **Match-detail modal**: native `<dialog class="modal" closedby="any">`
   (no `open` attr) swapped via HTMX into `#match-detail-host`. The host carries
   `hx-on::after-swap="this.querySelector('dialog:not([open])')?.showModal()"` — the
   ONE sanctioned JS exception, because Esc-to-close, `::backdrop` click-outside,
@@ -135,9 +147,9 @@ partial fragment (htmx swap). Always set `@model` on every `.cshtml`.
   selected tab/pill with `aria-current="true"` (`null` when inactive), NOT an
   `--active` modifier class — `site.css` styles active state via `[aria-current]`
   selectors, so `--active` classes silently render nothing.
-- **Improvement**: HTMX URLs are hand-coded strings (e.g.
-  `hx-get="/Players/Profile/@id?handler=matches&offset=0"`). The Htmx.TagHelpers
-  `hx-page` / `hx-page-handler` would be type-safe but aren't used yet.
+- **HTMX URLs**: relative (`?tab=...`, `?handler=...&accountId=...`) for all
+  profile-page HTMX requests. The Htmx.TagHelpers `hx-page` / `hx-page-handler`
+  would be type-safe but aren't used yet.
 - **Production caching**: endpoints that branch on `Request.IsHtmx()` should set
   `Vary: HX-Request` to avoid a caching proxy serving a fragment for a full-page
   request (or vice versa). Not set yet (app not deployed).

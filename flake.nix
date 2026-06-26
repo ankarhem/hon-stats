@@ -45,6 +45,7 @@
               with pkgs;
               [
                 dotnet
+                dotnet-ef
                 omnisharp-roslyn
                 nuget
                 just

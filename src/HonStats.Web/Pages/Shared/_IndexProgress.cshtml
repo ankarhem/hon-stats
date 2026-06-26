@@ -17,7 +17,7 @@ else
             etaText = $" — ~{(int)(remaining / rate)}s left";
         }
     }
-    <div hx-get="@Url.Page("/Players/Profile", "IndexProgress", new { accountId = Model.AccountId })"
+    <div hx-get="?handler=IndexProgress&accountId=@Model.AccountId"
          hx-trigger="every 2s" hx-target="this" hx-swap="outerHTML">
         <span class="reindex-status">
             @(Model.Total > 0 ? $"Indexing {Model.Fetched}/{Model.Total} ({pct}%){etaText}" : "Queued…")

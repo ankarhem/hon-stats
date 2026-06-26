@@ -1,0 +1,41 @@
+@page "/items/{slug}"
+@model ItemDetailModel
+@{
+    ViewData["Title"] = Model.Item?.TranslatedName ?? "Item";
+}
+
+@if (Model.Item is null)
+{
+    <div class="empty-state">
+        <h2>Item not found</h2>
+        <p><a href="/items">← Back to items</a></p>
+    </div>
+}
+else
+{
+    var i = Model.Item;
+    <div class="detail-header">
+        <img class="detail-header__icon detail-header__icon--sm" src="@i.IconUrl" alt="" loading="lazy" />
+        <div>
+            <h1 class="detail-header__name">@i.TranslatedName</h1>
+            <p class="detail-header__meta">
+                @if (i.Cost > 0)
+                {
+                    <span>@i.Cost gold</span>
+                }
+                @if (i.ShopCategories.Count > 0)
+                {
+                    <span> · @string.Join(", ", i.ShopCategories)</span>
+                }
+            </p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(i.Description))
+    {
+        <div class="panel card">
+            <p class="eyebrow card__title">Description</p>
+            <p>@i.Description</p>
+        </div>
+    }
+}

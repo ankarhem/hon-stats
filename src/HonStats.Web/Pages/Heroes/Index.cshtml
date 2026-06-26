@@ -1,0 +1,18 @@
+@page "/heroes"
+@model HeroesModel
+@{
+    ViewData["Title"] = "Heroes";
+}
+
+<h1>Heroes</h1>
+<ul class="grid-list">
+    @foreach (var hero in Model.Heroes)
+    {
+        <li class="grid-list__item">
+            <a href="/heroes/@hero.Slug">
+                <img class="grid-list__icon" src="@hero.IconUrl" alt="" loading="lazy" />
+                <div class="grid-list__name">@hero.TranslatedName</div>
+            </a>
+        </li>
+    }
+</ul>

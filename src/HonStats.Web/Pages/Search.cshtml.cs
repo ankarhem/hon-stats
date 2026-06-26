@@ -30,6 +30,10 @@ public class SearchModel(IPlayerSearch search) : PageModel
         if (!string.IsNullOrWhiteSpace(q))
         {
             Results = await search.SearchAsync(q, ct);
+            if (Results.Count > 0)
+            {
+                return Redirect($"/players/{Results[0].Username}");
+            }
         }
 
         return Page();

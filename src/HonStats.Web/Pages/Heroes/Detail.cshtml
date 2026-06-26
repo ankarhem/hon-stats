@@ -1,0 +1,57 @@
+@page "/heroes/{slug}"
+@model HeroDetailModel
+@{
+    ViewData["Title"] = Model.Hero?.TranslatedName ?? "Hero";
+}
+
+@if (Model.Hero is null)
+{
+    <div class="empty-state">
+        <h2>Hero not found</h2>
+        <p><a href="/heroes">← Back to heroes</a></p>
+    </div>
+}
+else
+{
+    var h = Model.Hero;
+    <div class="detail-header">
+        <img class="detail-header__icon" src="@h.IconUrl" alt="" loading="lazy" />
+        <div>
+            <h1 class="detail-header__name">@h.TranslatedName</h1>
+            <p class="detail-header__meta">
+                <span>@(h.AttackType ?? "Unknown") attack</span>
+                <span> · STR @h.Strength / AGI @h.Agility / INT @h.Intelligence</span>
+            </p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(h.Description))
+    {
+        <div class="panel card">
+            <p class="eyebrow card__title">Description</p>
+            <p>@h.Description</p>
+        </div>
+    }
+
+    @if (h.Abilities.Count > 0)
+    {
+        <div class="panel card">
+            <p class="eyebrow card__title">Abilities</p>
+            <ul class="ability-list">
+                @foreach (var ability in h.Abilities)
+                {
+                    <li class="ability-list__item">
+                        <img class="ability-icon" src="@ability.IconUrl" alt="" loading="lazy" />
+                        <div>
+                            <div class="ability-list__name">@ability.TranslatedName</div>
+                            @if (!string.IsNullOrEmpty(ability.Description))
+                            {
+                                <p class="muted">@ability.Description</p>
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+}

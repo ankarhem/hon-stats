@@ -19,6 +19,8 @@ public class ProfileModel(
     IMatchQuery matches,
     IPlayerInsightsQuery insights,
     IReferenceDataQuery reference,
+    IPlayerNameResolver nameResolver,
+    IPlayerSearch playerSearch,
     IReindexQueue queue,
     IIndexProgressTracker progressTracker
 ) : PageModel
@@ -26,6 +28,7 @@ public class ProfileModel(
     public const int PageSize = 25;
 
     public Guid AccountId { get; set; }
+    public string? Username { get; set; }
     public string Tab { get; set; } = "matches";
     public PlayerProfile? Profile { get; set; }
     public IndexedPlayer? Indexed { get; set; }
@@ -41,32 +44,37 @@ public class ProfileModel(
     public int SelectedHeroId { get; set; }
 
     public async Task<IActionResult> OnGet(
-        Guid accountId,
+        string username,
         string tab = "matches",
         int heroId = 0,
         CancellationToken ct = default
     )
     {
-        this.AccountId = accountId;
+        var searchResults = await playerSearch.SearchAsync(username, ct);
+        if (searchResults.Count == 0)
+            return NotFound();
+
+        this.AccountId = searchResults[0].AccountId;
+        this.Username = username;
         this.Tab = tab;
 
-        this.Indexed = await insights.GetIndexedPlayerAsync(accountId, ct);
+        this.Indexed = await insights.GetIndexedPlayerAsync(this.AccountId, ct);
         this.Heroes = (await reference.GetHeroesAsync(ct)).ToDictionary(h => h.Id);
 
         if (!Request.IsHtmx())
         {
-            this.Profile = await profiles.GetAsync(accountId, ct);
+            this.Profile = await profiles.GetAsync(this.AccountId, ct);
         }
 
         switch (tab)
         {
             case "teammates":
-                this.Teammates = await insights.GetTeammatesAsync(accountId, PageSize, 0, ct);
+                this.Teammates = await insights.GetTeammatesAsync(this.AccountId, PageSize, 0, ct);
                 this.HasMoreTeammates = this.Teammates.Count == PageSize;
                 break;
             case "heroBuilds":
                 this.Items = (await reference.GetItemsAsync(ct)).ToDictionary(i => i.Id);
-                this.HeroGames = await insights.GetHeroGamesAsync(accountId, ct);
+                this.HeroGames = await insights.GetHeroGamesAsync(this.AccountId, ct);
                 this.SelectedHeroId =
                     heroId == 0 && this.HeroGames.Count > 0
                         ? this.HeroGames.OrderByDescending(kv => kv.Value).First().Key
@@ -74,7 +82,7 @@ public class ProfileModel(
                 if (this.SelectedHeroId > 0)
                 {
                     this.HeroBuild = await insights.GetHeroBuildAsync(
-                        accountId,
+                        this.AccountId,
                         this.SelectedHeroId,
                         ct
                     );
@@ -83,7 +91,7 @@ public class ProfileModel(
             default:
                 this.Tab = "matches";
                 this.RecentMatches = await matches.GetRecentForPlayerAsync(
-                    accountId,
+                    this.AccountId,
                     PageSize,
                     0,
                     ct
@@ -131,7 +139,10 @@ public class ProfileModel(
         var detail = await matches.GetSummaryAsync(gameId, ct);
         var heroes = (await reference.GetHeroesAsync(ct)).ToDictionary(h => h.Id);
         var items = (await reference.GetItemsAsync(ct)).ToDictionary(i => i.Id);
-        return Partial("_MatchDetail", new MatchDetailView(detail, heroes, items));
+        var names = detail is null
+            ? new Dictionary<Guid, ResolvedName>()
+            : await nameResolver.ResolveAsync(detail.Players.Select(p => p.AccountId).ToList(), ct);
+        return Partial("_MatchDetail", new MatchDetailView(detail, heroes, items, names));
     }
 
     public async Task<IActionResult> OnPostReindex(Guid accountId, CancellationToken ct = default)
@@ -184,7 +195,8 @@ public record TeammatesView(
 public record MatchDetailView(
     MatchDetail? Detail,
     Dictionary<int, Hero> Heroes,
-    Dictionary<int, Item> Items
+    Dictionary<int, Item> Items,
+    IReadOnlyDictionary<Guid, ResolvedName> Names
 );
 
 public record ReindexButtonView(Guid AccountId, ReindexResult? Result, IndexedPlayer? Indexed);

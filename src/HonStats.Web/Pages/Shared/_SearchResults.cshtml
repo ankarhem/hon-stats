@@ -10,7 +10,7 @@ else
         @foreach (var player in Model)
         {
             <li class="search-results__item" role="option">
-                <a href="/Players/Profile/@player.AccountId">@player.Username</a>
+                <a href="/players/@player.Username">@player.Username</a>
             </li>
         }
     </ul>

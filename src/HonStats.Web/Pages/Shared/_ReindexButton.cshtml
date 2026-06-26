@@ -4,7 +4,7 @@
     var rejected = Model.Result is { Outcome: ReindexOutcome.CooldownRejected };
 }
 <form method="post"
-      hx-post="@Url.Page("/Players/Profile", "Reindex", new { accountId = Model.AccountId })"
+      hx-post="?handler=Reindex&accountId=@Model.AccountId"
       hx-target="this" hx-swap="outerHTML"
       hx-disabled-elt="button">
     @if (indexing)

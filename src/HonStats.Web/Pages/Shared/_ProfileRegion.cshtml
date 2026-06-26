@@ -1,17 +1,17 @@
 @model ProfileModel
 <nav class="tabs" aria-label="Profile sections">
     <button class="tab" aria-current="@(Model.Tab == "matches" ? "true" : null)"
-            hx-get="@Url.Page("/Players/Profile", null, new { accountId = Model.AccountId, tab = "matches" })"
+            hx-get="?tab=matches"
             hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
         Matches
     </button>
     <button class="tab" aria-current="@(Model.Tab == "teammates" ? "true" : null)"
-            hx-get="@Url.Page("/Players/Profile", null, new { accountId = Model.AccountId, tab = "teammates" })"
+            hx-get="?tab=teammates"
             hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
         Teammates
     </button>
     <button class="tab" aria-current="@(Model.Tab == "heroBuilds" ? "true" : null)"
-            hx-get="@Url.Page("/Players/Profile", null, new { accountId = Model.AccountId, tab = "heroBuilds" })"
+            hx-get="?tab=heroBuilds"
             hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
         Hero Builds
     </button>
@@ -59,7 +59,7 @@
                     var hero = Model.Heroes.GetValueOrDefault(kv.Key);
                     var isActive = kv.Key == Model.SelectedHeroId;
                     <a class="hero-picker__chip" aria-current="@(isActive ? "true" : null)"
-                       hx-get="@Url.Page("/Players/Profile", null, new { accountId = Model.AccountId, tab = "heroBuilds", heroId = kv.Key })"
+                       hx-get="?tab=heroBuilds&heroId=@kv.Key"
                        hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
                         @(hero?.TranslatedName ?? ("Hero " + kv.Key)) <span class="tab__count">(@kv.Value)</span>
                     </a>
