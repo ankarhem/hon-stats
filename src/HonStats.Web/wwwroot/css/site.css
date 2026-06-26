@@ -816,20 +816,6 @@ dialog.modal::backdrop {
     }
 }
 
-.reindex-btn {
-    display: inline-flex;
-    align-items: center;
-}
-
-.reindex-status {
-    font-size: 0.78rem;
-    color: var(--muted);
-}
-
-.reindex-status--error {
-    color: var(--loss);
-}
-
 /* ---------- Empty / loading states ---------- */
 .empty-state {
     text-align: center;
