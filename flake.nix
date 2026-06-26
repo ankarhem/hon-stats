@@ -56,6 +56,7 @@
             dotnet-sdk = pkgs.dotnet-sdk_10;
             dotnet-runtime = pkgs.dotnet-runtime_10;
             runtimeDeps = [ pkgs.sqlite.out ];
+            postPatch = "rm -f .config/dotnet-tools.json";
           };
 
           checks = lib.optionalAttrs (system == "x86_64-linux") (
