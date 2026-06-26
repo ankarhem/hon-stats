@@ -1,3 +1,4 @@
+using HonStats.Domain.Insights;
 using HonStats.Infra.Insights;
 using HonStats.Infra.Juvio;
 using HonStats.Infra.Persistence;
@@ -28,4 +29,12 @@ static async Task MigrateDatabaseAsync(IServiceProvider services)
     var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<HonStatsDbContext>>();
     await using var db = await factory.CreateDbContextAsync();
     await db.Database.MigrateAsync();
+
+    var stuck = await db
+        .IndexedPlayers.Where(p => p.Status == IndexingStatus.Indexing)
+        .ToListAsync();
+    foreach (var p in stuck)
+        p.Status = IndexingStatus.Failed;
+    if (stuck.Count > 0)
+        await db.SaveChangesAsync();
 }

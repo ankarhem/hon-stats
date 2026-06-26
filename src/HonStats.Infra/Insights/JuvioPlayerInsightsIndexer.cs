@@ -38,15 +38,51 @@ internal sealed class JuvioPlayerInsightsIndexer(
         indexed.Status = IndexingStatus.Indexing;
         await db.SaveChangesAsync(ct);
 
+        try
+        {
+            await this.DoIndexAsync(db, indexed, accountId, ct);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            indexed.Status = IndexingStatus.Failed;
+            await db.SaveChangesAsync(CancellationToken.None);
+            progressTracker.Complete(accountId);
+            logger.LogError(ex, "Indexing failed for {AccountId}", accountId);
+            throw;
+        }
+    }
+
+    private async Task DoIndexAsync(
+        HonStatsDbContext db,
+        IndexedPlayer indexed,
+        Guid accountId,
+        CancellationToken ct
+    )
+    {
         var recent = new List<PlayerMatch>();
         var pageSize = options.Value.RecentMatchesLimit;
+        var lastKnown = indexed.LastIndexedMatchId ?? 0;
         for (var offset = 0; ; offset += pageSize)
         {
             var page = await matches.GetRecentForPlayerAsync(accountId, pageSize, offset, ct);
             if (page.Count == 0)
                 break;
-            recent.AddRange(page);
-            if (page.Count < pageSize)
+
+            var hitKnown = false;
+            foreach (var m in page)
+            {
+                if (m.GameId <= lastKnown)
+                {
+                    hitKnown = true;
+                    break;
+                }
+                recent.Add(m);
+            }
+            if (hitKnown || page.Count < pageSize)
                 break;
         }
         var stored = (
@@ -103,20 +139,36 @@ internal sealed class JuvioPlayerInsightsIndexer(
         if (gameIds.Count == 0)
             return;
 
+        var alreadyIngested = await db
+            .MatchRoster.Where(r => gameIds.Contains(r.GameId))
+            .Select(r => r.GameId)
+            .Distinct()
+            .ToListAsync(ct);
+        var toIngest = gameIds.Except(alreadyIngested).ToList();
+
+        if (toIngest.Count == 0)
+        {
+            progressTracker.AddCompleted(accountId, 0);
+            return;
+        }
+
         var concurrency = Math.Max(1, options.Value.MatchSummaryConcurrency);
         using var gate = new SemaphoreSlim(concurrency);
         var summaries = new List<MatchDetail>();
         var summariesLock = new object();
 
-        var fetches = gameIds.Select(async gameId =>
+        var fetches = toIngest.Select(async gameId =>
         {
             await gate.WaitAsync(ct);
             try
             {
                 var summary = await matches.GetSummaryAsync(gameId, ct);
                 if (summary is not null)
+                {
                     lock (summariesLock)
                         summaries.Add(summary);
+                    progressTracker.AddCompleted(accountId, 1);
+                }
             }
             finally
             {
@@ -124,7 +176,6 @@ internal sealed class JuvioPlayerInsightsIndexer(
             }
         });
         await Task.WhenAll(fetches);
-        progressTracker.AddCompleted(accountId, summaries.Count);
 
         foreach (var summary in summaries)
         {

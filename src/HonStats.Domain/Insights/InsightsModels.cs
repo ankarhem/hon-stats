@@ -5,6 +5,7 @@ public enum IndexingStatus
     NotIndexed,
     Indexing,
     Indexed,
+    Failed,
 }
 
 // Persisted + read model (returned directly by IPlayerInsightsQuery — no mapping).
