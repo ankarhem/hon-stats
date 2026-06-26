@@ -152,12 +152,16 @@ public class ProfileModel(
         return Partial("_ReindexButton", new ReindexButtonView(accountId, result, indexed));
     }
 
-    public IActionResult OnGetIndexProgress(Guid accountId)
+    public async Task<IActionResult> OnGetIndexProgress(
+        Guid accountId,
+        CancellationToken ct = default
+    )
     {
         var p = progressTracker.GetProgress(accountId);
+        var indexed = await insights.GetIndexedPlayerAsync(accountId, ct);
         return Partial(
-            "_IndexProgress",
-            new IndexProgressView(accountId, p.Fetched, p.Total, p.Done, p.StartedAt)
+            "_ReindexButton",
+            new ReindexButtonView(accountId, null, indexed, p.Fetched, p.Total, p.Done, p.StartedAt)
         );
     }
 
@@ -199,12 +203,12 @@ public record MatchDetailView(
     IReadOnlyDictionary<Guid, ResolvedName> Names
 );
 
-public record ReindexButtonView(Guid AccountId, ReindexResult? Result, IndexedPlayer? Indexed);
-
-public record IndexProgressView(
+public record ReindexButtonView(
     Guid AccountId,
-    int Fetched,
-    int Total,
-    bool Done,
-    DateTimeOffset? StartedAt
+    ReindexResult? Result,
+    IndexedPlayer? Indexed,
+    int Fetched = 0,
+    int Total = 0,
+    bool ProgressDone = false,
+    DateTimeOffset? ProgressStartedAt = null
 );

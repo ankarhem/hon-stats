@@ -777,9 +777,43 @@ dialog.modal::backdrop {
     background: transparent;
 }
 
+.btn--sm {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.4rem 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn__spinner {
+    width: 13px;
+    height: 13px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.reindex-btn {
+    display: inline-flex;
+    align-items: center;
+}
+
 .reindex-status {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     color: var(--muted);
+}
+
+.reindex-status--error {
+    color: var(--loss);
 }
 
 /* ---------- Empty / loading states ---------- */
