@@ -21,7 +21,7 @@ public static class PlayerSearchServiceCollectionExtensions
         // is correct and avoids a captive-dependency in the singleton seed service.
         services.AddSingleton<IPlayerCorpusQuery, SqlitePlayerCorpusQuery>();
         services.AddSingleton<PlayerNameIndexCache>();
-        services.AddSingleton<IPlayerNameSearch, CachedPlayerNameSearch>();
+        services.AddSingleton<IPlayerNameSearch, InMemoryPlayerNameSearch>();
         services.AddHostedService<PlayerNameIndexSeedService>();
         // Scoped like the existing rebuild handlers; resolved per-dispatch scope by the
         // DomainEventDispatcher.

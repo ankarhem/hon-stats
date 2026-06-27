@@ -6,7 +6,7 @@ namespace HonStats.Infra.PlayerSearch;
 // IPlayerNameSearch adapter over the singleton PlayerNameIndexCache. Synchronous under
 // the hood — the port is async (Task-returning, CancellationToken-aware) to allow a
 // future FTS5 adapter that queries the database per call without changing call sites.
-internal sealed class CachedPlayerNameSearch(PlayerNameIndexCache cache) : IPlayerNameSearch
+internal sealed class InMemoryPlayerNameSearch(PlayerNameIndexCache cache) : IPlayerNameSearch
 {
     public Task<IReadOnlyList<PlayerNameSearchResult>> SearchAsync(
         string query,
