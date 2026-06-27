@@ -1,4 +1,5 @@
 @model ProfileModel
+@using HonStats.App.Insights
 <nav class="tabs" aria-label="Profile sections">
     <button class="tab" aria-current="@(Model.Tab == "matches" ? "true" : null)"
             hx-get="?tab=matches"
@@ -80,27 +81,63 @@
                 var games = Model.HeroBuild.First().Games;
                 var heroName = Model.Heroes.GetValueOrDefault(Model.SelectedHeroId)?.TranslatedName ?? ("Hero " + Model.SelectedHeroId);
                 var timingByItem = Model.HeroItemTiming.ToDictionary(t => t.ItemId);
+
+                // Split the build into Early / Core / Late tiers. Core/Late is an
+                // adaptive per-hero median split on pick rate (see GuideTierClassifier).
+                var tiers = GuideTierClassifier.ClassifySet(
+                    Model.HeroBuild.Select(e => (
+                        e.ItemId,
+                        TotalCost: Model.Items.GetValueOrDefault(e.ItemId)?.TotalCost ?? 0,
+                        PickRate: games > 0 ? e.Frequency / (double)games : 0d
+                    ))
+                );
+                var byTier = Model.HeroBuild
+                    .GroupBy(e => tiers.GetValueOrDefault(e.ItemId))
+                    .ToDictionary(
+                        g => g.Key,
+                        g => (IReadOnlyList<HeroBuildEntry>)g
+                            .OrderByDescending(e => e.Frequency)
+                            .ThenBy(e => e.ItemId)
+                            .ToList()
+                    );
+
                 <p class="eyebrow card__title">Items over @games games on @heroName</p>
-                <ul class="grid-list">
-                    @foreach (var entry in Model.HeroBuild)
+                @foreach (var tier in new[] { GuideTier.Early, GuideTier.Core, GuideTier.Late })
+                {
+                    if (!byTier.TryGetValue(tier, out var tierEntries) || tierEntries.Count == 0)
                     {
-                        var item = Model.Items.GetValueOrDefault(entry.ItemId);
-                        var iconUrl = item?.IconUrl ?? $"https://gamestorage.juvio.com/items/{entry.ItemId}/icon.webp";
-                        var pickPct = games > 0 ? entry.Frequency * 100 / games : 0;
-                        int? winPct = entry.Frequency > 0 ? entry.Wins * 100 / entry.Frequency : null;
-                        var boughtAt = timingByItem.TryGetValue(entry.ItemId, out var timing)
-                            ? ProfileModel.FormatBuyTime(timing.AvgSeconds)
-                            : "—";
-                        <li class="grid-list__item">
-                            <img class="grid-list__icon" src="@iconUrl" alt="" loading="lazy" />
-                            <div class="grid-list__name">@(item?.DisplayName ?? ("Item " + entry.ItemId))</div>
-                            <div class="grid-list__meta">
-                                @entry.Frequency/@games · @pickPct% · @(winPct.HasValue ? $"{winPct}% win" : "—")
-                                <br /><span class="muted">avg @boughtAt</span>
-                            </div>
-                        </li>
+                        continue;
                     }
-                </ul>
+                    var tierTotal = tierEntries.Sum(e => Model.Items.GetValueOrDefault(e.ItemId)?.TotalCost ?? 0);
+                    <section class="build-tier build-tier--@tier.ToString().ToLowerInvariant()">
+                        <div class="build-tier__head">
+                            <p class="eyebrow card__title">@tier</p>
+                            <span class="build-tier__total">@tierTotal.ToString("N0")g</span>
+                        </div>
+                        <ul class="grid-list">
+                            @foreach (var entry in tierEntries)
+                            {
+                                var item = Model.Items.GetValueOrDefault(entry.ItemId);
+                                var iconUrl = item?.IconUrl ?? $"https://gamestorage.juvio.com/items/{entry.ItemId}/icon.webp";
+                                var itemCost = item?.TotalCost ?? 0;
+                                var pickPct = games > 0 ? entry.Frequency * 100 / games : 0;
+                                int? winPct = entry.Frequency > 0 ? entry.Wins * 100 / entry.Frequency : null;
+                                var boughtAt = timingByItem.TryGetValue(entry.ItemId, out var timing)
+                                    ? ProfileModel.FormatBuyTime(timing.AvgSeconds)
+                                    : "—";
+                                <li class="grid-list__item">
+                                    <img class="grid-list__icon" src="@iconUrl" alt="" loading="lazy" />
+                                    <div class="grid-list__name">@(item?.DisplayName ?? ("Item " + entry.ItemId))</div>
+                                    <div class="grid-list__cost">@itemCost.ToString("N0")g</div>
+                                    <div class="grid-list__meta">
+                                        @entry.Frequency/@games · @pickPct% · @(winPct.HasValue ? $"{winPct}% win" : "—")
+                                        <br /><span class="muted">avg @boughtAt</span>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </section>
+                }
 
                 if (Model.HeroItemPairs.Count > 0)
                 {

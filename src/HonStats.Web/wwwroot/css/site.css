@@ -766,6 +766,43 @@ dialog.modal::backdrop {
     border-color: var(--accent);
 }
 
+/* ---------- Hero build tiers (Early / Core / Late) ---------- */
+.build-tier {
+    margin-bottom: 1.25rem;
+}
+
+.build-tier:last-of-type {
+    margin-bottom: 0;
+}
+
+.build-tier__head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.build-tier__head .eyebrow {
+    margin: 0;
+}
+
+.build-tier__total {
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--gold);
+    background: oklch(from var(--gold) l c h / 0.12);
+    border: 1px solid oklch(from var(--gold) l c h / 0.3);
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+}
+
+.grid-list__cost {
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--gold);
+    margin-bottom: 0.2rem;
+}
+
 /* ---------- Buttons ---------- */
 .btn {
     appearance: none;
