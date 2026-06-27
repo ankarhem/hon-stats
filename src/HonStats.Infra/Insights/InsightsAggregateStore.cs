@@ -28,6 +28,7 @@ internal sealed class InsightsAggregateStore(IDbContextFactory<HonStatsDbContext
                     HeroId = heroId,
                     ItemId = entry.ItemId,
                     Frequency = entry.Frequency,
+                    Wins = entry.Wins,
                     Games = entry.Games,
                 }
             );

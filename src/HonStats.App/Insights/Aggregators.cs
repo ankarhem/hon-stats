@@ -12,11 +12,14 @@ public static class HeroBuildAggregator
             return [];
 
         var frequency = new Dictionary<int, int>();
+        var wins = new Dictionary<int, int>();
         foreach (var input in inputs)
         {
             foreach (var itemId in input.ItemIds.Distinct())
             {
                 frequency[itemId] = frequency.TryGetValue(itemId, out var count) ? count + 1 : 1;
+                if (input.Won)
+                    wins[itemId] = wins.TryGetValue(itemId, out var w) ? w + 1 : 1;
             }
         }
 
@@ -25,6 +28,7 @@ public static class HeroBuildAggregator
             {
                 ItemId = kv.Key,
                 Frequency = kv.Value,
+                Wins = wins.TryGetValue(kv.Key, out var w) ? w : 0,
                 Games = inputs.Count,
             })
             .OrderByDescending(entry => entry.Frequency)

@@ -67,6 +67,7 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
             {
                 ItemId = h.ItemId,
                 Frequency = h.Frequency,
+                Wins = h.Wins,
                 Games = h.Games,
             })
             .ToList();

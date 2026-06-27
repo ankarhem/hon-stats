@@ -1,10 +1,11 @@
 namespace HonStats.Domain.Insights;
 
-// Read model: a single item's pick frequency for a player+hero.
+// Read model: a single item's pick frequency + win count for a player+hero.
 public sealed class HeroBuildEntry
 {
     public int ItemId { get; set; }
     public int Frequency { get; set; }
+    public int Wins { get; set; }
     public int Games { get; set; }
 }
 

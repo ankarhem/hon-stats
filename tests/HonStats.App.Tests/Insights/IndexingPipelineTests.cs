@@ -100,6 +100,7 @@ public class IndexingPipelineTests
                     {
                         ItemId = 10,
                         Frequency = 2,
+                        Wins = 1,
                         Games = 2,
                     }
                 );
@@ -110,6 +111,7 @@ public class IndexingPipelineTests
                     {
                         ItemId = 20,
                         Frequency = 1,
+                        Wins = 1,
                         Games = 2,
                     }
                 );
@@ -120,6 +122,7 @@ public class IndexingPipelineTests
                     {
                         ItemId = 30,
                         Frequency = 1,
+                        Wins = 0,
                         Games = 2,
                     }
                 );

@@ -116,4 +116,66 @@ public class HeroBuildAggregatorTests
 
         result.Select(e => e.ItemId).Should().Equal([2000, 1000, 3000]);
     }
+
+    [Fact]
+    public void CountsWinsPerItem_OnlyForMatchesWon_BinaryPresenceDeduped()
+    {
+        var inputs = new List<MatchItemInput>
+        {
+            new()
+            {
+                GameId = 1,
+                Won = true,
+                ItemIds = [2445, 2266],
+            },
+            new()
+            {
+                GameId = 2,
+                Won = true,
+                ItemIds = [2445],
+            },
+            new()
+            {
+                GameId = 3,
+                Won = false,
+                ItemIds = [2445, 2490],
+            },
+        };
+
+        var result = HeroBuildAggregator.Build(inputs);
+
+        result
+            .Should()
+            .ContainEquivalentOf(
+                new HeroBuildEntry
+                {
+                    ItemId = 2445,
+                    Frequency = 3,
+                    Wins = 2,
+                    Games = 3,
+                }
+            );
+        result
+            .Should()
+            .ContainEquivalentOf(
+                new HeroBuildEntry
+                {
+                    ItemId = 2266,
+                    Frequency = 1,
+                    Wins = 1,
+                    Games = 3,
+                }
+            );
+        result
+            .Should()
+            .ContainEquivalentOf(
+                new HeroBuildEntry
+                {
+                    ItemId = 2490,
+                    Frequency = 1,
+                    Wins = 0,
+                    Games = 3,
+                }
+            );
+    }
 }

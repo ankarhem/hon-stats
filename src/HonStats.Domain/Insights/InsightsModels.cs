@@ -56,13 +56,14 @@ public sealed class MatchRoster
     public int? DeathGoldLost { get; set; }
 }
 
-// Persisted aggregate: item frequency for a (player, hero).
+// Persisted aggregate: item frequency + wins for a (player, hero).
 public sealed class HeroBuild
 {
     public Guid AccountId { get; set; }
     public int HeroId { get; set; }
     public int ItemId { get; set; }
     public int Frequency { get; set; }
+    public int Wins { get; set; }
     public int Games { get; set; }
 }
 
