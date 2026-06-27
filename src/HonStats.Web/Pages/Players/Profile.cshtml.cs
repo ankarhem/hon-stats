@@ -249,11 +249,21 @@ public class ProfileModel(
 
     public async Task<IActionResult> OnGetIndexProgress(
         Guid accountId,
+        bool wasIndexing = false,
         CancellationToken ct = default
     )
     {
         var p = progressTracker.GetProgress(accountId);
         var indexed = await insights.GetIndexedPlayerAsync(accountId, ct);
+
+        // When indexing completes (was Indexing, now Indexed), refresh the whole
+        // page so stats/matches/builds/loadouts re-render with the new data.
+        if (wasIndexing && indexed?.Status == IndexingStatus.Indexed)
+        {
+            Response.Headers["HX-Refresh"] = "true";
+            return Content("");
+        }
+
         return Partial(
             "_ReindexButton",
             new ReindexButtonView(accountId, null, indexed, p.Fetched, p.Total, p.Done, p.StartedAt)

@@ -35,7 +35,7 @@
         }
     }
 
-    <div hx-get="?handler=IndexProgress&accountId=@Model.AccountId"
+    <div hx-get="?handler=IndexProgress&accountId=@Model.AccountId@(indexing ? "&wasIndexing=true" : "")"
          hx-trigger="every 1.5s" hx-target="this" hx-swap="outerHTML">
         <button class="btn btn--sm" disabled>
             <span class="btn__spinner"></span>
