@@ -53,7 +53,8 @@ internal sealed class JuvioPlayerProfileQuery(
             $"/v1/stats/getprofilestats?userId={accountId}",
             ct
         );
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+            return null;
         await using var stream = await response.Content.ReadAsStreamAsync(ct);
         return await JsonSerializer.DeserializeAsync<ProfileOverviewDto>(
             stream,
@@ -69,7 +70,8 @@ internal sealed class JuvioPlayerProfileQuery(
             $"/v1/stats/getplayersummary?accountId={accountId}",
             ct
         );
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+            return null;
         await using var stream = await response.Content.ReadAsStreamAsync(ct);
         return await JsonSerializer.DeserializeAsync<ProfileSummaryDto>(
             stream,
@@ -85,7 +87,8 @@ internal sealed class JuvioPlayerProfileQuery(
             $"/v1/stats/getplayerrank?accountId={accountId}",
             ct
         );
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+            return null;
         await using var stream = await response.Content.ReadAsStreamAsync(ct);
         return await JsonSerializer.DeserializeAsync<PlayerRankDto>(stream, JuvioJson.Options, ct);
     }
