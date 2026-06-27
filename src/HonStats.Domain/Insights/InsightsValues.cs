@@ -52,3 +52,31 @@ public sealed class TeammateAggregate
     public int GamesTogether { get; set; }
     public int WinsTogether { get; set; }
 }
+
+// Value object consumed by MapStatsAggregator: one row per played match. GoldEarned
+// is null when the gold breakdown is absent (pre-gold-ingestion matches).
+public sealed class MatchStatInput
+{
+    public long GameId { get; set; }
+    public string Map { get; set; } = string.Empty;
+    public int Kills { get; set; }
+    public int Deaths { get; set; }
+    public int Assists { get; set; }
+    public int? GoldEarned { get; set; }
+    public int DurationSeconds { get; set; }
+    public bool Won { get; set; }
+}
+
+// Read model produced by MapStatsAggregator: per-map KDA + GPM + win rate.
+// AvgGPM is null when no games for the map carry a gold breakdown.
+public sealed class MapStatEntry
+{
+    public string Map { get; set; } = string.Empty;
+    public int Games { get; set; }
+    public double AvgKills { get; set; }
+    public double AvgDeaths { get; set; }
+    public double AvgAssists { get; set; }
+    public double? AvgGPM { get; set; }
+    public int Wins { get; set; }
+    public double WinRate { get; set; }
+}

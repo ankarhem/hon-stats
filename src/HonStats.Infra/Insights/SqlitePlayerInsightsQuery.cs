@@ -108,4 +108,67 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
         var rows = await db.PlayerMatches.Where(p => p.AccountId == accountId).ToListAsync(ct);
         return rows.GroupBy(r => r.HeroId).ToDictionary(g => g.Key, g => g.Count());
     }
+
+    public async Task<IReadOnlyList<MapStatEntry>> GetMapStatsAsync(
+        Guid accountId,
+        CancellationToken ct = default
+    )
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        var matches = await db.PlayerMatches.Where(m => m.AccountId == accountId).ToListAsync(ct);
+        if (matches.Count == 0)
+            return [];
+
+        var gameIds = matches.Select(m => m.GameId).Distinct().ToList();
+
+        // Won + the gold breakdown live on the subject's match_roster row (one per
+        // game). Keyed by GameId for a per-match lookup as the aggregator consumes.
+        var rosterByGame = await db
+            .MatchRoster.Where(r => r.AccountId == accountId && gameIds.Contains(r.GameId))
+            .ToDictionaryAsync(r => r.GameId, ct);
+
+        var inputs = matches
+            .Select(m =>
+            {
+                rosterByGame.TryGetValue(m.GameId, out var r);
+                var goldEarned = GoldEarnedFor(r);
+                return new MatchStatInput
+                {
+                    GameId = m.GameId,
+                    Map = m.Map,
+                    Kills = m.Kills,
+                    Deaths = m.Deaths,
+                    Assists = m.Assists,
+                    GoldEarned = goldEarned,
+                    DurationSeconds = m.Duration,
+                    Won = r?.Won ?? false,
+                };
+            })
+            .ToList();
+
+        return MapStatsAggregator.Build(inputs);
+    }
+
+    // GoldEarned sums the five earned-gold sources; null when any is absent
+    // (pre-gold-ingestion roster rows stay null so GPM degrades gracefully).
+    private static int? GoldEarnedFor(MatchRoster? r)
+    {
+        if (
+            r is null
+            || !r.GoldFromCreeps.HasValue
+            || !r.GoldFromNeutrals.HasValue
+            || !r.GoldFromKills.HasValue
+            || !r.GoldFromAssists.HasValue
+            || !r.GoldFromBuildings.HasValue
+        )
+        {
+            return null;
+        }
+
+        return r.GoldFromCreeps.Value
+            + r.GoldFromNeutrals.Value
+            + r.GoldFromKills.Value
+            + r.GoldFromAssists.Value
+            + r.GoldFromBuildings.Value;
+    }
 }

@@ -15,6 +15,11 @@
             hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
         Hero Builds
     </button>
+    <button class="tab" aria-current="@(Model.Tab == "maps" ? "true" : null)"
+            hx-get="?tab=maps"
+            hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
+        Maps
+    </button>
 </nav>
 
 @switch (Model.Tab)
@@ -114,6 +119,33 @@
                     </ul>
                 }
             }
+        }
+        break;
+
+    case "maps":
+        @if (Model.MapStats.Count == 0)
+        {
+            <div class="empty-state"><p>No matches indexed yet.</p></div>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr><th>Map</th><th>Games</th><th>K/D/A</th><th>GPM</th><th>Win %</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.MapStats)
+                    {
+                        <tr>
+                            <td>@entry.Map</td>
+                            <td>@entry.Games</td>
+                            <td>@entry.AvgKills.ToString("F1")/@entry.AvgDeaths.ToString("F1")/@entry.AvgAssists.ToString("F1")</td>
+                            <td>@(entry.AvgGPM.HasValue ? entry.AvgGPM.Value.ToString("F0") : "—")</td>
+                            <td>@entry.WinRate.ToString("F0")%</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         }
         break;
 

@@ -41,6 +41,7 @@ public class ProfileModel(
     public IReadOnlyDictionary<int, int> HeroGames { get; set; } = new Dictionary<int, int>();
     public IReadOnlyList<HeroBuildEntry> HeroBuild { get; set; } = [];
     public IReadOnlyList<HeroItemPairEntry> HeroItemPairs { get; set; } = [];
+    public IReadOnlyList<MapStatEntry> MapStats { get; set; } = [];
     public Dictionary<int, Item> Items { get; set; } = new();
     public int SelectedHeroId { get; set; }
 
@@ -94,6 +95,9 @@ public class ProfileModel(
                         ct
                     );
                 }
+                break;
+            case "maps":
+                this.MapStats = await insights.GetMapStatsAsync(this.AccountId, ct);
                 break;
             default:
                 this.Tab = "matches";

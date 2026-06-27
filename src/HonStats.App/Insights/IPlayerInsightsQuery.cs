@@ -30,6 +30,11 @@ public interface IPlayerInsightsQuery
         Guid accountId,
         CancellationToken ct = default
     );
+
+    Task<IReadOnlyList<MapStatEntry>> GetMapStatsAsync(
+        Guid accountId,
+        CancellationToken ct = default
+    );
 }
 
 public interface IPlayerInsightsIndexer

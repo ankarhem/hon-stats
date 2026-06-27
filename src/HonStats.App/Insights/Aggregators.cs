@@ -101,3 +101,43 @@ public static class HeroItemPairAggregator
             .ToList();
     }
 }
+
+public static class MapStatsAggregator
+{
+    public static IReadOnlyList<MapStatEntry> Build(IReadOnlyList<MatchStatInput> inputs)
+    {
+        return inputs
+            .GroupBy(i => i.Map)
+            .Select(g => BuildEntry(g.ToList()))
+            .OrderByDescending(e => e.Games)
+            .ThenBy(e => e.Map, StringComparer.Ordinal)
+            .ToList();
+    }
+
+    private static MapStatEntry BuildEntry(IReadOnlyList<MatchStatInput> matches)
+    {
+        var games = matches.Count;
+        var wins = matches.Count(m => m.Won);
+
+        // GPM is an aggregate rate over the gold-bearing games only: total gold
+        // earned divided by total minutes played. Null when no game carries gold.
+        var goldGames = matches.Where(m => m.GoldEarned.HasValue && m.DurationSeconds > 0).ToList();
+        var totalMinutes = goldGames.Sum(m => m.DurationSeconds / 60.0);
+        double? avgGpm =
+            goldGames.Count > 0 && totalMinutes > 0
+                ? goldGames.Sum(m => m.GoldEarned!.Value) / totalMinutes
+                : null;
+
+        return new MapStatEntry
+        {
+            Map = matches[0].Map,
+            Games = games,
+            AvgKills = games > 0 ? matches.Sum(m => m.Kills) / (double)games : 0,
+            AvgDeaths = games > 0 ? matches.Sum(m => m.Deaths) / (double)games : 0,
+            AvgAssists = games > 0 ? matches.Sum(m => m.Assists) / (double)games : 0,
+            AvgGPM = avgGpm,
+            Wins = wins,
+            WinRate = games > 0 ? wins * 100.0 / games : 0,
+        };
+    }
+}
