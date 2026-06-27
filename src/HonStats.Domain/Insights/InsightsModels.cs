@@ -44,6 +44,16 @@ public sealed class MatchRoster
     public Guid AccountId { get; set; }
     public string Team { get; set; } = string.Empty;
     public bool Won { get; set; }
+
+    // Per-game gold breakdown (feeds per-map GPM). Nullable/forward-only: rows
+    // ingested before these columns existed stay null.
+    public int? GoldFromCreeps { get; set; }
+    public int? GoldFromNeutrals { get; set; }
+    public int? GoldFromKills { get; set; }
+    public int? GoldFromAssists { get; set; }
+    public int? GoldFromBuildings { get; set; }
+    public int? StartingGold { get; set; }
+    public int? DeathGoldLost { get; set; }
 }
 
 // Persisted aggregate: item frequency for a (player, hero).

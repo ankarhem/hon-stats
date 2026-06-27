@@ -23,6 +23,8 @@ public sealed class TeammateStat
 public sealed class MatchItemInput
 {
     public long GameId { get; set; }
+    public bool Won { get; set; }
+    public string Map { get; set; } = string.Empty;
     public List<int> ItemIds { get; set; } = [];
 }
 

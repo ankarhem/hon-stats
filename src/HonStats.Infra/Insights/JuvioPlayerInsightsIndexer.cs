@@ -185,6 +185,13 @@ internal sealed class JuvioPlayerInsightsIndexer(
                         AccountId = player.AccountId,
                         Team = player.Team,
                         Won = player.Team == summary.WinningTeam,
+                        GoldFromCreeps = player.GoldFromCreeps,
+                        GoldFromNeutrals = player.GoldFromNeutrals,
+                        GoldFromKills = player.GoldFromKills,
+                        GoldFromAssists = player.GoldFromAssists,
+                        GoldFromBuildings = player.GoldFromBuildings,
+                        StartingGold = player.StartingGold,
+                        DeathGoldLost = player.DeathGoldLost,
                     }
                 );
                 var slot = 0;

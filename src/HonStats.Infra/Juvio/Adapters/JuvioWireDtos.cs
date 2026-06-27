@@ -173,6 +173,13 @@ internal sealed class MatchPlayerSummaryDto
     public int NeutralKills { get; set; }
     public int CreepDenies { get; set; }
     public int NetWorth { get; set; }
+    public int GoldFromCreeps { get; set; }
+    public int GoldFromNeutrals { get; set; }
+    public int GoldFromKills { get; set; }
+    public int GoldFromAssists { get; set; }
+    public int GoldFromBuildings { get; set; }
+    public int StartingGold { get; set; }
+    public int DeathGoldLost { get; set; }
     public int WardOfSightPlaced { get; set; }
     public int WardOfRevelationPlaced { get; set; }
     public int RavenPlaced { get; set; }
@@ -190,4 +197,55 @@ internal sealed class MatchPlayerSummaryDto
     public int Inventory63Id { get; set; }
     public int Inventory64Id { get; set; }
     public int RoleIndex { get; set; }
+}
+
+// getparsedreplay wire shape. Snapshot players have no accountId/heroId — identity
+// is positional (team-index + player-index). Only snapshot[0]'s players carry
+// SlotIndex + StartingGold (the position->player anchor). Fields are nullable since
+// juvio omits most of them on non-anchor snapshots.
+internal sealed class ParsedReplayResponseDto
+{
+    public ParsedReplayDto? ParsedReplay { get; set; }
+}
+
+internal sealed class ParsedReplayDto
+{
+    public int GameId { get; set; }
+    public string? Date { get; set; }
+    public string? WinningTeam { get; set; }
+    public List<ParsedReplaySnapshotDto>? Snapshots { get; set; }
+    public List<ParsedReplaySnapshotDto> SnapshotsValue => this.Snapshots ?? [];
+}
+
+internal sealed class ParsedReplaySnapshotDto
+{
+    public int Time { get; set; }
+    public List<ParsedReplayTeamDto>? Teams { get; set; }
+    public List<ParsedReplayTeamDto> TeamsValue => this.Teams ?? [];
+}
+
+internal sealed class ParsedReplayTeamDto
+{
+    public List<ParsedReplayPlayerDto>? Players { get; set; }
+    public List<ParsedReplayPlayerDto> PlayersValue => this.Players ?? [];
+}
+
+internal sealed class ParsedReplayPlayerDto
+{
+    public List<ParsedReplayItemDto>? Items { get; set; }
+    public int? NetWorth { get; set; }
+    public double? Level { get; set; }
+    public double? Experience { get; set; }
+    public int? CreepDenies { get; set; }
+    public int? RavenPlaced { get; set; }
+    public int? SlotIndex { get; set; }
+    public int? StartingGold { get; set; }
+    public List<object>? Skills { get; set; }
+    public List<ParsedReplayItemDto> ItemsValue => this.Items ?? [];
+}
+
+internal sealed class ParsedReplayItemDto
+{
+    public int ItemId { get; set; }
+    public int Slot { get; set; }
 }

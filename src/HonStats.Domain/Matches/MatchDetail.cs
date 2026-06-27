@@ -15,6 +15,13 @@ public sealed class MatchPlayer
     public int NeutralKills { get; set; }
     public int CreepDenies { get; set; }
     public int NetWorth { get; set; }
+    public int GoldFromCreeps { get; set; }
+    public int GoldFromNeutrals { get; set; }
+    public int GoldFromKills { get; set; }
+    public int GoldFromAssists { get; set; }
+    public int GoldFromBuildings { get; set; }
+    public int StartingGold { get; set; }
+    public int DeathGoldLost { get; set; }
     public int WardOfSightPlaced { get; set; }
     public int WardOfRevelationPlaced { get; set; }
     public int RavenPlaced { get; set; }

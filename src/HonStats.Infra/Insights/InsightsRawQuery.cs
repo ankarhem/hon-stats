@@ -31,11 +31,26 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
         var rows = await db
             .MatchPlayerItems.Where(i => i.AccountId == accountId && i.HeroId == heroId)
             .ToListAsync(ct);
+        if (rows.Count == 0)
+            return [];
+
+        var gameIds = rows.Select(r => r.GameId).Distinct().ToList();
+
+        // Won lives on the subject's match_roster row (one per game); Map lives on
+        // the subject's player_matches row (only the aggregated account has one).
+        var wonByGame = await db
+            .MatchRoster.Where(r => r.AccountId == accountId && gameIds.Contains(r.GameId))
+            .ToDictionaryAsync(r => r.GameId, r => r.Won, ct);
+        var mapByGame = await db
+            .PlayerMatches.Where(m => m.AccountId == accountId && gameIds.Contains(m.GameId))
+            .ToDictionaryAsync(m => m.GameId, m => m.Map, ct);
 
         return rows.GroupBy(r => r.GameId)
             .Select(g => new MatchItemInput
             {
                 GameId = g.Key,
+                Won = wonByGame.TryGetValue(g.Key, out var won) && won,
+                Map = mapByGame.TryGetValue(g.Key, out var map) ? map : string.Empty,
                 ItemIds = g.Select(x => x.ItemId).ToList(),
             })
             .ToList();

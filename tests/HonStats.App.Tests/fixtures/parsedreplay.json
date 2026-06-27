@@ -1,0 +1,822 @@
+{
+  "parsedReplay": {
+    "gameId": 8008220,
+    "date": "2026-06-27T09:40:00.0000000Z",
+    "winningTeam": "Legion",
+    "snapshots": [
+      {
+        "time": -90,
+        "teams": [
+          {
+            "team": "Legion",
+            "players": [
+              {
+                "accountId": "08de0b27-c9b9-461f-8d3b-21c6f674bace",
+                "name": "Stordtik",
+                "heroId": 1339,
+                "netWorth": 600,
+                "level": 1,
+                "items": [],
+                "startingGold": 600,
+                "roleIndex": 5,
+                "heroName": "Hero_Monarch",
+                "skills": []
+              },
+              {
+                "accountId": "019ef291-2a58-7904-a655-66a614346233",
+                "name": "SmliezDealy22",
+                "heroId": 830,
+                "netWorth": 600,
+                "level": 1,
+                "items": [],
+                "slotIndex": 1,
+                "startingGold": 600,
+                "roleIndex": 1,
+                "heroName": "Hero_ForsakenArcher",
+                "skills": []
+              },
+              {
+                "accountId": "019f029a-03b5-7997-80fe-be46f5f9428d",
+                "name": "wurze982",
+                "heroId": 1477,
+                "netWorth": 600,
+                "level": 1,
+                "items": [],
+                "slotIndex": 2,
+                "startingGold": 600,
+                "roleIndex": 2,
+                "heroName": "Hero_Pandamonium",
+                "skills": []
+              },
+              {
+                "accountId": "08ddc42e-19f0-4d73-8eee-e54079c029ab",
+                "name": "Miram",
+                "heroId": 391,
+                "netWorth": 600,
+                "level": 1,
+                "items": [],
+                "slotIndex": 3,
+                "startingGold": 600,
+                "roleIndex": 3,
+                "heroName": "Hero_AmunRa",
+                "skills": []
+              },
+              {
+                "accountId": "019dd9ac-09ed-731f-a269-a02dcaf35ff7",
+                "name": "HikkiMoron",
+                "heroId": 963,
+                "netWorth": 600,
+                "level": 1,
+                "items": [],
+                "slotIndex": 4,
+                "startingGold": 600,
+                "roleIndex": 4,
+                "heroName": "Hero_Geomancer",
+                "skills": []
+              }
+            ]
+          },
+          {
+            "team": "Hellbourne",
+            "players": [
+              {
+                "accountId": "019ef2f7-ede7-7ec1-b48e-2d5269b6dc16",
+                "name": "bossa1120",
+                "heroId": 1800,
+                "netWorth": 600,
+                "level": 1,
+                "items": [],
+                "startingGold": 600,
+                "roleIndex": 6,
+                "heroName": "Hero_Scout",
+                "skills": []
+              },
+              {
+                "accountId": "08dd4228-0084-431a-80be-b69c09bcad89",
+                "name": "Cheeetah",
+                "heroId": 2152,
+                "netWorth": 600,
+                "level": 1,
+                "items": [],
+                "slotIndex": 1,
+                "startingGold": 600,
+                "roleIndex": 5,
+                "heroName": "Hero_WitchSlayer",
+                "skills": []
+              },
+              {
+                "accountId": "019e2323-63a2-77ea-8476-c44e41a1d55e",
+                "name": "jimmyakesson",
+                "heroId": 1935,
+                "netWorth": 600,
+                "level": 1,
+                "items": [],
+                "slotIndex": 2,
+                "startingGold": 600,
+                "roleIndex": 2,
+                "heroName": "Hero_Soulstealer",
+                "skills": []
+              },
+              {
+                "accountId": "019c71d9-284c-718f-b47e-4642e01262f6",
+                "name": "happycamper",
+                "heroId": 3766,
+                "netWorth": 600,
+                "level": 1,
+                "items": [],
+                "slotIndex": 3,
+                "startingGold": 600,
+                "roleIndex": 7,
+                "heroName": "Hero_Dampeer",
+                "skills": []
+              },
+              {
+                "accountId": "019cb99f-d4be-7556-86d6-df88de2ac7a3",
+                "name": "Kugen3",
+                "heroId": 3946,
+                "netWorth": 600,
+                "level": 1,
+                "items": [],
+                "slotIndex": 4,
+                "startingGold": 600,
+                "roleIndex": 1,
+                "heroName": "Hero_Bushwack",
+                "skills": []
+              }
+            ]
+          }
+        ],
+        "buildings": [
+          {
+            "buildingId": 8,
+            "name": "Building_R_LegionTower",
+            "team": "Legion",
+            "health": 2250,
+            "destroyed": false,
+            "lane": "Middle",
+            "level": 4
+          },
+          {
+            "buildingId": 17,
+            "name": "Building_R_HellbourneTower",
+            "team": "Hellbourne",
+            "health": 2250,
+            "destroyed": false,
+            "lane": "Bot",
+            "level": 3
+          },
+          {
+            "buildingId": 20,
+            "name": "Building_R_LegionTower",
+            "team": "Legion",
+            "health": 2250,
+            "destroyed": false,
+            "lane": "Bot",
+            "level": 4
+          },
+          {
+            "buildingId": 46,
+            "name": "Building_R_LegionTower",
+            "team": "Legion",
+            "health": 2250,
+            "destroyed": false,
+            "lane": "Top",
+            "level": 3
+          },
+          {
+            "buildingId": 70,
+            "name": "Building_R_HellbourneTower",
+            "team": "Hellbourne",
+            "health": 2600,
+            "destroyed": false,
+            "lane": "Bot",
+            "level": 2
+          },
+          {
+            "buildingId": 146,
+            "name": "Building_R_HellbourneTower",
+            "team": "Hellbourne",
+            "health": 2600,
+            "destroyed": false,
+            "lane": "Top",
+            "level": 2
+          },
+          {
+            "buildingId": 193,
+            "name": "Building_R_HellbourneTower",
+            "team": "Hellbourne",
+            "health": 2250,
+            "destroyed": false,
+            "lane": "Bot",
+            "level": 4
+          },
+          {
+            "buildingId": 202,
+            "name": "Building_R_LegionTower",
+            "team": "Legion",
+            "health": 2600,
+            "destroyed": false,
+            "lane": "Top",
+            "level": 2
+          },
+          {
+            "buildingId": 207,
+            "name": "Building_R_HellbourneTower",
+            "team": "Hellbourne",
+            "health": 2600,
+            "destroyed": false,
+            "lane": "Middle",
+            "level": 1
+          },
+          {
+            "buildingId": 231,
+            "name": "Building_R_LegionTower",
+            "team": "Legion",
+            "health": 2600,
+            "destroyed": false,
+            "lane": "Middle",
+            "level": 2
+          },
+          {
+            "buildingId": 318,
+            "name": "Building_R_HellbourneTower",
+            "team": "Hellbourne",
+            "health": 2250,
+            "destroyed": false,
+            "lane": "Top",
+            "level": 3
+          },
+          {
+            "buildingId": 344,
+            "name": "Building_R_HellbourneTower",
+            "team": "Hellbourne",
+            "health": 2600,
+            "destroyed": false,
+            "lane": "Bot",
+            "level": 1
+          },
+          {
+            "buildingId": 346,
+            "name": "Building_R_LegionTower",
+            "team": "Legion",
+            "health": 2600,
+            "destroyed": false,
+            "lane": "Top",
+            "level": 1
+          },
+          {
+            "buildingId": 422,
+            "name": "Building_R_LegionTower",
+            "team": "Legion",
+            "health": 2600,
+            "destroyed": false,
+            "lane": "Bot",
+            "level": 1
+          },
+          {
+            "buildingId": 477,
+            "name": "Building_R_HellbourneTower",
+            "team": "Hellbourne",
+            "health": 2250,
+            "destroyed": false,
+            "lane": "Middle",
+            "level": 4
+          },
+          {
+            "buildingId": 533,
+            "name": "Building_R_LegionTower",
+            "team": "Legion",
+            "health": 2600,
+            "destroyed": false,
+            "lane": "Middle",
+            "level": 1
+          },
+          {
+            "buildingId": 577,
+            "name": "Building_R_HellbourneTower",
+            "team": "Hellbourne",
+            "health": 2250,
+            "destroyed": false,
+            "lane": "Middle",
+            "level": 3
+          },
+          {
+            "buildingId": 602,
+            "name": "Building_R_HellbourneTower",
+            "team": "Hellbourne",
+            "health": 2600,
+            "destroyed": false,
+            "lane": "Middle",
+            "level": 2
+          },
+          {
+            "buildingId": 619,
+            "name": "Building_R_LegionTower",
+            "team": "Legion",
+            "health": 2600,
+            "destroyed": false,
+            "lane": "Bot",
+            "level": 2
+          },
+          {
+            "buildingId": 677,
+            "name": "Building_R_HellbourneTower",
+            "team": "Hellbourne",
+            "health": 2600,
+            "destroyed": false,
+            "lane": "Top",
+            "level": 1
+          },
+          {
+            "buildingId": 701,
+            "name": "Building_R_LegionTower",
+            "team": "Legion",
+            "health": 2250,
+            "destroyed": false,
+            "lane": "Bot",
+            "level": 3
+          },
+          {
+            "buildingId": 752,
+            "name": "Building_R_LegionTower",
+            "team": "Legion",
+            "health": 2250,
+            "destroyed": false,
+            "lane": "Middle",
+            "level": 3
+          }
+        ]
+      },
+      {
+        "time": -60,
+        "teams": [
+          {
+            "team": "Legion",
+            "players": [
+              {
+                "items": [
+                  {
+                    "itemId": 2273,
+                    "slot": 0
+                  },
+                  {
+                    "itemId": 2274,
+                    "slot": 1
+                  },
+                  {
+                    "itemId": 2333,
+                    "slot": 6
+                  },
+                  {
+                    "itemId": 2224,
+                    "slot": 7
+                  }
+                ],
+                "skills": [
+                  {
+                    "skillId": 1312,
+                    "level": 1
+                  }
+                ]
+              },
+              {
+                "items": [
+                  {
+                    "itemId": 2276,
+                    "slot": 0
+                  },
+                  {
+                    "itemId": 2224,
+                    "slot": 6
+                  }
+                ],
+                "skills": [
+                  {
+                    "skillId": 808,
+                    "level": 1
+                  }
+                ]
+              },
+              {
+                "items": [
+                  {
+                    "itemId": 2266,
+                    "slot": 0
+                  },
+                  {
+                    "itemId": 2264,
+                    "slot": 1
+                  },
+                  {
+                    "itemId": 2269,
+                    "slot": 2
+                  },
+                  {
+                    "itemId": 2337,
+                    "slot": 3
+                  },
+                  {
+                    "itemId": 2224,
+                    "slot": 6
+                  },
+                  {
+                    "itemId": 2248,
+                    "slot": 7
+                  }
+                ],
+                "skills": [
+                  {
+                    "skillId": 1460,
+                    "level": 1
+                  }
+                ]
+              },
+              {
+                "items": [
+                  {
+                    "itemId": 2264,
+                    "slot": 0
+                  },
+                  {
+                    "itemId": 2266,
+                    "slot": 1
+                  },
+                  {
+                    "itemId": 2235,
+                    "slot": 2
+                  },
+                  {
+                    "itemId": 2224,
+                    "slot": 6
+                  }
+                ],
+                "skills": []
+              },
+              {
+                "items": [
+                  {
+                    "itemId": 2276,
+                    "slot": 0
+                  },
+                  {
+                    "itemId": 2274,
+                    "slot": 1
+                  },
+                  {
+                    "itemId": 2337,
+                    "slot": 6
+                  },
+                  {
+                    "itemId": 2333,
+                    "slot": 7
+                  }
+                ],
+                "skills": []
+              }
+            ]
+          },
+          {
+            "team": "Hellbourne",
+            "players": [
+              {
+                "items": [
+                  {
+                    "itemId": 2266,
+                    "slot": 0
+                  },
+                  {
+                    "itemId": 2224,
+                    "slot": 1
+                  },
+                  {
+                    "itemId": 2248,
+                    "slot": 2
+                  },
+                  {
+                    "itemId": 2264,
+                    "slot": 3
+                  },
+                  {
+                    "itemId": 2274,
+                    "slot": 5
+                  },
+                  {
+                    "itemId": 2224,
+                    "slot": 6
+                  },
+                  {
+                    "itemId": 2274,
+                    "slot": 7
+                  }
+                ],
+                "skills": []
+              },
+              {
+                "items": [
+                  {
+                    "itemId": 2528,
+                    "slot": 0
+                  },
+                  {
+                    "itemId": 2337,
+                    "slot": 6
+                  },
+                  {
+                    "itemId": 2333,
+                    "slot": 7
+                  }
+                ],
+                "skills": []
+              },
+              {
+                "items": [
+                  {
+                    "itemId": 2266,
+                    "slot": 0
+                  },
+                  {
+                    "itemId": 2301,
+                    "slot": 1
+                  },
+                  {
+                    "itemId": 2224,
+                    "slot": 6
+                  }
+                ],
+                "skills": []
+              },
+              {
+                "items": [
+                  {
+                    "itemId": 2264,
+                    "slot": 0
+                  },
+                  {
+                    "itemId": 2266,
+                    "slot": 1
+                  },
+                  {
+                    "itemId": 2224,
+                    "slot": 6
+                  }
+                ],
+                "skills": []
+              },
+              {
+                "items": [
+                  {
+                    "itemId": 2266,
+                    "slot": 0
+                  },
+                  {
+                    "itemId": 2301,
+                    "slot": 1
+                  },
+                  {
+                    "itemId": 2235,
+                    "slot": 2
+                  },
+                  {
+                    "itemId": 2274,
+                    "slot": 4
+                  },
+                  {
+                    "itemId": 2224,
+                    "slot": 5
+                  },
+                  {
+                    "itemId": 2224,
+                    "slot": 6
+                  },
+                  {
+                    "itemId": 2274,
+                    "slot": 7
+                  }
+                ],
+                "skills": []
+              }
+            ]
+          }
+        ],
+        "buildings": [
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          }
+        ]
+      },
+      {
+        "time": -30,
+        "teams": [
+          {
+            "team": "Legion",
+            "players": [
+              {
+                "wardOfRevelationPlaced": 1,
+                "items": [
+                  {
+                    "itemId": 2273,
+                    "slot": 2
+                  },
+                  {
+                    "itemId": 65535,
+                    "slot": 6
+                  }
+                ],
+                "skills": []
+              },
+              {
+                "items": [],
+                "skills": []
+              },
+              {
+                "items": [],
+                "skills": []
+              },
+              {
+                "items": [],
+                "skills": []
+              },
+              {
+                "wardOfRevelationPlaced": 1,
+                "ravenPlaced": 1,
+                "items": [
+                  {
+                    "itemId": 65535,
+                    "slot": 7
+                  }
+                ],
+                "skills": []
+              }
+            ]
+          },
+          {
+            "team": "Hellbourne",
+            "players": [
+              {
+                "items": [],
+                "skills": []
+              },
+              {
+                "items": [],
+                "skills": []
+              },
+              {
+                "items": [],
+                "skills": []
+              },
+              {
+                "items": [],
+                "skills": [
+                  {
+                    "skillId": 3774,
+                    "level": 1
+                  }
+                ]
+              },
+              {
+                "items": [],
+                "skills": [
+                  {
+                    "skillId": 3955,
+                    "level": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "buildings": [
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          },
+          {
+            "team": "None"
+          }
+        ]
+      }
+    ]
+  }
+}

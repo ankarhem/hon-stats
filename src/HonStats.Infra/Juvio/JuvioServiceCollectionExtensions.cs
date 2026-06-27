@@ -72,6 +72,7 @@ public static class JuvioServiceCollectionExtensions
         ));
         services.AddScoped<IPlayerProfileQuery, JuvioPlayerProfileQuery>();
         services.AddScoped<IMatchQuery, JuvioMatchQuery>();
+        services.AddScoped<IParsedReplayQuery, JuvioParsedReplayQuery>();
 
         return services;
     }

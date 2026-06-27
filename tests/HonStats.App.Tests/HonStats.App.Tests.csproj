@@ -20,6 +20,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="fixtures/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Insights\Fixtures\getmatchsummary.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\HonStats.App\HonStats.App.csproj" />
     <ProjectReference Include="..\..\src\HonStats.Infra\HonStats.Infra.csproj" />
     <ProjectReference Include="..\..\src\HonStats.Domain\HonStats.Domain.csproj" />
