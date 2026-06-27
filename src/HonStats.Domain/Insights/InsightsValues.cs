@@ -9,15 +9,9 @@ public sealed class HeroBuildEntry
     public int Games { get; set; }
 }
 
-// Read model: how often two items co-occur (bought together) across a player+hero's
-// matches. Canonicalized so ItemA < ItemB (no ordered/ self pairs).
-public sealed class HeroItemPairEntry
-{
-    public int ItemA { get; set; }
-    public int ItemB { get; set; }
-    public int Frequency { get; set; }
-    public int Games { get; set; }
-}
+// Read model: a specific item loadout (full inventory sequence) and its frequency
+// + win rate for a player+hero.
+public sealed record LoadoutEntry(IReadOnlyList<int> ItemIds, int Count, int Wins, double WinRate);
 
 // Read model: a teammate row enriched with display info (resolved via getuserinfo).
 public sealed class TeammateStat
@@ -65,6 +59,8 @@ public sealed class MatchStatInput
     public int Deaths { get; set; }
     public int Assists { get; set; }
     public int? GoldEarned { get; set; }
+    public int? Experience { get; set; }
+    public int? HeroDamage { get; set; }
     public int DurationSeconds { get; set; }
     public bool Won { get; set; }
     public int WardsPlaced { get; set; }
@@ -81,6 +77,8 @@ public sealed class MapStatEntry
     public double AvgAssists { get; set; }
     public double AvgWards { get; set; }
     public double? AvgGPM { get; set; }
+    public double? AvgXPM { get; set; }
+    public double? AvgDPM { get; set; }
     public int Wins { get; set; }
     public double WinRate { get; set; }
 }

@@ -16,6 +16,9 @@ public static class InsightsServiceCollectionExtensions
     )
     {
         services.Configure<IndexingOptions>(configuration.GetSection(IndexingOptions.SectionName));
+        services.Configure<TierTimingOptions>(
+            configuration.GetSection(TierTimingOptions.SectionName)
+        );
 
         services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddSingleton<IIndexProgressTracker, IndexProgressTracker>();

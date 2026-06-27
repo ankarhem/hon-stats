@@ -35,7 +35,6 @@ public class HonStatsDbContextSchemaTests
                     "match_player_items",
                     "match_item_timing",
                     "hero_builds",
-                    "hero_item_pairs",
                     "teammates",
                     "players",
                 ]);

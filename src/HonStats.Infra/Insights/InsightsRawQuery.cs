@@ -24,6 +24,7 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
     public async Task<IReadOnlyList<MatchItemInput>> GetHeroItemInputsAsync(
         Guid accountId,
         int heroId,
+        string? map = null,
         CancellationToken ct = default
     )
     {
@@ -45,12 +46,25 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
             .PlayerMatches.Where(m => m.AccountId == accountId && gameIds.Contains(m.GameId))
             .ToDictionaryAsync(m => m.GameId, m => m.Map, ct);
 
+        // Per-map filter: narrow to only games played on the requested map.
+        // "all" and null are treated identically (no filtering).
+        if (ShouldFilterByMap(map))
+        {
+            var matchingGameIds = mapByGame
+                .Where(kv => string.Equals(kv.Value, map, StringComparison.OrdinalIgnoreCase))
+                .Select(kv => kv.Key)
+                .ToHashSet();
+            rows = rows.Where(r => matchingGameIds.Contains(r.GameId)).ToList();
+            if (rows.Count == 0)
+                return [];
+        }
+
         return rows.GroupBy(r => r.GameId)
             .Select(g => new MatchItemInput
             {
                 GameId = g.Key,
                 Won = wonByGame.TryGetValue(g.Key, out var won) && won,
-                Map = mapByGame.TryGetValue(g.Key, out var map) ? map : string.Empty,
+                Map = mapByGame.TryGetValue(g.Key, out var m) ? m : string.Empty,
                 ItemIds = g.Select(x => x.ItemId).ToList(),
             })
             .ToList();
@@ -58,6 +72,7 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
 
     public async Task<IReadOnlyList<MatchTeammateInput>> GetTeammateInputsAsync(
         Guid accountId,
+        string? map = null,
         CancellationToken ct = default
     )
     {
@@ -67,6 +82,26 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
             .ToListAsync(ct);
         if (subjectGames.Count == 0)
             return [];
+
+        // Per-map filter: narrow the subject's games to only those on the
+        // requested map before joining for teammates.
+        if (ShouldFilterByMap(map))
+        {
+            var subjectGameIds = subjectGames.Select(g => g.GameId).Distinct().ToList();
+            var matchingGameIds = (
+                await db
+                    .PlayerMatches.Where(m =>
+                        m.AccountId == accountId
+                        && subjectGameIds.Contains(m.GameId)
+                        && m.Map == map
+                    )
+                    .Select(m => m.GameId)
+                    .ToListAsync(ct)
+            ).ToHashSet();
+            subjectGames = subjectGames.Where(g => matchingGameIds.Contains(g.GameId)).ToList();
+            if (subjectGames.Count == 0)
+                return [];
+        }
 
         var gameIds = subjectGames.Select(g => g.GameId).Distinct().ToList();
         var allForGames = await db
@@ -87,4 +122,9 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
             })
             .ToList();
     }
+
+    // "all" and null/empty mean "no map filter" — the caller wants every game.
+    private static bool ShouldFilterByMap(string? map) =>
+        !string.IsNullOrWhiteSpace(map)
+        && !string.Equals(map, "all", StringComparison.OrdinalIgnoreCase);
 }

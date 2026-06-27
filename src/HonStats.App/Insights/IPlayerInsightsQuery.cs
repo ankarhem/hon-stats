@@ -10,19 +10,14 @@ public interface IPlayerInsightsQuery
         Guid accountId,
         int limit,
         int offset,
+        string? map = null,
         CancellationToken ct = default
     );
 
     Task<IReadOnlyList<HeroBuildEntry>> GetHeroBuildAsync(
         Guid accountId,
         int heroId,
-        CancellationToken ct = default
-    );
-
-    Task<IReadOnlyList<HeroItemPairEntry>> GetHeroItemPairsAsync(
-        Guid accountId,
-        int heroId,
-        int limit,
+        string? map = null,
         CancellationToken ct = default
     );
 
@@ -43,6 +38,10 @@ public interface IPlayerInsightsQuery
         Guid accountId,
         CancellationToken ct = default
     );
+
+    // Aggregates all maps into a single "all" entry (Map="all"). Replaces the
+    // juvio getprofilestats dependency for the stats panel overall view.
+    Task<MapStatEntry> GetOverallStatsAsync(Guid accountId, CancellationToken ct = default);
 }
 
 public interface IPlayerInsightsIndexer

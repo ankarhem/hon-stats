@@ -2,17 +2,17 @@
 @using HonStats.App.Insights
 <nav class="tabs" aria-label="Profile sections">
     <button class="tab" aria-current="@(Model.Tab == "matches" ? "true" : null)"
-            hx-get="?tab=matches"
+            hx-get="?tab=matches&map=@Model.SelectedMap"
             hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
         Matches
     </button>
     <button class="tab" aria-current="@(Model.Tab == "teammates" ? "true" : null)"
-            hx-get="?tab=teammates"
+            hx-get="?tab=teammates&map=@Model.SelectedMap"
             hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
         Teammates
     </button>
     <button class="tab" aria-current="@(Model.Tab == "heroBuilds" ? "true" : null)"
-            hx-get="?tab=heroBuilds"
+            hx-get="?tab=heroBuilds&map=@Model.SelectedMap"
             hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
         Hero Builds
     </button>
@@ -35,7 +35,7 @@
         else
         {
             <ul class="roster">
-                <partial name="_TeammatesRows" model="new TeammatesView(Model.AccountId, Model.Teammates, 0, ProfileModel.PageSize, Model.HasMoreTeammates)" />
+                    <partial name="_TeammatesRows" model="new TeammatesView(Model.AccountId, Model.Teammates, 0, ProfileModel.PageSize, Model.HasMoreTeammates, Model.SelectedMap)" />
             </ul>
         }
         break;
@@ -60,8 +60,8 @@
                     var hero = Model.Heroes.GetValueOrDefault(kv.Key);
                     var isActive = kv.Key == Model.SelectedHeroId;
                     <a class="hero-picker__chip" aria-current="@(isActive ? "true" : null)"
-                       hx-get="?tab=heroBuilds&heroId=@kv.Key"
-                       hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
+                        hx-get="?tab=heroBuilds&heroId=@kv.Key&map=@Model.SelectedMap"
+                        hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
                         @(hero?.TranslatedName ?? ("Hero " + kv.Key)) <span class="tab__count">(@kv.Value)</span>
                     </a>
                 }
@@ -76,48 +76,135 @@
                 var games = Model.HeroBuild.First().Games;
                 var heroName = Model.Heroes.GetValueOrDefault(Model.SelectedHeroId)?.TranslatedName ?? ("Hero " + Model.SelectedHeroId);
                 var timingByItem = Model.HeroItemTiming.ToDictionary(t => t.ItemId);
+                var itemsById = Model.Items;
 
-                // Split the build into Early / Core / Late tiers. Core/Late is an
-                // adaptive per-hero median split on pick rate (see GuideTierClassifier).
-                var tiers = GuideTierClassifier.ClassifySet(
-                    Model.HeroBuild.Select(e => (
-                        e.ItemId,
-                        TotalCost: Model.Items.GetValueOrDefault(e.ItemId)?.TotalCost ?? 0,
-                        PickRate: games > 0 ? e.Frequency / (double)games : 0d
+                // Split the build into Early / Core / Late tiers by mean buy time.
+                var tierItems = Model.HeroBuild
+                    .Select(b => (
+                        ItemId: b.ItemId,
+                        AvgSeconds: timingByItem.TryGetValue(b.ItemId, out var t) ? t.AvgSeconds : 0
                     ))
+                    .ToList();
+                var tierByItem = GuideTierClassifier.ClassifyByTime(
+                    tierItems,
+                    Model.EarlyCutoffMinutes,
+                    Model.LateCutoffMinutes
                 );
                 var byTier = Model.HeroBuild
-                    .GroupBy(e => tiers.GetValueOrDefault(e.ItemId))
+                    .GroupBy(e => tierByItem.GetValueOrDefault(e.ItemId))
                     .ToDictionary(
                         g => g.Key,
                         g => (IReadOnlyList<HeroBuildEntry>)g
-                            .OrderByDescending(e => e.Frequency)
+                            .OrderBy(e => timingByItem.TryGetValue(e.ItemId, out var t) ? t.AvgSeconds : double.MaxValue)
                             .ThenBy(e => e.ItemId)
                             .ToList()
                     );
 
-                if (Model.HeroItemPairs.Count > 0)
+                if (Model.Loadouts.Any())
                 {
-                    var pairsGames = Model.HeroItemPairs.First().Games;
-                    <p class="eyebrow card__title">Common Combos on @heroName</p>
-                    <ul class="grid-list">
-                        @foreach (var pair in Model.HeroItemPairs)
-                        {
-                            var itemA = Model.Items.GetValueOrDefault(pair.ItemA);
-                            var itemB = Model.Items.GetValueOrDefault(pair.ItemB);
-                            var iconA = itemA?.IconUrl ?? $"https://gamestorage.juvio.com/items/{pair.ItemA}/icon.webp";
-                            var iconB = itemB?.IconUrl ?? $"https://gamestorage.juvio.com/items/{pair.ItemB}/icon.webp";
-                            var pairPct = pairsGames > 0 ? pair.Frequency * 100 / pairsGames : 0;
-                            <li class="grid-list__item">
-                                <div class="grid-list__pair">
-                                    <img class="grid-list__icon" src="@iconA" alt="" loading="lazy" />
-                                    <img class="grid-list__icon" src="@iconB" alt="" loading="lazy" />
-                                </div>
-                                <div class="grid-list__name">@(itemA?.DisplayName ?? ("Item " + pair.ItemA)) + @(itemB?.DisplayName ?? ("Item " + pair.ItemB))</div>
-                                <div class="grid-list__meta">@pair.Frequency/@pairsGames · @pairPct%</div>
-                            </li>
-                        }
-                    </ul>
+                    <section class="loadouts">
+                        <p class="eyebrow card__title">Common Loadouts on @heroName</p>
+                        <ul class="loadout-list">
+                            @foreach (var (loadout, loadoutIndex) in Model.Loadouts.Select((l, i) => (l, i)))
+                            {
+                                <li class="loadout-row">
+                                    <span class="loadout-row__items">
+                                        @foreach (var (itemId, itemIndex) in loadout.ItemIds.Select((id, i) => (id, i)))
+                                        {
+                                            var item = itemsById.GetValueOrDefault(itemId);
+                                            if (item is null)
+                                            {
+                                                continue;
+                                            }
+                                            var anchorName = $"--loadout{loadoutIndex}-item{itemIndex}";
+                                            <span class="loadout-item item-tile" style="anchor-name: @anchorName">
+                                                <img src="@item.IconUrl" alt="@item.DisplayName" class="loadout-item__img" loading="lazy" />
+                                                <div class="item-tooltip" role="tooltip"
+                                                     style="position-anchor: @anchorName; bottom: anchor(top); left: anchor(center); translate: -50% 0; position-try-fallbacks: flip-block">
+                                                    <div class="item-tooltip__head">
+                                                        <img class="item-tooltip__head-icon" src="@item.IconUrl" alt="" loading="lazy" />
+                                                        <div class="item-tooltip__head-text">
+                                                            <span class="item-tooltip__name">@item.DisplayName</span>
+                                                            @if (item.Tier is not null)
+                                                            {
+                                                                <span class="item-tooltip__tier">@item.Tier</span>
+                                                            }
+                                                        </div>
+                                                        @if (item.TotalCost > 0)
+                                                        {
+                                                            <span class="item-tooltip__value gold">Value: @item.TotalCost</span>
+                                                        }
+                                                    </div>
+                                                    <div class="item-tooltip__body">
+                                                        @if (!string.IsNullOrEmpty(item.Description))
+                                                        {
+                                                            <div class="item-tooltip__desc">@GameText.Render(item.Description)</div>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(item.Description2))
+                                                        {
+                                                            <div class="item-tooltip__note">@GameText.Render(item.Description2)</div>
+                                                        }
+                                                        @if (item.IsActive)
+                                                        {
+                                                            <div class="item-tooltip__section">
+                                                                <p class="eyebrow">Activation</p>
+                                                                <ul class="item-stat-list">
+                                                                    @if (!string.IsNullOrEmpty(item.TargetType))
+                                                                    {
+                                                                        <li><span class="muted">Target</span> @item.TargetType</li>
+                                                                    }
+                                                                    @if (item.Range is > 0)
+                                                                    {
+                                                                        <li><span class="muted">Range</span> @item.Range</li>
+                                                                    }
+                                                                    @if (item.ManaCost is > 0)
+                                                                    {
+                                                                        <li><span class="muted">Mana cost</span> @item.ManaCost</li>
+                                                                    }
+                                                                    @if (item.Cooldown is > 0)
+                                                                    {
+                                                                        <li><span class="muted">Cooldown</span> <span class="highlight">@item.Cooldown s</span></li>
+                                                                    }
+                                                                </ul>
+                                                                @if (!string.IsNullOrEmpty(item.ImpactEffect))
+                                                                {
+                                                                    <div class="item-tooltip__prose">@GameText.Render(item.ImpactEffect)</div>
+                                                                }
+                                                            </div>
+                                                        }
+                                                        @if (item.PassiveBonuses.Count > 0 || !string.IsNullOrEmpty(item.AttackImpactEffect))
+                                                        {
+                                                            <div class="item-tooltip__section">
+                                                                @if (item.PassiveBonuses.Count > 0)
+                                                                {
+                                                                    <p class="eyebrow">Passive Bonuses</p>
+                                                                    <ul class="item-bonus-list">
+                                                                        @foreach (var bonus in item.PassiveBonuses)
+                                                                        {
+                                                                            <li>@bonus</li>
+                                                                        }
+                                                                    </ul>
+                                                                }
+                                                                @if (!string.IsNullOrEmpty(item.AttackImpactEffect))
+                                                                {
+                                                                    <p class="eyebrow">On Attack Impact</p>
+                                                                    <div class="item-tooltip__prose">@GameText.Render(item.AttackImpactEffect)</div>
+                                                                }
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </span>
+                                        }
+                                    </span>
+                                    <span class="loadout-row__stats">
+                                        <span class="loadout-row__count">@loadout.Count×</span>
+                                        <span class="loadout-row__winrate">@loadout.WinRate.ToString("0%")</span>
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    </section>
                 }
 
                 <p class="eyebrow card__title">Items over @games games on @heroName</p>
@@ -127,16 +214,17 @@
                     {
                         continue;
                     }
-                    var tierTotal = tierEntries.Sum(e => Model.Items.GetValueOrDefault(e.ItemId)?.TotalCost ?? 0);
+                    var costs = tierEntries.Select(e => itemsById.GetValueOrDefault(e.ItemId)?.TotalCost ?? 0).OrderBy(c => c).ToList();
+                    var goldRange = costs.Count > 0 ? $"{costs[0]}g – {costs[^1]}g" : "";
                     <section class="build-tier build-tier--@tier.ToString().ToLowerInvariant()">
                         <div class="build-tier__head">
                             <p class="eyebrow card__title">@tier</p>
-                            <span class="build-tier__total">@tierTotal.ToString("N0")g</span>
+                            <span class="build-tier__total">@goldRange</span>
                         </div>
                         <ul class="grid-list">
                             @foreach (var entry in tierEntries)
                             {
-                                var item = Model.Items.GetValueOrDefault(entry.ItemId);
+                                var item = itemsById.GetValueOrDefault(entry.ItemId);
                                 var iconUrl = item?.IconUrl ?? $"https://gamestorage.juvio.com/items/{entry.ItemId}/icon.webp";
                                 var itemCost = item?.TotalCost ?? 0;
                                 var pickPct = games > 0 ? entry.Frequency * 100 / games : 0;
@@ -175,7 +263,7 @@
                     <tr><th>Hero</th><th>Result</th><th>K/D/A</th><th>Duration</th><th>Map</th><th>Date</th></tr>
                 </thead>
                 <tbody>
-                    <partial name="_MatchesRows" model="new MatchesView(Model.AccountId, Model.RecentMatches, Model.Heroes, 0, ProfileModel.PageSize, Model.HasMoreMatches)" />
+                    <partial name="_MatchesRows" model="new MatchesView(Model.AccountId, Model.RecentMatches, Model.Heroes, 0, ProfileModel.PageSize, Model.HasMoreMatches, Model.SelectedMap)" />
                 </tbody>
             </table>
         }

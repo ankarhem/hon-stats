@@ -15,7 +15,7 @@
 {
     var next = Model.Offset + Model.PageSize;
     <li class="roster__item loading-row"
-        hx-get="?handler=TeammatesMore&accountId=@Model.AccountId&offset=@next"
+        hx-get="?handler=TeammatesMore&accountId=@Model.AccountId&offset=@next&map=@Model.SelectedMap"
         hx-trigger="revealed" hx-target="this" hx-swap="outerHTML">
         <span class="muted">Loading more…</span>
     </li>

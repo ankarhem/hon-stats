@@ -23,7 +23,7 @@
 {
     var next = Model.Offset + Model.PageSize;
     <tr class="loading-row"
-        hx-get="?handler=MatchesMore&accountId=@Model.AccountId&offset=@next"
+        hx-get="?handler=MatchesMore&accountId=@Model.AccountId&offset=@next&map=@Model.SelectedMap"
         hx-trigger="revealed" hx-target="this" hx-swap="outerHTML">
         <td colspan="6">Loading more…</td>
     </tr>

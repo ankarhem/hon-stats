@@ -1,96 +1,44 @@
 @model ProfileModel
-@using HonStats.Domain.Insights
 @{
-    var username = Model.Username ?? "";
-    var indexed = Model.Indexed is not null && Model.Indexed.Status == IndexingStatus.Indexed;
+    var s = Model.MapOverview;
+    var kdr = s is null ? (double?)null : s.AvgDeaths > 0 ? s.AvgKills / s.AvgDeaths : (double?)null;
 }
 
 <div class="panel card">
     <p class="eyebrow card__title">Profile stats</p>
 
-    <div class="map-selector">
-        <button class="pill" type="button"
-                aria-current="@(Model.SelectedMap == "all" ? "true" : null)"
-                hx-get="?map=all"
-                hx-target="#profile-stats" hx-swap="innerHTML" hx-push-url="true">
-            All
-        </button>
-        <button class="pill" type="button"
-                aria-current="@(Model.SelectedMap == "ForestsOfCaldavar" ? "true" : null)"
-                hx-get="?map=ForestsOfCaldavar"
-                hx-target="#profile-stats" hx-swap="innerHTML" hx-push-url="true">
-            Forests of Caldavar
-        </button>
-        <button class="pill" type="button"
-                aria-current="@(Model.SelectedMap == "MidWars" ? "true" : null)"
-                hx-get="?map=MidWars"
-                hx-target="#profile-stats" hx-swap="innerHTML" hx-push-url="true">
-            Mid Wars
-        </button>
+    <div class="stat-grid">
+        <div class="stat">
+            <div class="eyebrow">K/D/A</div>
+            <div class="stat__value">@(s is null ? "—" : $"{s.AvgKills:0.0} / {s.AvgDeaths:0.0} / {s.AvgAssists:0.0}")</div>
+        </div>
+        <div class="stat">
+            <div class="eyebrow">Win rate</div>
+            <div class="stat__value">@(s is null ? "—" : s.WinRate.ToString("0.00%"))</div>
+            @if (s is not null)
+            {
+                <div class="stat__sub">@(s.Wins)W / @(s.Games - s.Wins)L over @s.Games games</div>
+            }
+        </div>
+        <div class="stat">
+            <div class="eyebrow">KDR</div>
+            <div class="stat__value">@(kdr.HasValue ? kdr.Value.ToString("0.00") : "—")</div>
+        </div>
+        <div class="stat">
+            <div class="eyebrow">Avg wards</div>
+            <div class="stat__value">@(s is null ? "—" : s.AvgWards.ToString("0.0"))</div>
+        </div>
+        <div class="stat">
+            <div class="eyebrow">Avg GPM</div>
+            <div class="stat__value">@(s?.AvgGPM?.ToString("0") ?? "—")</div>
+        </div>
+        <div class="stat">
+            <div class="eyebrow">Avg XPM</div>
+            <div class="stat__value">@(s?.AvgXPM?.ToString("0") ?? "—")</div>
+        </div>
+        <div class="stat">
+            <div class="eyebrow">Avg DPM</div>
+            <div class="stat__value">@(s?.AvgDPM?.ToString("0") ?? "—")</div>
+        </div>
     </div>
-
-    @if (Model.MapStats.Count > 0)
-    {
-        <p class="map-selector__count muted">
-            @string.Join(" · ", Model.MapStats.Select(e => $"{ProfileModel.MapLabel(e.Map)}: {e.Games} games"))
-        </p>
-    }
-
-    @if (Model.SelectedMap == "all")
-    {
-        var p = Model.Profile;
-        if (p is null)
-        {
-            <div class="stat-grid">
-                <div class="stat"><div class="eyebrow">K/D/A</div><div class="stat__value">—</div></div>
-                <div class="stat"><div class="eyebrow">Win rate</div><div class="stat__value">—</div></div>
-                <div class="stat"><div class="eyebrow">KDR</div><div class="stat__value">—</div></div>
-                <div class="stat"><div class="eyebrow">Wards placed</div><div class="stat__value">—</div></div>
-                <div class="stat"><div class="eyebrow">Avg GPM</div><div class="stat__value">—</div></div>
-                <div class="stat"><div class="eyebrow">Avg XPM</div><div class="stat__value">—</div></div>
-            </div>
-        }
-        else
-        {
-            <div class="stat-grid">
-                <div class="stat"><div class="eyebrow">K/D/A</div><div class="stat__value">@p.Overview.AverageKDA.ToString("0.00")</div></div>
-                <div class="stat"><div class="eyebrow">Win rate</div><div class="stat__value">@p.Overview.WinRate.ToString("0.0")<span class="stat__sub">%</span></div></div>
-                <div class="stat"><div class="eyebrow">KDR</div><div class="stat__value">@p.Summary.KillDeathRatio.ToString("0.00")</div></div>
-                <div class="stat"><div class="eyebrow">Wards placed</div><div class="stat__value">@p.Overview.AllTimeRecord.WardsPlaced</div></div>
-                <div class="stat"><div class="eyebrow">Avg GPM</div><div class="stat__value">@p.Overview.AverageGPM.ToString("0")</div></div>
-                <div class="stat"><div class="eyebrow">Avg XPM</div><div class="stat__value">@p.Overview.AverageXPM.ToString("0")</div></div>
-            </div>
-        }
-    }
-    else
-    {
-        var entry = Model.MapOverview;
-        var label = ProfileModel.MapLabel(Model.SelectedMap);
-        if (entry is null)
-        {
-            <div class="stat-grid">
-                <div class="stat"><div class="eyebrow">K/D/A</div><div class="stat__value">—</div></div>
-                <div class="stat"><div class="eyebrow">Win rate</div><div class="stat__value">—</div></div>
-                <div class="stat"><div class="eyebrow">KDR</div><div class="stat__value">—</div></div>
-                <div class="stat"><div class="eyebrow">Wards placed</div><div class="stat__value">—</div></div>
-                <div class="stat"><div class="eyebrow">Avg GPM</div><div class="stat__value">—</div></div>
-                <div class="stat"><div class="eyebrow">Avg XPM</div><div class="stat__value">—</div></div>
-            </div>
-            <p class="map-selector__count muted">
-                @(indexed ? $"No {label} games indexed yet." : "Index player to see per-map stats.")
-            </p>
-        }
-        else
-        {
-            var kdr = entry.AvgDeaths > 0 ? entry.AvgKills / entry.AvgDeaths : (double?)null;
-            <div class="stat-grid">
-                <div class="stat"><div class="eyebrow">K/D/A</div><div class="stat__value">@entry.AvgKills.ToString("0.0")/@entry.AvgDeaths.ToString("0.0")/@entry.AvgAssists.ToString("0.0")</div></div>
-                <div class="stat"><div class="eyebrow">Win rate</div><div class="stat__value">@entry.WinRate.ToString("0.0")<span class="stat__sub">%</span></div></div>
-                <div class="stat"><div class="eyebrow">KDR</div><div class="stat__value">@(kdr.HasValue ? kdr.Value.ToString("0.00") : "—")</div></div>
-                <div class="stat"><div class="eyebrow">Wards placed</div><div class="stat__value">@entry.AvgWards.ToString("0.0")</div></div>
-                <div class="stat"><div class="eyebrow">Avg GPM</div><div class="stat__value">@(entry.AvgGPM.HasValue ? entry.AvgGPM.Value.ToString("0") : "—")</div></div>
-                <div class="stat"><div class="eyebrow">Avg XPM</div><div class="stat__value">—</div></div>
-            </div>
-        }
-    }
 </div>

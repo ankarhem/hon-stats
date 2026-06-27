@@ -67,22 +67,6 @@ public sealed class HeroBuildConfiguration : IEntityTypeConfiguration<HeroBuild>
     }
 }
 
-public sealed class HeroItemPairConfiguration : IEntityTypeConfiguration<HeroItemPair>
-{
-    public void Configure(EntityTypeBuilder<HeroItemPair> b)
-    {
-        b.ToTable("hero_item_pairs");
-        b.HasKey(x => new
-        {
-            x.AccountId,
-            x.HeroId,
-            x.ItemA,
-            x.ItemB,
-        });
-        b.HasIndex(x => new { x.AccountId, x.HeroId });
-    }
-}
-
 public sealed class TeammateConfiguration : IEntityTypeConfiguration<Teammate>
 {
     public void Configure(EntityTypeBuilder<Teammate> b)

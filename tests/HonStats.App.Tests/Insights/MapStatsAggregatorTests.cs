@@ -62,7 +62,7 @@ public class MapStatsAggregatorTests
         caldavar.AvgDeaths.Should().BeApproximately(5.5, 0.0001);
         caldavar.AvgAssists.Should().BeApproximately(11.5, 0.0001);
         caldavar.Wins.Should().Be(1);
-        caldavar.WinRate.Should().BeApproximately(50.0, 0.0001);
+        caldavar.WinRate.Should().BeApproximately(0.5, 0.0001);
 
         var mid = result.Single(e => e.Map == "MidWars");
         mid.Games.Should().Be(1);
@@ -70,7 +70,7 @@ public class MapStatsAggregatorTests
         mid.AvgDeaths.Should().BeApproximately(3.0, 0.0001);
         mid.AvgAssists.Should().BeApproximately(10.0, 0.0001);
         mid.Wins.Should().Be(1);
-        mid.WinRate.Should().BeApproximately(100.0, 0.0001);
+        mid.WinRate.Should().BeApproximately(1.0, 0.0001);
     }
 
     [Fact]
@@ -221,5 +221,202 @@ public class MapStatsAggregatorTests
         // Alpha and Beta both have 3 games; Zeta has 1.
         // Tie on Games (3) broken by Map ascending: Alpha before Beta; Zeta last.
         result.Select(e => e.Map).Should().Equal(["Alpha", "Beta", "Zeta"]);
+    }
+
+    [Fact]
+    public void Build_ComputesAvgXPM_FromExperience()
+    {
+        var inputs = new List<MatchStatInput>
+        {
+            new()
+            {
+                GameId = 1,
+                Map = "ForestsOfCaldavar",
+                Experience = 600,
+                DurationSeconds = 600,
+            },
+            new()
+            {
+                GameId = 2,
+                Map = "ForestsOfCaldavar",
+                Experience = 1200,
+                DurationSeconds = 600,
+            },
+        };
+
+        var result = MapStatsAggregator.Build(inputs);
+
+        var caldavar = result.Single(e => e.Map == "ForestsOfCaldavar");
+        // (600 + 1200) xp / (10 + 10) minutes = 1800 / 20 = 90.
+        caldavar.AvgXPM.Should().BeApproximately(90.0, 0.0001);
+    }
+
+    [Fact]
+    public void Build_NullExperience_SkippedFromXPMDenominator()
+    {
+        // game1 carries xp; game2 has no xp breakdown. Only game1 contributes to
+        // numerator AND denominator (separate-denominator pattern, like GPM).
+        var inputs = new List<MatchStatInput>
+        {
+            new()
+            {
+                GameId = 1,
+                Map = "ForestsOfCaldavar",
+                Experience = 600,
+                DurationSeconds = 600,
+            },
+            new()
+            {
+                GameId = 2,
+                Map = "ForestsOfCaldavar",
+                Experience = null,
+                DurationSeconds = 600,
+            },
+        };
+
+        var result = MapStatsAggregator.Build(inputs);
+
+        var caldavar = result.Single(e => e.Map == "ForestsOfCaldavar");
+        caldavar.Games.Should().Be(2);
+        // 600 / 10 minutes = 60 — NOT 600 / 20 (the null-xp game's minutes excluded).
+        caldavar.AvgXPM.Should().BeApproximately(60.0, 0.0001);
+    }
+
+    [Fact]
+    public void Build_ComputesAvgDPM_FromHeroDamage()
+    {
+        var inputs = new List<MatchStatInput>
+        {
+            new()
+            {
+                GameId = 1,
+                Map = "ForestsOfCaldavar",
+                HeroDamage = 30000,
+                DurationSeconds = 600,
+            },
+            new()
+            {
+                GameId = 2,
+                Map = "ForestsOfCaldavar",
+                HeroDamage = 60000,
+                DurationSeconds = 1200,
+            },
+        };
+
+        var result = MapStatsAggregator.Build(inputs);
+
+        var caldavar = result.Single(e => e.Map == "ForestsOfCaldavar");
+        // (30000 + 60000) damage / (10 + 20) minutes = 90000 / 30 = 3000.
+        caldavar.AvgDPM.Should().BeApproximately(3000.0, 0.0001);
+    }
+
+    [Fact]
+    public void Build_AllExperienceNull_AvgXPMIsNull()
+    {
+        var inputs = new List<MatchStatInput>
+        {
+            new()
+            {
+                GameId = 1,
+                Map = "MidWars",
+                Experience = null,
+                DurationSeconds = 900,
+            },
+            new()
+            {
+                GameId = 2,
+                Map = "MidWars",
+                Experience = null,
+                DurationSeconds = 900,
+            },
+        };
+
+        var result = MapStatsAggregator.Build(inputs);
+
+        var mid = result.Single(e => e.Map == "MidWars");
+        mid.AvgXPM.Should().BeNull();
+    }
+
+    [Fact]
+    public void BuildOverall_AggregatesAllMapsIntoSingleEntry()
+    {
+        var inputs = new List<MatchStatInput>
+        {
+            new()
+            {
+                GameId = 1,
+                Map = "ForestsOfCaldavar",
+                Kills = 10,
+                Deaths = 5,
+                Assists = 15,
+                DurationSeconds = 1800,
+                Won = true,
+            },
+            new()
+            {
+                GameId = 2,
+                Map = "ForestsOfCaldavar",
+                Kills = 4,
+                Deaths = 6,
+                Assists = 8,
+                DurationSeconds = 1800,
+                Won = false,
+            },
+            new()
+            {
+                GameId = 3,
+                Map = "MidWars",
+                Kills = 20,
+                Deaths = 3,
+                Assists = 10,
+                DurationSeconds = 900,
+                Won = true,
+            },
+        };
+
+        var overall = MapStatsAggregator.BuildOverall(inputs);
+
+        overall.Map.Should().Be("all");
+        overall.Games.Should().Be(3);
+        // (10 + 4 + 20) / 3, (5 + 6 + 3) / 3, (15 + 8 + 10) / 3.
+        overall.AvgKills.Should().BeApproximately(34.0 / 3.0, 0.0001);
+        overall.AvgDeaths.Should().BeApproximately(14.0 / 3.0, 0.0001);
+        overall.AvgAssists.Should().BeApproximately(33.0 / 3.0, 0.0001);
+        overall.Wins.Should().Be(2);
+        overall.WinRate.Should().BeApproximately(2.0 / 3.0, 0.0001);
+    }
+
+    [Fact]
+    public void BuildOverall_ComputesXpmAndDpm()
+    {
+        // Inputs span two maps; BuildOverall aggregates raw totals across all of
+        // them (no per-map grouping). Null-xp game is excluded from the xp
+        // denominator, mirroring per-map Build.
+        var inputs = new List<MatchStatInput>
+        {
+            new()
+            {
+                GameId = 1,
+                Map = "ForestsOfCaldavar",
+                Experience = 600,
+                HeroDamage = 15000,
+                DurationSeconds = 600,
+            },
+            new()
+            {
+                GameId = 2,
+                Map = "MidWars",
+                Experience = null,
+                HeroDamage = 30000,
+                DurationSeconds = 600,
+            },
+        };
+
+        var overall = MapStatsAggregator.BuildOverall(inputs);
+
+        // XPM: only game1 carries xp -> 600 / 10 = 60 (game2's minutes excluded).
+        overall.AvgXPM.Should().BeApproximately(60.0, 0.0001);
+        // DPM: both carry damage -> (15000 + 30000) / (10 + 10) = 45000 / 20 = 2250.
+        overall.AvgDPM.Should().BeApproximately(2250.0, 0.0001);
     }
 }

@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HonStats.Infra.Insights;
 
-internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbContext> dbFactory)
-    : IPlayerInsightsQuery
+internal sealed class SqlitePlayerInsightsQuery(
+    IDbContextFactory<HonStatsDbContext> dbFactory,
+    IInsightsRawQuery rawQuery
+) : IPlayerInsightsQuery
 {
     public async Task<IndexedPlayer?> GetIndexedPlayerAsync(
         Guid accountId,
@@ -21,19 +23,49 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
         Guid accountId,
         int limit,
         int offset,
+        string? map = null,
         CancellationToken ct = default
     )
     {
-        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        if (ShouldFilterByMap(map))
+        {
+            var inputs = await rawQuery.GetTeammateInputsAsync(accountId, map, ct);
+            var aggregates = TeammateAggregator.Build(inputs);
+            var paged = aggregates.Skip(offset).Take(limit).ToList();
+
+            await using var db = await dbFactory.CreateDbContextAsync(ct);
+            var teammateIds = paged.Select(a => a.TeammateAccountId).ToList();
+            var names = await db
+                .Players.Where(p => teammateIds.Contains(p.AccountId))
+                .ToDictionaryAsync(p => p.AccountId, ct);
+
+            return paged
+                .Select(a =>
+                {
+                    names.TryGetValue(a.TeammateAccountId, out var p);
+                    return new TeammateStat
+                    {
+                        TeammateAccountId = a.TeammateAccountId,
+                        DisplayName = p?.DisplayName,
+                        Username = p?.Username,
+                        Country = p?.Country,
+                        GamesTogether = a.GamesTogether,
+                        WinsTogether = a.WinsTogether,
+                    };
+                })
+                .ToList();
+        }
+
+        await using var db2 = await dbFactory.CreateDbContextAsync(ct);
 
         // LEFT JOIN players on TeammateAccountId — names now live in the single
         // source-of-truth players table. players.AccountId is a PK, so each
         // teammate matches at most one row; pagination is unaffected by the join.
         var rows = await (
-            from t in db.Teammates
+            from t in db2.Teammates
             where t.AccountId == accountId
             orderby t.GamesTogether descending, t.TeammateAccountId
-            from p in db.Players.Where(p => p.AccountId == t.TeammateAccountId).DefaultIfEmpty()
+            from p in db2.Players.Where(p => p.AccountId == t.TeammateAccountId).DefaultIfEmpty()
             select new TeammateStat
             {
                 TeammateAccountId = t.TeammateAccountId,
@@ -54,9 +86,16 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
     public async Task<IReadOnlyList<HeroBuildEntry>> GetHeroBuildAsync(
         Guid accountId,
         int heroId,
+        string? map = null,
         CancellationToken ct = default
     )
     {
+        if (ShouldFilterByMap(map))
+        {
+            var inputs = await rawQuery.GetHeroItemInputsAsync(accountId, heroId, map, ct);
+            return HeroBuildAggregator.Build(inputs);
+        }
+
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var rows = await db
             .HeroBuilds.Where(h => h.AccountId == accountId && h.HeroId == heroId)
@@ -68,32 +107,6 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
                 ItemId = h.ItemId,
                 Frequency = h.Frequency,
                 Wins = h.Wins,
-                Games = h.Games,
-            })
-            .ToList();
-    }
-
-    public async Task<IReadOnlyList<HeroItemPairEntry>> GetHeroItemPairsAsync(
-        Guid accountId,
-        int heroId,
-        int limit,
-        CancellationToken ct = default
-    )
-    {
-        await using var db = await dbFactory.CreateDbContextAsync(ct);
-        var rows = await db
-            .HeroItemPairs.Where(h => h.AccountId == accountId && h.HeroId == heroId)
-            .OrderByDescending(h => h.Frequency)
-            .ThenBy(h => h.ItemA)
-            .ThenBy(h => h.ItemB)
-            .Take(limit)
-            .ToListAsync(ct);
-
-        return rows.Select(h => new HeroItemPairEntry
-            {
-                ItemA = h.ItemA,
-                ItemB = h.ItemB,
-                Frequency = h.Frequency,
                 Games = h.Games,
             })
             .ToList();
@@ -143,6 +156,27 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
         CancellationToken ct = default
     )
     {
+        var inputs = await GetStatInputsAsync(accountId, ct);
+        return MapStatsAggregator.Build(inputs);
+    }
+
+    public async Task<MapStatEntry> GetOverallStatsAsync(
+        Guid accountId,
+        CancellationToken ct = default
+    )
+    {
+        var inputs = await GetStatInputsAsync(accountId, ct);
+        if (inputs.Count == 0)
+            return new MapStatEntry { Map = "all" };
+
+        return MapStatsAggregator.BuildOverall(inputs);
+    }
+
+    private async Task<IReadOnlyList<MatchStatInput>> GetStatInputsAsync(
+        Guid accountId,
+        CancellationToken ct = default
+    )
+    {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var matches = await db.PlayerMatches.Where(m => m.AccountId == accountId).ToListAsync(ct);
         if (matches.Count == 0)
@@ -167,7 +201,7 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
             select new { GameId = g.Key, Wards = g.Max(x => x.WardsPlaced) }
         ).ToDictionaryAsync(x => x.GameId, x => x.Wards, ct);
 
-        var inputs = matches
+        return matches
             .Select(m =>
             {
                 rosterByGame.TryGetValue(m.GameId, out var r);
@@ -181,14 +215,14 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
                     Deaths = m.Deaths,
                     Assists = m.Assists,
                     GoldEarned = goldEarned,
+                    Experience = r?.Experience,
+                    HeroDamage = r?.HeroDamage,
                     DurationSeconds = m.Duration,
                     Won = r?.Won ?? false,
                     WardsPlaced = wards,
                 };
             })
             .ToList();
-
-        return MapStatsAggregator.Build(inputs);
     }
 
     // GoldEarned sums the five earned-gold sources; null when any is absent
@@ -213,4 +247,8 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
             + r.GoldFromAssists.Value
             + r.GoldFromBuildings.Value;
     }
+
+    private static bool ShouldFilterByMap(string? map) =>
+        !string.IsNullOrWhiteSpace(map)
+        && !string.Equals(map, "all", StringComparison.OrdinalIgnoreCase);
 }

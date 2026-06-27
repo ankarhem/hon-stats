@@ -67,44 +67,10 @@ public static class TeammateAggregator
     }
 }
 
-public static class HeroItemPairAggregator
-{
-    public static IReadOnlyList<HeroItemPairEntry> Build(IReadOnlyList<MatchItemInput> inputs)
-    {
-        if (inputs.Count == 0)
-            return [];
-
-        var frequency = new Dictionary<(int ItemA, int ItemB), int>();
-        foreach (var input in inputs)
-        {
-            var distinct = input.ItemIds.Distinct().OrderBy(id => id).ToList();
-            for (var i = 0; i < distinct.Count; i++)
-            {
-                for (var j = i + 1; j < distinct.Count; j++)
-                {
-                    var pair = (distinct[i], distinct[j]);
-                    frequency[pair] = frequency.TryGetValue(pair, out var count) ? count + 1 : 1;
-                }
-            }
-        }
-
-        return frequency
-            .Select(kv => new HeroItemPairEntry
-            {
-                ItemA = kv.Key.ItemA,
-                ItemB = kv.Key.ItemB,
-                Frequency = kv.Value,
-                Games = inputs.Count,
-            })
-            .OrderByDescending(entry => entry.Frequency)
-            .ThenBy(entry => entry.ItemA)
-            .ThenBy(entry => entry.ItemB)
-            .ToList();
-    }
-}
-
 public static class MapStatsAggregator
 {
+    public const string OverallMap = "all";
+
     public static IReadOnlyList<MapStatEntry> Build(IReadOnlyList<MatchStatInput> inputs)
     {
         return inputs
@@ -115,19 +81,30 @@ public static class MapStatsAggregator
             .ToList();
     }
 
+    public static MapStatEntry BuildOverall(IReadOnlyList<MatchStatInput> inputs)
+    {
+        if (inputs.Count == 0)
+            return new MapStatEntry { Map = OverallMap };
+
+        var entry = BuildEntry(inputs);
+        entry.Map = OverallMap;
+        return entry;
+    }
+
     private static MapStatEntry BuildEntry(IReadOnlyList<MatchStatInput> matches)
     {
         var games = matches.Count;
         var wins = matches.Count(m => m.Won);
 
-        // GPM is an aggregate rate over the gold-bearing games only: total gold
-        // earned divided by total minutes played. Null when no game carries gold.
-        var goldGames = matches.Where(m => m.GoldEarned.HasValue && m.DurationSeconds > 0).ToList();
-        var totalMinutes = goldGames.Sum(m => m.DurationSeconds / 60.0);
-        double? avgGpm =
-            goldGames.Count > 0 && totalMinutes > 0
-                ? goldGames.Sum(m => m.GoldEarned!.Value) / totalMinutes
-                : null;
+        // Per-minute rates (GPM/XPM/DPM) are aggregate rates over the games that
+        // actually carry the relevant breakdown: total value divided by total
+        // minutes played in those games. Each field has its own denominator —
+        // nulls are skipped from both numerator and minutes. Null when no game
+        // carries the breakdown. Zero-duration games are excluded to avoid
+        // divide-by-zero.
+        var avgGpm = PerMinuteRate(matches, m => m.GoldEarned);
+        var avgXpm = PerMinuteRate(matches, m => m.Experience);
+        var avgDpm = PerMinuteRate(matches, m => m.HeroDamage);
 
         return new MapStatEntry
         {
@@ -138,9 +115,25 @@ public static class MapStatsAggregator
             AvgAssists = games > 0 ? matches.Sum(m => m.Assists) / (double)games : 0,
             AvgWards = games > 0 ? matches.Sum(m => m.WardsPlaced) / (double)games : 0,
             AvgGPM = avgGpm,
+            AvgXPM = avgXpm,
+            AvgDPM = avgDpm,
             Wins = wins,
-            WinRate = games > 0 ? wins * 100.0 / games : 0,
+            WinRate = games > 0 ? (double)wins / games : 0,
         };
+    }
+
+    private static double? PerMinuteRate(
+        IReadOnlyList<MatchStatInput> matches,
+        Func<MatchStatInput, int?> selector
+    )
+    {
+        var bearingGames = matches
+            .Where(m => selector(m).HasValue && m.DurationSeconds > 0)
+            .ToList();
+        var minutes = bearingGames.Sum(m => m.DurationSeconds / 60.0);
+        return bearingGames.Count > 0 && minutes > 0
+            ? bearingGames.Sum(m => selector(m)!.Value) / minutes
+            : null;
     }
 }
 

@@ -17,11 +17,9 @@ public sealed class RebuildHeroBuildsHandler(IInsightsRawQuery raw, IInsightsAgg
 
         foreach (var heroId in heroIds)
         {
-            var inputs = await raw.GetHeroItemInputsAsync(accountId, heroId, ct);
+            var inputs = await raw.GetHeroItemInputsAsync(accountId, heroId, ct: ct);
             var entries = HeroBuildAggregator.Build(inputs);
             await store.ReplaceHeroBuildsAsync(accountId, heroId, entries, ct);
-            var pairs = HeroItemPairAggregator.Build(inputs);
-            await store.ReplaceHeroItemPairsAsync(accountId, heroId, pairs, ct);
         }
     }
 }
@@ -36,7 +34,7 @@ public sealed class RebuildTeammatesHandler(
     public async Task HandleAsync(PlayerMatchesIndexed @event, CancellationToken ct = default)
     {
         var accountId = @event.AccountId;
-        var inputs = await raw.GetTeammateInputsAsync(accountId, ct);
+        var inputs = await raw.GetTeammateInputsAsync(accountId, ct: ct);
         var aggregates = TeammateAggregator.Build(inputs);
 
         var ids = aggregates.Select(a => a.TeammateAccountId).ToList();

@@ -3,6 +3,7 @@ using System;
 using HonStats.Infra.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HonStats.Infra.Migrations
 {
     [DbContext(typeof(HonStatsDbContext))]
-    partial class HonStatsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260627194924_AddMatchRosterExperienceAndHeroDamage")]
+    partial class AddMatchRosterExperienceAndHeroDamage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
@@ -42,6 +45,33 @@ namespace HonStats.Infra.Migrations
                     b.HasIndex("AccountId", "HeroId");
 
                     b.ToTable("hero_builds", (string)null);
+                });
+
+            modelBuilder.Entity("HonStats.Domain.Insights.HeroItemPair", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("HeroId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ItemA")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ItemB")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Frequency")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Games")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("AccountId", "HeroId", "ItemA", "ItemB");
+
+                    b.HasIndex("AccountId", "HeroId");
+
+                    b.ToTable("hero_item_pairs", (string)null);
                 });
 
             modelBuilder.Entity("HonStats.Domain.Insights.IndexedPlayer", b =>

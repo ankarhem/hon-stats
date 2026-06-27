@@ -8,9 +8,11 @@ using HonStats.Domain.Insights;
 using HonStats.Domain.Matches;
 using HonStats.Domain.Players;
 using HonStats.Domain.ReferenceData;
+using HonStats.Infra.Insights;
 using Htmx;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 
 namespace HonStats.Web.Pages;
 
@@ -18,11 +20,13 @@ public class ProfileModel(
     IPlayerProfileQuery profiles,
     IMatchQuery matches,
     IPlayerInsightsQuery insights,
+    IInsightsRawQuery rawQuery,
     IReferenceDataQuery reference,
     IPlayerNameResolver nameResolver,
     IPlayerSearch playerSearch,
     IReindexQueue queue,
-    IIndexProgressTracker progressTracker
+    IIndexProgressTracker progressTracker,
+    IOptions<TierTimingOptions> tierTiming
 ) : PageModel
 {
     public const int PageSize = 25;
@@ -41,12 +45,18 @@ public class ProfileModel(
     public bool HasMoreTeammates { get; set; }
     public IReadOnlyDictionary<int, int> HeroGames { get; set; } = new Dictionary<int, int>();
     public IReadOnlyList<HeroBuildEntry> HeroBuild { get; set; } = [];
-    public IReadOnlyList<HeroItemPairEntry> HeroItemPairs { get; set; } = [];
     public IReadOnlyList<ItemTimingEntry> HeroItemTiming { get; set; } = [];
     public IReadOnlyList<MapStatEntry> MapStats { get; set; } = [];
     public MapStatEntry? MapOverview { get; set; }
     public Dictionary<int, Item> Items { get; set; } = new();
     public int SelectedHeroId { get; set; }
+    public IReadOnlyList<LoadoutEntry> Loadouts { get; set; } = [];
+
+    // Tier time-thresholds exposed for the Razor view so it can call
+    // GuideTierClassifier.ClassifyByTime. Sourced from IOptions<TierTimingOptions>
+    // (config section HonStats:Insights:TierTiming).
+    public int EarlyCutoffMinutes => tierTiming.Value.EarlyCutoffMinutes;
+    public int LateCutoffMinutes => tierTiming.Value.LateCutoffMinutes;
 
     public async Task<IActionResult> OnGet(
         string username,
@@ -68,25 +78,32 @@ public class ProfileModel(
         this.Indexed = await insights.GetIndexedPlayerAsync(this.AccountId, ct);
         this.Heroes = (await reference.GetHeroesAsync(ct)).ToDictionary(h => h.Id);
 
-        // The juvio overview drives the header (always, on full page) and the "All"
-        // stats view (it carries XPM, which indexed data lacks). Specific-map views
-        // are served purely from indexed data, so skip the juvio fetch for those HTMX
-        // swaps. "all" needs juvio even on HTMX, hence the disjunction.
-        if (!Request.IsHtmx() || map == "all")
+        // The juvio overview drives the header only (name, rank, matches played),
+        // which renders solely on full page load — HTMX swaps never touch it.
+        if (!Request.IsHtmx())
         {
             this.Profile = await profiles.GetAsync(this.AccountId, ct);
         }
 
-        // Map stats feed the per-map selector on the stats panel (always visible), so
-        // load them unconditionally. MapOverview is the single entry for the selected
-        // map, used by _ProfileStats to render per-map numbers.
+        // Stats panel numbers now come entirely from indexed data. "all" aggregates
+        // every map into a single entry; a specific map picks its row. MapStats is
+        // loaded unconditionally to feed the per-map game-count summary.
         this.MapStats = await insights.GetMapStatsAsync(this.AccountId, ct);
-        this.MapOverview = map != "all" ? this.MapStats.FirstOrDefault(e => e.Map == map) : null;
+        this.MapOverview =
+            this.SelectedMap == "all"
+                ? await insights.GetOverallStatsAsync(this.AccountId, ct)
+                : this.MapStats.FirstOrDefault(e => e.Map == this.SelectedMap);
 
         switch (tab)
         {
             case "teammates":
-                this.Teammates = await insights.GetTeammatesAsync(this.AccountId, PageSize, 0, ct);
+                this.Teammates = await insights.GetTeammatesAsync(
+                    this.AccountId,
+                    PageSize,
+                    0,
+                    this.SelectedMap == "all" ? null : this.SelectedMap,
+                    ct
+                );
                 this.HasMoreTeammates = this.Teammates.Count == PageSize;
                 break;
             case "heroBuilds":
@@ -101,12 +118,7 @@ public class ProfileModel(
                     this.HeroBuild = await insights.GetHeroBuildAsync(
                         this.AccountId,
                         this.SelectedHeroId,
-                        ct
-                    );
-                    this.HeroItemPairs = await insights.GetHeroItemPairsAsync(
-                        this.AccountId,
-                        this.SelectedHeroId,
-                        10,
+                        this.SelectedMap == "all" ? null : this.SelectedMap,
                         ct
                     );
                     this.HeroItemTiming = await insights.GetHeroItemTimingAsync(
@@ -114,25 +126,44 @@ public class ProfileModel(
                         this.SelectedHeroId,
                         ct
                     );
+                    var itemInputs = await rawQuery.GetHeroItemInputsAsync(
+                        this.AccountId,
+                        this.SelectedHeroId,
+                        this.SelectedMap == "all" ? null : this.SelectedMap,
+                        ct
+                    );
+                    this.Loadouts = LoadoutAggregator.Build(itemInputs, ResolveConsumableItemIds());
                 }
                 break;
             default:
                 this.Tab = "matches";
-                this.RecentMatches = await matches.GetRecentForPlayerAsync(
+                var fetched = await matches.GetRecentForPlayerAsync(
                     this.AccountId,
                     PageSize,
                     0,
                     ct
                 );
-                this.HasMoreMatches = this.RecentMatches.Count == PageSize;
+                // The juvio match query has no server-side map filter, so filter
+                // post-fetch. HasMore reflects the unfiltered page so pagination
+                // keeps walking the full history across sparse per-map slices.
+                this.RecentMatches =
+                    this.SelectedMap == "all"
+                        ? fetched
+                        : fetched.Where(m => m.Map == this.SelectedMap).ToList();
+                this.HasMoreMatches = fetched.Count == PageSize;
                 break;
         }
 
         if (Request.IsHtmx())
         {
-            return Request.Headers["HX-Target"] == "profile-stats"
-                ? Partial("_ProfileStats", this)
-                : Partial("_ProfileRegion", this);
+            // Map pills target #profile-context (stats + region together); tab pills
+            // and hero-picker chips target #profile-region. Default to the region.
+            var target = Request.Headers["HX-Target"].ToString();
+            return target switch
+            {
+                "profile-context" => Partial("_ProfileContext", this),
+                _ => Partial("_ProfileRegion", this),
+            };
         }
         return Page();
     }
@@ -140,27 +171,57 @@ public class ProfileModel(
     public async Task<IActionResult> OnGetMatchesMore(
         Guid accountId,
         int offset,
+        string? map = null,
         CancellationToken ct = default
     )
     {
-        var recent = await matches.GetRecentForPlayerAsync(accountId, PageSize, offset, ct);
+        var fetched = await matches.GetRecentForPlayerAsync(accountId, PageSize, offset, ct);
         var heroes = (await reference.GetHeroesAsync(ct)).ToDictionary(h => h.Id);
+        // Post-fetch map filter mirrors OnGet: the juvio query has no server-side
+        // map param. SelectedMap is threaded into the view so row partials can carry
+        // &map= in their own pagination URLs (Wired by T-UI-ROWS).
+        var selectedMap = string.IsNullOrEmpty(map) ? "all" : map;
+        var recent =
+            selectedMap == "all" ? fetched : fetched.Where(m => m.Map == selectedMap).ToList();
         return Partial(
             "_MatchesRows",
-            new MatchesView(accountId, recent, heroes, offset, PageSize, recent.Count == PageSize)
+            new MatchesView(
+                accountId,
+                recent,
+                heroes,
+                offset,
+                PageSize,
+                fetched.Count == PageSize,
+                selectedMap
+            )
         );
     }
 
     public async Task<IActionResult> OnGetTeammatesMore(
         Guid accountId,
         int offset,
+        string? map = null,
         CancellationToken ct = default
     )
     {
-        var teammates = await insights.GetTeammatesAsync(accountId, PageSize, offset, ct);
+        var selectedMap = string.IsNullOrEmpty(map) ? "all" : map;
+        var teammates = await insights.GetTeammatesAsync(
+            accountId,
+            PageSize,
+            offset,
+            selectedMap == "all" ? null : selectedMap,
+            ct
+        );
         return Partial(
             "_TeammatesRows",
-            new TeammatesView(accountId, teammates, offset, PageSize, teammates.Count == PageSize)
+            new TeammatesView(
+                accountId,
+                teammates,
+                offset,
+                PageSize,
+                teammates.Count == PageSize,
+                selectedMap
+            )
         );
     }
 
@@ -199,6 +260,16 @@ public class ProfileModel(
         );
     }
 
+    // Consumable item ids used to strip potions/runes/etc. from final-inventory
+    // loadouts. Derived from the same reference fetch that populates Items, so this
+    // is only valid after the heroBuilds tab has loaded Items. Opaque to the
+    // LoadoutAggregator, which just treats it as an exclusion set.
+    private ISet<int> ResolveConsumableItemIds() =>
+        this
+            .Items.Values.Where(i => i.ShopCategories.Contains("consumable"))
+            .Select(i => i.Id)
+            .ToHashSet();
+
     public static string Flag(string? country)
     {
         if (string.IsNullOrEmpty(country) || country.Length != 2)
@@ -235,7 +306,8 @@ public record MatchesView(
     Dictionary<int, Hero> Heroes,
     int Offset,
     int PageSize,
-    bool HasMore
+    bool HasMore,
+    string SelectedMap = "all"
 );
 
 public record TeammatesView(
@@ -243,7 +315,8 @@ public record TeammatesView(
     IReadOnlyList<TeammateStat> Teammates,
     int Offset,
     int PageSize,
-    bool HasMore
+    bool HasMore,
+    string SelectedMap = "all"
 );
 
 public record MatchDetailView(

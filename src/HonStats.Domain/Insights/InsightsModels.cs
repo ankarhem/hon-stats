@@ -47,13 +47,15 @@ public sealed class MatchRoster
 
     // Per-game gold breakdown (feeds per-map GPM). Nullable/forward-only: rows
     // ingested before these columns existed stay null.
-    public int? GoldFromCreeps { get; set; }
-    public int? GoldFromNeutrals { get; set; }
-    public int? GoldFromKills { get; set; }
+    public int? DeathGoldLost { get; set; }
+    public int? Experience { get; set; }
     public int? GoldFromAssists { get; set; }
     public int? GoldFromBuildings { get; set; }
+    public int? GoldFromCreeps { get; set; }
+    public int? GoldFromKills { get; set; }
+    public int? GoldFromNeutrals { get; set; }
+    public int? HeroDamage { get; set; }
     public int? StartingGold { get; set; }
-    public int? DeathGoldLost { get; set; }
 }
 
 // Persisted aggregate: item frequency + wins for a (player, hero).
@@ -64,17 +66,6 @@ public sealed class HeroBuild
     public int ItemId { get; set; }
     public int Frequency { get; set; }
     public int Wins { get; set; }
-    public int Games { get; set; }
-}
-
-// Persisted aggregate: item co-occurrence (bought together) for a (player, hero).
-public sealed class HeroItemPair
-{
-    public Guid AccountId { get; set; }
-    public int HeroId { get; set; }
-    public int ItemA { get; set; }
-    public int ItemB { get; set; }
-    public int Frequency { get; set; }
     public int Games { get; set; }
 }
 

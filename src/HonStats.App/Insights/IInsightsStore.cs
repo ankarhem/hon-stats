@@ -10,11 +10,13 @@ public interface IInsightsRawQuery
     Task<IReadOnlyList<MatchItemInput>> GetHeroItemInputsAsync(
         Guid accountId,
         int heroId,
+        string? map = null,
         CancellationToken ct = default
     );
 
     Task<IReadOnlyList<MatchTeammateInput>> GetTeammateInputsAsync(
         Guid accountId,
+        string? map = null,
         CancellationToken ct = default
     );
 }
@@ -26,13 +28,6 @@ public interface IInsightsAggregateStore
         Guid accountId,
         int heroId,
         IReadOnlyList<HeroBuildEntry> entries,
-        CancellationToken ct = default
-    );
-
-    Task ReplaceHeroItemPairsAsync(
-        Guid accountId,
-        int heroId,
-        IReadOnlyList<HeroItemPairEntry> entries,
         CancellationToken ct = default
     );
 
