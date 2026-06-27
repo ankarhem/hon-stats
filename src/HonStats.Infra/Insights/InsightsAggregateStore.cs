@@ -37,6 +37,35 @@ internal sealed class InsightsAggregateStore(IDbContextFactory<HonStatsDbContext
         await db.SaveChangesAsync(ct);
     }
 
+    public async Task ReplaceHeroItemPairsAsync(
+        Guid accountId,
+        int heroId,
+        IReadOnlyList<HeroItemPairEntry> entries,
+        CancellationToken ct = default
+    )
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        var existing = db.HeroItemPairs.Where(h => h.AccountId == accountId && h.HeroId == heroId);
+        db.HeroItemPairs.RemoveRange(existing);
+
+        foreach (var entry in entries)
+        {
+            db.HeroItemPairs.Add(
+                new HeroItemPair
+                {
+                    AccountId = accountId,
+                    HeroId = heroId,
+                    ItemA = entry.ItemA,
+                    ItemB = entry.ItemB,
+                    Frequency = entry.Frequency,
+                    Games = entry.Games,
+                }
+            );
+        }
+
+        await db.SaveChangesAsync(ct);
+    }
+
     public async Task ReplaceTeammatesAsync(
         Guid accountId,
         IReadOnlyList<Teammate> teammates,

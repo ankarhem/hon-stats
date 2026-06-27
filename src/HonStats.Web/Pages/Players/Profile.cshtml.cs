@@ -40,6 +40,7 @@ public class ProfileModel(
     public bool HasMoreTeammates { get; set; }
     public IReadOnlyDictionary<int, int> HeroGames { get; set; } = new Dictionary<int, int>();
     public IReadOnlyList<HeroBuildEntry> HeroBuild { get; set; } = [];
+    public IReadOnlyList<HeroItemPairEntry> HeroItemPairs { get; set; } = [];
     public Dictionary<int, Item> Items { get; set; } = new();
     public int SelectedHeroId { get; set; }
 
@@ -84,6 +85,12 @@ public class ProfileModel(
                     this.HeroBuild = await insights.GetHeroBuildAsync(
                         this.AccountId,
                         this.SelectedHeroId,
+                        ct
+                    );
+                    this.HeroItemPairs = await insights.GetHeroItemPairsAsync(
+                        this.AccountId,
+                        this.SelectedHeroId,
+                        10,
                         ct
                     );
                 }

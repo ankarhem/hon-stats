@@ -13,6 +13,7 @@ public sealed class HonStatsDbContext(DbContextOptions<HonStatsDbContext> option
     public DbSet<MatchRoster> MatchRoster => this.Set<MatchRoster>();
     public DbSet<MatchPlayerItem> MatchPlayerItems => this.Set<MatchPlayerItem>();
     public DbSet<HeroBuild> HeroBuilds => this.Set<HeroBuild>();
+    public DbSet<HeroItemPair> HeroItemPairs => this.Set<HeroItemPair>();
     public DbSet<Teammate> Teammates => this.Set<Teammate>();
     public DbSet<Player> Players => this.Set<Player>();
 

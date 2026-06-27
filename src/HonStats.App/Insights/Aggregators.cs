@@ -65,3 +65,39 @@ public static class TeammateAggregator
             .ToList();
     }
 }
+
+public static class HeroItemPairAggregator
+{
+    public static IReadOnlyList<HeroItemPairEntry> Build(IReadOnlyList<MatchItemInput> inputs)
+    {
+        if (inputs.Count == 0)
+            return [];
+
+        var frequency = new Dictionary<(int ItemA, int ItemB), int>();
+        foreach (var input in inputs)
+        {
+            var distinct = input.ItemIds.Distinct().OrderBy(id => id).ToList();
+            for (var i = 0; i < distinct.Count; i++)
+            {
+                for (var j = i + 1; j < distinct.Count; j++)
+                {
+                    var pair = (distinct[i], distinct[j]);
+                    frequency[pair] = frequency.TryGetValue(pair, out var count) ? count + 1 : 1;
+                }
+            }
+        }
+
+        return frequency
+            .Select(kv => new HeroItemPairEntry
+            {
+                ItemA = kv.Key.ItemA,
+                ItemB = kv.Key.ItemB,
+                Frequency = kv.Value,
+                Games = inputs.Count,
+            })
+            .OrderByDescending(entry => entry.Frequency)
+            .ThenBy(entry => entry.ItemA)
+            .ThenBy(entry => entry.ItemB)
+            .ToList();
+    }
+}

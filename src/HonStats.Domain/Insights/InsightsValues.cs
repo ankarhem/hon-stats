@@ -9,6 +9,16 @@ public sealed class HeroBuildEntry
     public int Games { get; set; }
 }
 
+// Read model: how often two items co-occur (bought together) across a player+hero's
+// matches. Canonicalized so ItemA < ItemB (no ordered/ self pairs).
+public sealed class HeroItemPairEntry
+{
+    public int ItemA { get; set; }
+    public int ItemB { get; set; }
+    public int Frequency { get; set; }
+    public int Games { get; set; }
+}
+
 // Read model: a teammate row enriched with display info (resolved via getuserinfo).
 public sealed class TeammateStat
 {

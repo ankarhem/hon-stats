@@ -20,6 +20,8 @@ public sealed class RebuildHeroBuildsHandler(IInsightsRawQuery raw, IInsightsAgg
             var inputs = await raw.GetHeroItemInputsAsync(accountId, heroId, ct);
             var entries = HeroBuildAggregator.Build(inputs);
             await store.ReplaceHeroBuildsAsync(accountId, heroId, entries, ct);
+            var pairs = HeroItemPairAggregator.Build(inputs);
+            await store.ReplaceHeroItemPairsAsync(accountId, heroId, pairs, ct);
         }
     }
 }

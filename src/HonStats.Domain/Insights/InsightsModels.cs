@@ -67,6 +67,17 @@ public sealed class HeroBuild
     public int Games { get; set; }
 }
 
+// Persisted aggregate: item co-occurrence (bought together) for a (player, hero).
+public sealed class HeroItemPair
+{
+    public Guid AccountId { get; set; }
+    public int HeroId { get; set; }
+    public int ItemA { get; set; }
+    public int ItemB { get; set; }
+    public int Frequency { get; set; }
+    public int Games { get; set; }
+}
+
 // Persisted aggregate: co-occurrence for a (player, teammate).
 public sealed class Teammate
 {

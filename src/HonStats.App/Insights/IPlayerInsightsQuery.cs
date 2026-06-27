@@ -19,6 +19,13 @@ public interface IPlayerInsightsQuery
         CancellationToken ct = default
     );
 
+    Task<IReadOnlyList<HeroItemPairEntry>> GetHeroItemPairsAsync(
+        Guid accountId,
+        int heroId,
+        int limit,
+        CancellationToken ct = default
+    );
+
     Task<IReadOnlyDictionary<int, int>> GetHeroGamesAsync(
         Guid accountId,
         CancellationToken ct = default

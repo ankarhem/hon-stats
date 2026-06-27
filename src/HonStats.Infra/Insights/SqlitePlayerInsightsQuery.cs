@@ -73,6 +73,32 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
             .ToList();
     }
 
+    public async Task<IReadOnlyList<HeroItemPairEntry>> GetHeroItemPairsAsync(
+        Guid accountId,
+        int heroId,
+        int limit,
+        CancellationToken ct = default
+    )
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        var rows = await db
+            .HeroItemPairs.Where(h => h.AccountId == accountId && h.HeroId == heroId)
+            .OrderByDescending(h => h.Frequency)
+            .ThenBy(h => h.ItemA)
+            .ThenBy(h => h.ItemB)
+            .Take(limit)
+            .ToListAsync(ct);
+
+        return rows.Select(h => new HeroItemPairEntry
+            {
+                ItemA = h.ItemA,
+                ItemB = h.ItemB,
+                Frequency = h.Frequency,
+                Games = h.Games,
+            })
+            .ToList();
+    }
+
     public async Task<IReadOnlyDictionary<int, int>> GetHeroGamesAsync(
         Guid accountId,
         CancellationToken ct = default

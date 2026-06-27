@@ -29,6 +29,13 @@ public interface IInsightsAggregateStore
         CancellationToken ct = default
     );
 
+    Task ReplaceHeroItemPairsAsync(
+        Guid accountId,
+        int heroId,
+        IReadOnlyList<HeroItemPairEntry> entries,
+        CancellationToken ct = default
+    );
+
     Task ReplaceTeammatesAsync(
         Guid accountId,
         IReadOnlyList<Teammate> teammates,
