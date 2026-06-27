@@ -4,14 +4,15 @@
     // the header (stats + active tab) in one shot. Each pill carries the current
     // tab so a map switch preserves the open section.
     var maps = new[] { ("all", "All"), ("ForestsOfCaldavar", "Forests of Caldavar"), ("MidWars", "Mid Wars") };
+    var heroParam = Model.SelectedHeroId > 0 ? $"&heroId={Model.SelectedHeroId}" : "";
 }
 <nav class="map-selector" aria-label="Map filter">
     @foreach (var (value, label) in maps)
     {
         var active = Model.SelectedMap == value;
-        <a class="map-pill"
-           href="?map=@value&tab=@Model.Tab"
-           hx-get="?map=@value&tab=@Model.Tab"
+        <a class="pill"
+           href="?map=@value&tab=@Model.Tab@heroParam"
+           hx-get="?map=@value&tab=@Model.Tab@heroParam"
            hx-target="#profile-context" hx-swap="innerHTML" hx-push-url="true"
            aria-current="@(active ? "true" : null)">
             @label

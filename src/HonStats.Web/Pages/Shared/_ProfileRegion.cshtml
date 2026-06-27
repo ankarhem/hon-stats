@@ -227,8 +227,8 @@
                                 var item = itemsById.GetValueOrDefault(entry.ItemId);
                                 var iconUrl = item?.IconUrl ?? $"https://gamestorage.juvio.com/items/{entry.ItemId}/icon.webp";
                                 var itemCost = item?.TotalCost ?? 0;
-                                var pickPct = games > 0 ? entry.Frequency * 100 / games : 0;
-                                int? winPct = entry.Frequency > 0 ? entry.Wins * 100 / entry.Frequency : null;
+                                var pickPct = games > 0 ? entry.Frequency * 100.0 / games : 0;
+                                double? winPct = entry.Frequency > 0 ? entry.Wins * 100.0 / entry.Frequency : null;
                                 var boughtAt = timingByItem.TryGetValue(entry.ItemId, out var timing)
                                     ? ProfileModel.FormatBuyTime(timing.AvgSeconds)
                                     : "—";
@@ -238,7 +238,7 @@
                                     <div class="grid-list__cost">@itemCost.ToString("N0")g</div>
                                     <div class="grid-list__meta">
                                         <span>Bought: @entry.Frequency/@games games (@pickPct%)</span>
-                                        <br /><span>Win Rate: @(winPct ?? 0)%</span>
+                                        <br /><span>Win Rate: @(winPct.HasValue ? winPct.Value.ToString("0") + "%" : "—")</span>
                                         <br /><span class="mbt" title="Mean Buy Time: @boughtAt">MBT @boughtAt</span>
                                     </div>
                                 </li>

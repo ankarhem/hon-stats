@@ -225,8 +225,8 @@ internal sealed class JuvioPlayerInsightsIndexer(
                         GoldFromBuildings = player.GoldFromBuildings,
                         StartingGold = player.StartingGold,
                         DeathGoldLost = player.DeathGoldLost,
-                        Experience = (int?)player.Experience,
-                        HeroDamage = player.HeroDamage,
+                        Experience = player.Experience > 0 ? (int?)player.Experience : null,
+                        HeroDamage = player.HeroDamage > 0 ? player.HeroDamage : null,
                     }
                 );
                 var slot = 0;
