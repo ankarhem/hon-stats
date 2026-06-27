@@ -130,8 +130,9 @@
                                     <div class="grid-list__name">@(item?.DisplayName ?? ("Item " + entry.ItemId))</div>
                                     <div class="grid-list__cost">@itemCost.ToString("N0")g</div>
                                     <div class="grid-list__meta">
-                                        @entry.Frequency/@games · @pickPct% · @(winPct.HasValue ? $"{winPct}% win" : "—")
-                                        <br /><span class="muted">avg @boughtAt</span>
+                                        <span>Bought: @entry.Frequency/@games games (@pickPct%)</span>
+                                        <br /><span>Win Rate: @(winPct ?? 0)%</span>
+                                        <br /><span class="mbt" title="Mean Buy Time: @boughtAt">MBT @boughtAt</span>
                                     </div>
                                 </li>
                             }
