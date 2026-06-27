@@ -103,13 +103,10 @@ internal sealed class JuvioPlayerInsightsIndexer(
         progressTracker.Start(accountId, newGameIds.Count);
         await this.IngestSummariesAsync(db, accountId, newGameIds, ct);
 
-        var resolved = await names.ResolveAsync(new[] { accountId }, ct);
-        if (resolved.TryGetValue(accountId, out var name))
-        {
-            indexed.Username = name.Username;
-            indexed.DisplayName = name.DisplayName;
-            indexed.Country = name.Country;
-        }
+        // Resolve the player's name to write-through into the players table (the
+        // LocalFirstPlayerNameResolver). The result is not assigned to
+        // indexed_players — name columns were dropped; players is the single source.
+        await names.ResolveAsync(new[] { accountId }, ct);
         if (newGameIds.Count > 0)
             indexed.LastIndexedMatchId = newGameIds.Max();
         indexed.IndexedAt = DateTimeOffset.UtcNow;

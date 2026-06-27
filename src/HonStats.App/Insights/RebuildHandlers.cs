@@ -38,22 +38,18 @@ public sealed class RebuildTeammatesHandler(
         var aggregates = TeammateAggregator.Build(inputs);
 
         var ids = aggregates.Select(a => a.TeammateAccountId).ToList();
-        var resolved = await names.ResolveAsync(ids, ct);
+        // Resolve teammate names to write-through into the players table (the
+        // LocalFirstPlayerNameResolver). Teammate rows no longer carry
+        // names — they JOIN players at read time.
+        await names.ResolveAsync(ids, ct);
 
         var rows = aggregates
-            .Select(a =>
+            .Select(a => new Teammate
             {
-                resolved.TryGetValue(a.TeammateAccountId, out var name);
-                return new Teammate
-                {
-                    AccountId = accountId,
-                    TeammateAccountId = a.TeammateAccountId,
-                    GamesTogether = a.GamesTogether,
-                    WinsTogether = a.WinsTogether,
-                    DisplayName = name?.DisplayName,
-                    Username = name?.Username,
-                    Country = name?.Country,
-                };
+                AccountId = accountId,
+                TeammateAccountId = a.TeammateAccountId,
+                GamesTogether = a.GamesTogether,
+                WinsTogether = a.WinsTogether,
             })
             .ToList();
 

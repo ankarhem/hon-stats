@@ -2,9 +2,7 @@ using System.Threading.Channels;
 using HonStats.App.Events;
 using HonStats.App.Indexing;
 using HonStats.App.Insights;
-using HonStats.App.Players;
 using HonStats.Domain.Events;
-using HonStats.Infra.Juvio.Adapters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,7 +19,6 @@ public static class InsightsServiceCollectionExtensions
 
         services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddSingleton<IIndexProgressTracker, IndexProgressTracker>();
-        services.AddScoped<IPlayerNameResolver, JuvioPlayerNameResolver>();
         services.AddScoped<IInsightsRawQuery, InsightsRawQuery>();
         services.AddScoped<IInsightsAggregateStore, InsightsAggregateStore>();
         services.AddScoped<IPlayerInsightsQuery, SqlitePlayerInsightsQuery>();

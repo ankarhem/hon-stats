@@ -25,24 +25,30 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
     )
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
-        var rows = await db
-            .Teammates.Where(t => t.AccountId == accountId)
-            .OrderByDescending(t => t.GamesTogether)
-            .ThenBy(t => t.TeammateAccountId)
+
+        // LEFT JOIN players on TeammateAccountId — names now live in the single
+        // source-of-truth players table. players.AccountId is a PK, so each
+        // teammate matches at most one row; pagination is unaffected by the join.
+        var rows = await (
+            from t in db.Teammates
+            where t.AccountId == accountId
+            orderby t.GamesTogether descending, t.TeammateAccountId
+            from p in db.Players.Where(p => p.AccountId == t.TeammateAccountId).DefaultIfEmpty()
+            select new TeammateStat
+            {
+                TeammateAccountId = t.TeammateAccountId,
+                DisplayName = p.DisplayName,
+                Username = p.Username,
+                Country = p.Country,
+                GamesTogether = t.GamesTogether,
+                WinsTogether = t.WinsTogether,
+            }
+        )
             .Skip(offset)
             .Take(limit)
             .ToListAsync(ct);
 
-        return rows.Select(r => new TeammateStat
-            {
-                TeammateAccountId = r.TeammateAccountId,
-                DisplayName = r.DisplayName,
-                Username = r.Username,
-                Country = r.Country,
-                GamesTogether = r.GamesTogether,
-                WinsTogether = r.WinsTogether,
-            })
-            .ToList();
+        return rows;
     }
 
     public async Task<IReadOnlyList<HeroBuildEntry>> GetHeroBuildAsync(

@@ -13,9 +13,6 @@ public enum IndexingStatus
 public sealed class IndexedPlayer
 {
     public Guid AccountId { get; set; }
-    public string? Username { get; set; }
-    public string? DisplayName { get; set; }
-    public string? Country { get; set; }
     public long? LastIndexedMatchId { get; set; }
     public DateTimeOffset? LastReindexAt { get; set; }
     public DateTimeOffset? IndexedAt { get; set; }
@@ -66,7 +63,4 @@ public sealed class Teammate
     public Guid TeammateAccountId { get; set; }
     public int GamesTogether { get; set; }
     public int WinsTogether { get; set; }
-    public string? DisplayName { get; set; }
-    public string? Username { get; set; }
-    public string? Country { get; set; }
 }

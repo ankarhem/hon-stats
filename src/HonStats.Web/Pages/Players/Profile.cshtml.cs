@@ -50,11 +50,11 @@ public class ProfileModel(
         CancellationToken ct = default
     )
     {
-        var searchResults = await playerSearch.SearchAsync(username, ct);
-        if (searchResults.Count == 0)
+        var results = await playerSearch.SearchAsync(username, ct);
+        if (results.Count == 0)
             return NotFound();
 
-        this.AccountId = searchResults[0].AccountId;
+        this.AccountId = results[0].AccountId;
         this.Username = username;
         this.Tab = tab;
 

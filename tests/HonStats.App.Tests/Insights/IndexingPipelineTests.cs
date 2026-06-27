@@ -8,6 +8,7 @@ using HonStats.Domain.Insights;
 using HonStats.Domain.Matches;
 using HonStats.Infra.Insights;
 using HonStats.Infra.Persistence;
+using HonStats.Infra.Players;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -66,7 +67,11 @@ public class IndexingPipelineTests
             services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildHeroBuildsHandler>();
             services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
             services.AddSingleton<IMatchQuery>(matchQuery);
-            services.AddSingleton<IPlayerNameResolver>(nameResolver);
+            services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
+            services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
+                nameResolver,
+                sp.GetRequiredService<IPlayerNameStore>()
+            ));
             var sp = services.BuildServiceProvider();
 
             await using (
@@ -86,7 +91,6 @@ public class IndexingPipelineTests
             var indexed = await query.GetIndexedPlayerAsync(PlayerA);
             indexed.Should().NotBeNull();
             indexed!.Status.Should().Be(IndexingStatus.Indexed);
-            indexed.Username.Should().Be("alpha");
 
             var build = await query.GetHeroBuildAsync(PlayerA, Hero);
             build

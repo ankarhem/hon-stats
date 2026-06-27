@@ -5,11 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HonStats.Infra.PlayerSearch;
 
-// Loads the full named-player corpus from SQLite: every teammate with a usable name
-// (the teammate's own account id + resolved name) UNION ALL every indexed player
-// with a usable name. The corpus feeds PlayerNameMatcher. Stateless and singleton —
-// depends only on the singleton IDbContextFactory, so injecting it into the singleton
-// seed service is safe (no captive-dependency).
+// Loads the full named-player corpus from the players table (the single source of
+// truth for player names). Feeds PlayerNameMatcher. Stateless and singleton —
+// depends only on the singleton IDbContextFactory, so injecting it into the
+// singleton seed service is safe (no captive-dependency).
 internal sealed class SqlitePlayerCorpusQuery(IDbContextFactory<HonStatsDbContext> dbFactory)
     : IPlayerCorpusQuery
 {
@@ -19,41 +18,24 @@ internal sealed class SqlitePlayerCorpusQuery(IDbContextFactory<HonStatsDbContex
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
 
-        // Project anonymously on the server (UNION ALL via Concat) — do NOT project
-        // directly into the Domain PlayerCorpusEntry in the SQL-translated query.
-        // Teammate.TeammateAccountId is the player's own id; Teammate.AccountId is the
-        // profile the teammate row belongs to, which is NOT the name we want to index.
         var rows = await db
-            .Teammates.Where(t =>
-                (t.Username != null && t.Username != "")
-                || (t.DisplayName != null && t.DisplayName != "")
+            .Players.Where(p =>
+                (p.Username != null && p.Username != "")
+                || (p.DisplayName != null && p.DisplayName != "")
             )
-            .Select(t => new
+            .Select(p => new
             {
-                AccountId = t.TeammateAccountId,
-                t.Username,
-                t.DisplayName,
+                p.AccountId,
+                p.Username,
+                p.DisplayName,
             })
-            .Concat(
-                db.IndexedPlayers.Where(p =>
-                        (p.Username != null && p.Username != "")
-                        || (p.DisplayName != null && p.DisplayName != "")
-                    )
-                    .Select(p => new
-                    {
-                        p.AccountId,
-                        p.Username,
-                        p.DisplayName,
-                    })
-            )
             .ToListAsync(ct);
 
-        return rows.DistinctBy(x => x.AccountId)
-            .Select(x => new PlayerCorpusEntry
+        return rows.Select(p => new PlayerCorpusEntry
             {
-                AccountId = x.AccountId,
-                Username = x.Username,
-                DisplayName = x.DisplayName,
+                AccountId = p.AccountId,
+                Username = p.Username,
+                DisplayName = p.DisplayName,
             })
             .ToList();
     }

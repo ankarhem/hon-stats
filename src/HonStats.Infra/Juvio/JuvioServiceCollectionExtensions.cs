@@ -1,7 +1,7 @@
 using HonStats.App.Matches;
 using HonStats.App.Players;
 using HonStats.Infra.Juvio.Adapters;
-using Microsoft.Extensions.Caching.Memory;
+using HonStats.Infra.Players;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
@@ -55,17 +55,20 @@ public static class JuvioServiceCollectionExtensions
             .AddPolicyHandler(retry)
             .AddHttpMessageHandler<AuthenticatingHandler>();
 
-        services.AddMemoryCache();
-
+        // Local-first resolution: players is the persistent, write-through cache
+        // (survives restarts), so there is no in-memory cache layer. Both ports
+        // read players first and fall back to juvio only for misses, write-
+        // through'ing the results. The concrete juvio impls are registered so the
+        // local-first decorators can inject them directly.
+        services.AddScoped<JuvioPlayerSearch>();
         services.AddScoped<JuvioPlayerNameResolver>();
-        services.AddScoped<IPlayerNameResolver>(sp => new CachedPlayerNameResolver(
-            sp.GetRequiredService<JuvioPlayerNameResolver>(),
-            sp.GetRequiredService<IMemoryCache>()
+        services.AddScoped<IPlayerSearch>(sp => new LocalFirstPlayerSearch(
+            sp.GetRequiredService<JuvioPlayerSearch>(),
+            sp.GetRequiredService<IPlayerNameStore>()
         ));
-
-        services.AddScoped<IPlayerSearch>(sp => new CachedPlayerSearch(
-            ActivatorUtilities.CreateInstance<JuvioPlayerSearch>(sp),
-            sp.GetRequiredService<IMemoryCache>()
+        services.AddScoped<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
+            sp.GetRequiredService<JuvioPlayerNameResolver>(),
+            sp.GetRequiredService<IPlayerNameStore>()
         ));
         services.AddScoped<IPlayerProfileQuery, JuvioPlayerProfileQuery>();
         services.AddScoped<IMatchQuery, JuvioMatchQuery>();

@@ -1,5 +1,6 @@
 using HonStats.Domain.Insights;
 using HonStats.Domain.Matches;
+using HonStats.Domain.Players;
 using Microsoft.EntityFrameworkCore;
 
 namespace HonStats.Infra.Persistence;
@@ -13,6 +14,7 @@ public sealed class HonStatsDbContext(DbContextOptions<HonStatsDbContext> option
     public DbSet<MatchPlayerItem> MatchPlayerItems => this.Set<MatchPlayerItem>();
     public DbSet<HeroBuild> HeroBuilds => this.Set<HeroBuild>();
     public DbSet<Teammate> Teammates => this.Set<Teammate>();
+    public DbSet<Player> Players => this.Set<Player>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

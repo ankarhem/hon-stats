@@ -3,6 +3,7 @@ using System;
 using HonStats.Infra.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HonStats.Infra.Migrations
 {
     [DbContext(typeof(HonStatsDbContext))]
-    partial class HonStatsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260627093456_CreatePlayersTable")]
+    partial class CreatePlayersTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
@@ -47,6 +50,12 @@ namespace HonStats.Infra.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Country")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTimeOffset?>("IndexedAt")
                         .HasColumnType("TEXT");
 
@@ -58,6 +67,9 @@ namespace HonStats.Infra.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Username")
                         .HasColumnType("TEXT");
 
                     b.HasKey("AccountId");
@@ -140,8 +152,17 @@ namespace HonStats.Infra.Migrations
                     b.Property<Guid>("TeammateAccountId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Country")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("GamesTogether")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("WinsTogether")
                         .HasColumnType("INTEGER");

@@ -1,5 +1,6 @@
 using HonStats.Domain.Insights;
 using HonStats.Domain.Matches;
+using HonStats.Domain.Players;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -73,5 +74,18 @@ public sealed class TeammateConfiguration : IEntityTypeConfiguration<Teammate>
         b.ToTable("teammates");
         b.HasKey(x => new { x.AccountId, x.TeammateAccountId });
         b.HasIndex(x => x.AccountId);
+    }
+}
+
+public sealed class PlayerConfiguration : IEntityTypeConfiguration<Player>
+{
+    public void Configure(EntityTypeBuilder<Player> b)
+    {
+        b.ToTable("players");
+        b.HasKey(x => x.AccountId);
+        // Non-unique index for fast username→accountId lookup (profile local-first
+        // resolution). App-layer steal-on-conflict keeps Username effectively unique;
+        // a DB unique constraint would complicate rename-collision handling.
+        b.HasIndex(x => x.Username);
     }
 }
