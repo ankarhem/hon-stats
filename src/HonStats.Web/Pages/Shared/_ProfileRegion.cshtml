@@ -101,6 +101,30 @@
                             .ToList()
                     );
 
+                if (Model.HeroItemPairs.Count > 0)
+                {
+                    var pairsGames = Model.HeroItemPairs.First().Games;
+                    <p class="eyebrow card__title">Common Combos on @heroName</p>
+                    <ul class="grid-list">
+                        @foreach (var pair in Model.HeroItemPairs)
+                        {
+                            var itemA = Model.Items.GetValueOrDefault(pair.ItemA);
+                            var itemB = Model.Items.GetValueOrDefault(pair.ItemB);
+                            var iconA = itemA?.IconUrl ?? $"https://gamestorage.juvio.com/items/{pair.ItemA}/icon.webp";
+                            var iconB = itemB?.IconUrl ?? $"https://gamestorage.juvio.com/items/{pair.ItemB}/icon.webp";
+                            var pairPct = pairsGames > 0 ? pair.Frequency * 100 / pairsGames : 0;
+                            <li class="grid-list__item">
+                                <div class="grid-list__pair">
+                                    <img class="grid-list__icon" src="@iconA" alt="" loading="lazy" />
+                                    <img class="grid-list__icon" src="@iconB" alt="" loading="lazy" />
+                                </div>
+                                <div class="grid-list__name">@(itemA?.DisplayName ?? ("Item " + pair.ItemA)) + @(itemB?.DisplayName ?? ("Item " + pair.ItemB))</div>
+                                <div class="grid-list__meta">@pair.Frequency/@pairsGames · @pairPct%</div>
+                            </li>
+                        }
+                    </ul>
+                }
+
                 <p class="eyebrow card__title">Items over @games games on @heroName</p>
                 @foreach (var tier in new[] { GuideTier.Early, GuideTier.Core, GuideTier.Late })
                 {
@@ -140,29 +164,6 @@
                     </section>
                 }
 
-                if (Model.HeroItemPairs.Count > 0)
-                {
-                    var pairsGames = Model.HeroItemPairs.First().Games;
-                    <p class="eyebrow card__title">Bought together on @heroName</p>
-                    <ul class="grid-list">
-                        @foreach (var pair in Model.HeroItemPairs)
-                        {
-                            var itemA = Model.Items.GetValueOrDefault(pair.ItemA);
-                            var itemB = Model.Items.GetValueOrDefault(pair.ItemB);
-                            var iconA = itemA?.IconUrl ?? $"https://gamestorage.juvio.com/items/{pair.ItemA}/icon.webp";
-                            var iconB = itemB?.IconUrl ?? $"https://gamestorage.juvio.com/items/{pair.ItemB}/icon.webp";
-                            var pairPct = pairsGames > 0 ? pair.Frequency * 100 / pairsGames : 0;
-                            <li class="grid-list__item">
-                                <div class="grid-list__pair">
-                                    <img class="grid-list__icon" src="@iconA" alt="" loading="lazy" />
-                                    <img class="grid-list__icon" src="@iconB" alt="" loading="lazy" />
-                                </div>
-                                <div class="grid-list__name">@(itemA?.DisplayName ?? ("Item " + pair.ItemA)) + @(itemB?.DisplayName ?? ("Item " + pair.ItemB))</div>
-                                <div class="grid-list__meta">@pair.Frequency/@pairsGames · @pairPct%</div>
-                            </li>
-                        }
-                    </ul>
-                }
             }
         }
         break;
