@@ -351,6 +351,43 @@ p {
     color: var(--faint);
 }
 
+/* ---------- Map selector (profile stats filter) ---------- */
+.map-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.pill {
+    appearance: none;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.pill[aria-current="true"] {
+    background: oklch(from var(--accent) l c h / 0.2);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.map-selector__count {
+    margin: 0 0 0.85rem;
+    font-size: 0.78rem;
+}
+
 /* ---------- Profile header ---------- */
 .profile-header {
     display: flex;

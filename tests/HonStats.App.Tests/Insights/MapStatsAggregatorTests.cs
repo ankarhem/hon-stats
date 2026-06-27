@@ -74,6 +74,42 @@ public class MapStatsAggregatorTests
     }
 
     [Fact]
+    public void AvgWards_SummedAcrossGamesDividedByGameCount()
+    {
+        var inputs = new List<MatchStatInput>
+        {
+            new()
+            {
+                GameId = 1,
+                Map = "ForestsOfCaldavar",
+                WardsPlaced = 10,
+            },
+            new()
+            {
+                GameId = 2,
+                Map = "ForestsOfCaldavar",
+                WardsPlaced = 4,
+            },
+            new()
+            {
+                GameId = 3,
+                Map = "MidWars",
+                WardsPlaced = 0,
+            },
+        };
+
+        var result = MapStatsAggregator.Build(inputs);
+
+        var caldavar = result.Single(e => e.Map == "ForestsOfCaldavar");
+        // (10 + 4) / 2 games = 7.
+        caldavar.AvgWards.Should().BeApproximately(7.0, 0.0001);
+
+        var mid = result.Single(e => e.Map == "MidWars");
+        // 0 / 1 = 0.
+        mid.AvgWards.Should().BeApproximately(0.0, 0.0001);
+    }
+
+    [Fact]
     public void GpmComputed_OnlyOverGamesWithGold_AndAggregateAcrossThem()
     {
         // game1 + game3 carry gold; game2 has no gold breakdown (pre-gold match).

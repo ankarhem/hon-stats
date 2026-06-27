@@ -30,6 +30,7 @@ public class ProfileModel(
     public Guid AccountId { get; set; }
     public string? Username { get; set; }
     public string Tab { get; set; } = "matches";
+    public string SelectedMap { get; set; } = "all";
     public PlayerProfile? Profile { get; set; }
     public IndexedPlayer? Indexed { get; set; }
     public Dictionary<int, Hero> Heroes { get; set; } = new();
@@ -43,12 +44,14 @@ public class ProfileModel(
     public IReadOnlyList<HeroItemPairEntry> HeroItemPairs { get; set; } = [];
     public IReadOnlyList<ItemTimingEntry> HeroItemTiming { get; set; } = [];
     public IReadOnlyList<MapStatEntry> MapStats { get; set; } = [];
+    public MapStatEntry? MapOverview { get; set; }
     public Dictionary<int, Item> Items { get; set; } = new();
     public int SelectedHeroId { get; set; }
 
     public async Task<IActionResult> OnGet(
         string username,
         string tab = "matches",
+        string map = "all",
         int heroId = 0,
         CancellationToken ct = default
     )
@@ -60,14 +63,25 @@ public class ProfileModel(
         this.AccountId = results[0].AccountId;
         this.Username = username;
         this.Tab = tab;
+        this.SelectedMap = map;
 
         this.Indexed = await insights.GetIndexedPlayerAsync(this.AccountId, ct);
         this.Heroes = (await reference.GetHeroesAsync(ct)).ToDictionary(h => h.Id);
 
-        if (!Request.IsHtmx())
+        // The juvio overview drives the header (always, on full page) and the "All"
+        // stats view (it carries XPM, which indexed data lacks). Specific-map views
+        // are served purely from indexed data, so skip the juvio fetch for those HTMX
+        // swaps. "all" needs juvio even on HTMX, hence the disjunction.
+        if (!Request.IsHtmx() || map == "all")
         {
             this.Profile = await profiles.GetAsync(this.AccountId, ct);
         }
+
+        // Map stats feed the per-map selector on the stats panel (always visible), so
+        // load them unconditionally. MapOverview is the single entry for the selected
+        // map, used by _ProfileStats to render per-map numbers.
+        this.MapStats = await insights.GetMapStatsAsync(this.AccountId, ct);
+        this.MapOverview = map != "all" ? this.MapStats.FirstOrDefault(e => e.Map == map) : null;
 
         switch (tab)
         {
@@ -102,9 +116,6 @@ public class ProfileModel(
                     );
                 }
                 break;
-            case "maps":
-                this.MapStats = await insights.GetMapStatsAsync(this.AccountId, ct);
-                break;
             default:
                 this.Tab = "matches";
                 this.RecentMatches = await matches.GetRecentForPlayerAsync(
@@ -117,7 +128,13 @@ public class ProfileModel(
                 break;
         }
 
-        return Request.IsHtmx() ? Partial("_ProfileRegion", this) : Page();
+        if (Request.IsHtmx())
+        {
+            return Request.Headers["HX-Target"] == "profile-stats"
+                ? Partial("_ProfileStats", this)
+                : Partial("_ProfileRegion", this);
+        }
+        return Page();
     }
 
     public async Task<IActionResult> OnGetMatchesMore(
@@ -194,6 +211,14 @@ public class ProfileModel(
     }
 
     public static string Stars(int level) => level > 0 ? new string('★', level) : string.Empty;
+
+    public static string MapLabel(string map) =>
+        map switch
+        {
+            "ForestsOfCaldavar" => "FoC",
+            "MidWars" => "MW",
+            _ => map,
+        };
 
     // Formats a mean first-buy second as M:SS. Pre-game purchases (negative seconds,
     // during the pre-creep phase) clamp to 0:00.

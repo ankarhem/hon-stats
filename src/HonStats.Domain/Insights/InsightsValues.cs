@@ -55,6 +55,8 @@ public sealed class TeammateAggregate
 
 // Value object consumed by MapStatsAggregator: one row per played match. GoldEarned
 // is null when the gold breakdown is absent (pre-gold-ingestion matches).
+// WardsPlaced is the subject's observer-ward count for that game (sourced from
+// match_player_items; 0 when the player has no item rows for the game).
 public sealed class MatchStatInput
 {
     public long GameId { get; set; }
@@ -65,6 +67,7 @@ public sealed class MatchStatInput
     public int? GoldEarned { get; set; }
     public int DurationSeconds { get; set; }
     public bool Won { get; set; }
+    public int WardsPlaced { get; set; }
 }
 
 // Read model produced by MapStatsAggregator: per-map KDA + GPM + win rate.
@@ -76,6 +79,7 @@ public sealed class MapStatEntry
     public double AvgKills { get; set; }
     public double AvgDeaths { get; set; }
     public double AvgAssists { get; set; }
+    public double AvgWards { get; set; }
     public double? AvgGPM { get; set; }
     public int Wins { get; set; }
     public double WinRate { get; set; }

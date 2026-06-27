@@ -156,10 +156,22 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
             .MatchRoster.Where(r => r.AccountId == accountId && gameIds.Contains(r.GameId))
             .ToDictionaryAsync(r => r.GameId, ct);
 
+        // WardsPlaced lives on match_player_items, duplicated across every inventory
+        // slot row for a (game, player) — so take Max per GameId (the rows are
+        // identical; Sum would over-count by slot count). Absent for games whose
+        // player has no item rows → treated as 0 by the lookup fallback.
+        var wardsByGame = await (
+            from mpi in db.MatchPlayerItems
+            where mpi.AccountId == accountId && gameIds.Contains(mpi.GameId)
+            group mpi by mpi.GameId into g
+            select new { GameId = g.Key, Wards = g.Max(x => x.WardsPlaced) }
+        ).ToDictionaryAsync(x => x.GameId, x => x.Wards, ct);
+
         var inputs = matches
             .Select(m =>
             {
                 rosterByGame.TryGetValue(m.GameId, out var r);
+                wardsByGame.TryGetValue(m.GameId, out var wards);
                 var goldEarned = GoldEarnedFor(r);
                 return new MatchStatInput
                 {
@@ -171,6 +183,7 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
                     GoldEarned = goldEarned,
                     DurationSeconds = m.Duration,
                     Won = r?.Won ?? false,
+                    WardsPlaced = wards,
                 };
             })
             .ToList();

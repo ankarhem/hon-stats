@@ -136,6 +136,7 @@ public static class MapStatsAggregator
             AvgKills = games > 0 ? matches.Sum(m => m.Kills) / (double)games : 0,
             AvgDeaths = games > 0 ? matches.Sum(m => m.Deaths) / (double)games : 0,
             AvgAssists = games > 0 ? matches.Sum(m => m.Assists) / (double)games : 0,
+            AvgWards = games > 0 ? matches.Sum(m => m.WardsPlaced) / (double)games : 0,
             AvgGPM = avgGpm,
             Wins = wins,
             WinRate = games > 0 ? wins * 100.0 / games : 0,

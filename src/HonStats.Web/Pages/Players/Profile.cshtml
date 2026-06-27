@@ -41,16 +41,8 @@ else
         Last indexed @TimeDisplay.Relative(Model.Indexed?.LastReindexAt)
     </p>
 
-    <div class="panel card">
-        <p class="eyebrow card__title">Profile stats</p>
-        <div class="stat-grid">
-            <div class="stat"><div class="eyebrow">K/D/A</div><div class="stat__value">@p.Overview.AverageKDA.ToString("0.00")</div></div>
-            <div class="stat"><div class="eyebrow">Win rate</div><div class="stat__value">@p.Overview.WinRate.ToString("0.0")<span class="stat__sub">%</span></div></div>
-            <div class="stat"><div class="eyebrow">KDR</div><div class="stat__value">@p.Summary.KillDeathRatio.ToString("0.00")</div></div>
-            <div class="stat"><div class="eyebrow">Wards placed</div><div class="stat__value">@p.Overview.AllTimeRecord.WardsPlaced</div></div>
-            <div class="stat"><div class="eyebrow">Avg GPM</div><div class="stat__value">@p.Overview.AverageGPM.ToString("0")</div></div>
-            <div class="stat"><div class="eyebrow">Avg XPM</div><div class="stat__value">@p.Overview.AverageXPM.ToString("0")</div></div>
-        </div>
+    <div id="profile-stats">
+        <partial name="_ProfileStats" model="Model" />
     </div>
 
     <div id="profile-region">
