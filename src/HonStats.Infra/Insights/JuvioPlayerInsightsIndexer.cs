@@ -218,18 +218,15 @@ internal sealed class JuvioPlayerInsightsIndexer(
                 }
             }
 
-            if (options.Value.IngestReplays)
-            {
-                await IngestItemTimingAsync(db, summary.GameId, ct);
-            }
+            await IngestItemTimingAsync(db, summary.GameId, ct);
         }
 
         await db.SaveChangesAsync(ct);
     }
 
-    // Optional, flag-gated: derive per-(game,player,item) first-buy seconds from the
-    // replay snapshot timeline. Failures are isolated — a missing/unparseable replay
-    // must never break the core summary ingestion (already persisted above).
+    // Optional: derive per-(game,player,item) first-buy seconds from the replay
+    // snapshot timeline. Failures are isolated — a missing/unparseable replay must
+    // never break the core summary ingestion (already persisted above).
     private async Task IngestItemTimingAsync(HonStatsDbContext db, int gameId, CancellationToken ct)
     {
         try

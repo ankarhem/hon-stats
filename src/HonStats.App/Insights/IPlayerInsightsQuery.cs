@@ -27,7 +27,7 @@ public interface IPlayerInsightsQuery
     );
 
     // Mean first-buy second per item for a player+hero. Only items with replay-timing
-    // data appear (match_item_timing rows exist only when Indexing:IngestReplays is on).
+    // data appear (match_item_timing rows exist only when replay data is available).
     Task<IReadOnlyList<ItemTimingEntry>> GetHeroItemTimingAsync(
         Guid accountId,
         int heroId,

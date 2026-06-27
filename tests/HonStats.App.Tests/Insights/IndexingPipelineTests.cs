@@ -143,8 +143,8 @@ public class IndexingPipelineTests
                     }
                 );
 
-            // Regression guard: with Indexing:IngestReplays OFF (default), no replay
-            // timing rows are written and the replay query is never invoked.
+            // Replay ingest is unconditional, but replay failures are isolated and must
+            // not break core ingestion; no timing rows are written when the replay query fails.
             await using (
                 var assertDb = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
                     .CreateDbContext()
@@ -163,7 +163,7 @@ public class IndexingPipelineTests
     }
 
     [Fact]
-    public async Task Index_WithIngestReplaysOn_PersistsItemTiming_AndReadsAverage()
+    public async Task Index_PersistsItemTiming_AndReadsAverage()
     {
         var dbPath = Path.Combine(Path.GetTempPath(), $"honstats-timing-{Guid.NewGuid():N}.db");
         try
@@ -232,7 +232,6 @@ public class IndexingPipelineTests
             {
                 o.RecentMatchesLimit = 50;
                 o.MatchSummaryConcurrency = 2;
-                o.IngestReplays = true;
             });
             services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
             services.AddSingleton<IIndexProgressTracker, IndexProgressTracker>();
@@ -395,15 +394,10 @@ public class IndexingPipelineTests
         }
     }
 
-    // If the flag-gated replay path were ever invoked with Indexing:IngestReplays OFF,
-    // this would throw and fail the test — proving the indexer never fetches replays
-    // unless the flag is on.
     private sealed class ThrowingParsedReplayQuery : IParsedReplayQuery
     {
         public Task<ParsedReplay?> GetAsync(int gameId, CancellationToken ct = default) =>
-            throw new InvalidOperationException(
-                "replay query must not be called when IngestReplays is off"
-            );
+            throw new InvalidOperationException("replay query failure must be isolated");
     }
 
     private sealed class FakeParsedReplayQuery(Dictionary<int, ParsedReplay> replays)
