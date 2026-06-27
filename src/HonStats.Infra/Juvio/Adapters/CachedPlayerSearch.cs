@@ -21,7 +21,9 @@ internal sealed class CachedPlayerSearch(IPlayerSearch inner, IMemoryCache cache
             return cached;
 
         var result = await inner.SearchAsync(username, ct);
-        cache.Set(key, result, Ttl);
+        // Don't cache misses: a transient juvio empty-200 would poison this key for the TTL.
+        if (result.Count > 0)
+            cache.Set(key, result, Ttl);
         return result;
     }
 }
