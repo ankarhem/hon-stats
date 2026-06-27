@@ -47,6 +47,52 @@ public static class SearchMatcher
     }
 
     /// <summary>
+    /// Scores how well <paramref name="query"/> matches <paramref name="name"/> on
+    /// a fixed tiered scale (higher is better; 0 = no match). The first tier that
+    /// hits wins, in this priority order:
+    /// <list type="bullet">
+    ///   <item><term>100</term><description>blank/whitespace query or normalized
+    ///     query empty (matches-all sentinel; callers gate blanks), or normalized
+    ///     query equals normalized name — the latter catches apostrophe-glued
+    ///     exacts ("Phoenix's" vs "phoenixs").</description></item>
+    ///   <item><term>90</term><description>normalized name starts with normalized
+    ///     query (prefix).</description></item>
+    ///   <item><term>80</term><description>normalized name contains normalized
+    ///     query (substring / infix).</description></item>
+    ///   <item><term>65</term><description>every query token fuzzy-matches a name
+    ///     token within the length-scaled edit threshold (token-level typo, e.g.
+    ///     "tlaon" vs "Phoenix's Talon").</description></item>
+    ///   <item><term>45</term><description>whole normalized strings within the
+    ///     length-scaled edit threshold (typo spanning token boundaries, e.g. a
+    ///     dropped space).</description></item>
+    ///   <item><term>0</term><description>otherwise.</description></item>
+    /// </list>
+    /// </summary>
+    public static int Score(string? query, string name)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return 100;
+
+        var q = Normalize(query);
+        if (q.Length == 0)
+            return 100;
+
+        var n = Normalize(name);
+
+        if (q == n)
+            return 100;
+        if (n.StartsWith(q, StringComparison.Ordinal))
+            return 90;
+        if (n.Contains(q, StringComparison.Ordinal))
+            return 80;
+        if (TokensMatch(q, n))
+            return 65;
+        if (Levenshtein(q, n) <= MaxDistanceFor(q.Length))
+            return 45;
+        return 0;
+    }
+
+    /// <summary>
     /// Builds a search key: lowercase, diacritics folded, apostrophes glued
     /// ("Phoenix's Talon"→"phoenixs talon"), other non-alphanumeric runs collapsed
     /// to one space, trimmed.

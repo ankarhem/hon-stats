@@ -203,6 +203,17 @@ p {
     text-decoration: none;
 }
 
+.search-results__display {
+    display: block;
+}
+
+.search-results__handle {
+    display: block;
+    font-size: 0.8em;
+    font-weight: 400;
+    color: var(--muted);
+}
+
 .search-results__empty {
     margin: 0;
     padding: 0.6rem 0.85rem;

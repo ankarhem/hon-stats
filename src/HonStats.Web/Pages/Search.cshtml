@@ -12,7 +12,7 @@
     }
     else
     {
-        <p class="muted">@(Model.Results.Count > 0 ? "Exact match:" : $"No player named \"{Model.Query}\".")</p>
+        <p class="muted">@(Model.Results.Count == 0 ? $"No player named \"{Model.Query}\"." : "Closest matches:")</p>
         <partial name="_SearchResults" model="Model.Results" />
     }
 </section>

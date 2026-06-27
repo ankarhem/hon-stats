@@ -36,7 +36,7 @@ else
                                             <img class="hero-icon" src="@hero?.IconUrl" alt="" loading="lazy" />
                                             <div>
                                                 <span class="hero-name">@(hero?.TranslatedName ?? pl.HeroId.ToString())</span>
-                                                <a class="match-row__player" href="/players/@(name?.Username ?? pl.AccountId.ToString())">
+                                                <a class="match-row__player" href="/players/@System.Uri.EscapeDataString(name?.Username ?? pl.AccountId.ToString())">
                                                     <span class="flag">@ProfileModel.Flag(name?.Country)</span>@(name?.DisplayName ?? name?.Username ?? pl.AccountId.ToString())
                                                 </a>
                                             </div>
