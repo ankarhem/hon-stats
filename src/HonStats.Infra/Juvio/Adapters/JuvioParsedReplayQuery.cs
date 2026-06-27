@@ -48,6 +48,8 @@ internal sealed class JuvioParsedReplayQuery(IHttpClientFactory httpClientFactor
     private static ReplayPlayer MapPlayer(ParsedReplayPlayerDto p) =>
         new()
         {
+            AccountId = Guid.TryParse(p.AccountId, out var id) ? id : null,
+            HeroId = p.HeroId,
             Items = p
                 .ItemsValue.Select(i => new ReplayItem { ItemId = i.ItemId, Slot = i.Slot })
                 .ToList(),

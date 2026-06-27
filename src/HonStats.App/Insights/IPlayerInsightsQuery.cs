@@ -26,6 +26,14 @@ public interface IPlayerInsightsQuery
         CancellationToken ct = default
     );
 
+    // Mean first-buy second per item for a player+hero. Only items with replay-timing
+    // data appear (match_item_timing rows exist only when Indexing:IngestReplays is on).
+    Task<IReadOnlyList<ItemTimingEntry>> GetHeroItemTimingAsync(
+        Guid accountId,
+        int heroId,
+        CancellationToken ct = default
+    );
+
     Task<IReadOnlyDictionary<int, int>> GetHeroGamesAsync(
         Guid accountId,
         CancellationToken ct = default

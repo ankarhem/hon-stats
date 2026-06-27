@@ -16,6 +16,7 @@ public sealed class HonStatsDbContext(DbContextOptions<HonStatsDbContext> option
     public DbSet<HeroItemPair> HeroItemPairs => this.Set<HeroItemPair>();
     public DbSet<Teammate> Teammates => this.Set<Teammate>();
     public DbSet<Player> Players => this.Set<Player>();
+    public DbSet<MatchItemTiming> MatchItemTimings => this.Set<MatchItemTiming>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -41,6 +41,7 @@ public class ProfileModel(
     public IReadOnlyDictionary<int, int> HeroGames { get; set; } = new Dictionary<int, int>();
     public IReadOnlyList<HeroBuildEntry> HeroBuild { get; set; } = [];
     public IReadOnlyList<HeroItemPairEntry> HeroItemPairs { get; set; } = [];
+    public IReadOnlyList<ItemTimingEntry> HeroItemTiming { get; set; } = [];
     public IReadOnlyList<MapStatEntry> MapStats { get; set; } = [];
     public Dictionary<int, Item> Items { get; set; } = new();
     public int SelectedHeroId { get; set; }
@@ -92,6 +93,11 @@ public class ProfileModel(
                         this.AccountId,
                         this.SelectedHeroId,
                         10,
+                        ct
+                    );
+                    this.HeroItemTiming = await insights.GetHeroItemTimingAsync(
+                        this.AccountId,
+                        this.SelectedHeroId,
                         ct
                     );
                 }
@@ -188,6 +194,14 @@ public class ProfileModel(
     }
 
     public static string Stars(int level) => level > 0 ? new string('★', level) : string.Empty;
+
+    // Formats a mean first-buy second as M:SS. Pre-game purchases (negative seconds,
+    // during the pre-creep phase) clamp to 0:00.
+    public static string FormatBuyTime(double seconds)
+    {
+        var clamped = Math.Max(0, (int)Math.Round(seconds));
+        return $"{clamped / 60}:{clamped % 60:D2}";
+    }
 }
 
 public record MatchesView(

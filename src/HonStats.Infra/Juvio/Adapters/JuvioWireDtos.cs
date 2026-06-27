@@ -199,10 +199,10 @@ internal sealed class MatchPlayerSummaryDto
     public int RoleIndex { get; set; }
 }
 
-// getparsedreplay wire shape. Snapshot players have no accountId/heroId — identity
-// is positional (team-index + player-index). Only snapshot[0]'s players carry
-// SlotIndex + StartingGold (the position->player anchor). Fields are nullable since
-// juvio omits most of them on non-anchor snapshots.
+// getparsedreplay wire shape. Only snapshot[0]'s players carry AccountId + HeroId
+// (the self-contained position->player anchor) plus SlotIndex + StartingGold; later
+// snapshots are positional-only. Fields are nullable since juvio omits most of them
+// on non-anchor snapshots.
 internal sealed class ParsedReplayResponseDto
 {
     public ParsedReplayDto? ParsedReplay { get; set; }
@@ -232,6 +232,8 @@ internal sealed class ParsedReplayTeamDto
 
 internal sealed class ParsedReplayPlayerDto
 {
+    public string? AccountId { get; set; }
+    public int? HeroId { get; set; }
     public List<ParsedReplayItemDto>? Items { get; set; }
     public int? NetWorth { get; set; }
     public double? Level { get; set; }

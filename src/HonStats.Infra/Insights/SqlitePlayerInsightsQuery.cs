@@ -109,6 +109,35 @@ internal sealed class SqlitePlayerInsightsQuery(IDbContextFactory<HonStatsDbCont
         return rows.GroupBy(r => r.HeroId).ToDictionary(g => g.Key, g => g.Count());
     }
 
+    public async Task<IReadOnlyList<ItemTimingEntry>> GetHeroItemTimingAsync(
+        Guid accountId,
+        int heroId,
+        CancellationToken ct = default
+    )
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+
+        // match_item_timing has no HeroId; scope to this hero's games via the games
+        // the player played as that hero in match_player_items. Each (GameId, ItemId)
+        // is unique per account, so the mean is naturally over distinct games.
+        var heroGames = db
+            .MatchPlayerItems.Where(mpi => mpi.AccountId == accountId && mpi.HeroId == heroId)
+            .Select(mpi => mpi.GameId)
+            .Distinct();
+
+        return await (
+            from mit in db.MatchItemTimings
+            where mit.AccountId == accountId && heroGames.Contains(mit.GameId)
+            group mit by mit.ItemId into g
+            select new ItemTimingEntry
+            {
+                ItemId = g.Key,
+                AvgSeconds = g.Average(x => (double)x.FirstSeenSeconds),
+                Games = g.Count(),
+            }
+        ).ToListAsync(ct);
+    }
+
     public async Task<IReadOnlyList<MapStatEntry>> GetMapStatsAsync(
         Guid accountId,
         CancellationToken ct = default

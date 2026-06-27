@@ -86,3 +86,15 @@ public sealed class Teammate
     public int GamesTogether { get; set; }
     public int WinsTogether { get; set; }
 }
+
+// Persisted raw store: first in-game second an item was seen for a (game, player).
+// Sourced from replay snapshots (see ItemTimingAggregator). HeroId is intentionally
+// absent — the read joins match_player_items on (AccountId, GameId, ItemId) to scope
+// a player's games on a hero.
+public sealed class MatchItemTiming
+{
+    public int GameId { get; set; }
+    public Guid AccountId { get; set; }
+    public int ItemId { get; set; }
+    public int FirstSeenSeconds { get; set; }
+}

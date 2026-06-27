@@ -115,6 +115,7 @@ public class MatchRosterGoldTests
             services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildHeroBuildsHandler>();
             services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
             services.AddSingleton<IMatchQuery>(matchQuery);
+            services.AddSingleton<IParsedReplayQuery, NullParsedReplayQuery>();
             services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
             services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
                 new FakeNameResolver(),
@@ -183,5 +184,11 @@ public class MatchRosterGoldTests
             IReadOnlyDictionary<Guid, ResolvedName> empty = new Dictionary<Guid, ResolvedName>();
             return Task.FromResult(empty);
         }
+    }
+
+    private sealed class NullParsedReplayQuery : IParsedReplayQuery
+    {
+        public Task<ParsedReplay?> GetAsync(int gameId, CancellationToken ct = default) =>
+            Task.FromResult<ParsedReplay?>(null);
     }
 }

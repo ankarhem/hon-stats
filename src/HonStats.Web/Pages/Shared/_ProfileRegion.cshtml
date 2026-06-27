@@ -79,6 +79,7 @@
             {
                 var games = Model.HeroBuild.First().Games;
                 var heroName = Model.Heroes.GetValueOrDefault(Model.SelectedHeroId)?.TranslatedName ?? ("Hero " + Model.SelectedHeroId);
+                var timingByItem = Model.HeroItemTiming.ToDictionary(t => t.ItemId);
                 <p class="eyebrow card__title">Items over @games games on @heroName</p>
                 <ul class="grid-list">
                     @foreach (var entry in Model.HeroBuild)
@@ -87,10 +88,16 @@
                         var iconUrl = item?.IconUrl ?? $"https://gamestorage.juvio.com/items/{entry.ItemId}/icon.webp";
                         var pickPct = games > 0 ? entry.Frequency * 100 / games : 0;
                         int? winPct = entry.Frequency > 0 ? entry.Wins * 100 / entry.Frequency : null;
+                        var boughtAt = timingByItem.TryGetValue(entry.ItemId, out var timing)
+                            ? ProfileModel.FormatBuyTime(timing.AvgSeconds)
+                            : "—";
                         <li class="grid-list__item">
                             <img class="grid-list__icon" src="@iconUrl" alt="" loading="lazy" />
                             <div class="grid-list__name">@(item?.DisplayName ?? ("Item " + entry.ItemId))</div>
-                            <div class="grid-list__meta">@entry.Frequency/@games · @pickPct% · @(winPct.HasValue ? $"{winPct}% win" : "—")</div>
+                            <div class="grid-list__meta">
+                                @entry.Frequency/@games · @pickPct% · @(winPct.HasValue ? $"{winPct}% win" : "—")
+                                <br /><span class="muted">avg @boughtAt</span>
+                            </div>
                         </li>
                     }
                 </ul>

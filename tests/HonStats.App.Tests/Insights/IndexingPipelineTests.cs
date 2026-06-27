@@ -67,6 +67,7 @@ public class IndexingPipelineTests
             services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildHeroBuildsHandler>();
             services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
             services.AddSingleton<IMatchQuery>(matchQuery);
+            services.AddSingleton<IParsedReplayQuery>(new ThrowingParsedReplayQuery());
             services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
             services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
                 nameResolver,
@@ -139,6 +140,160 @@ public class IndexingPipelineTests
                         GamesTogether = 2,
                         WinsTogether = 1,
                         Username = "bravo",
+                    }
+                );
+
+            // Regression guard: with Indexing:IngestReplays OFF (default), no replay
+            // timing rows are written and the replay query is never invoked.
+            await using (
+                var assertDb = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                (await assertDb.MatchItemTimings.ToListAsync()).Should().BeEmpty();
+            }
+        }
+        finally
+        {
+            if (File.Exists(dbPath))
+            {
+                File.Delete(dbPath);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task Index_WithIngestReplaysOn_PersistsItemTiming_AndReadsAverage()
+    {
+        var dbPath = Path.Combine(Path.GetTempPath(), $"honstats-timing-{Guid.NewGuid():N}.db");
+        try
+        {
+            var matchQuery = CreateMatchQuery();
+            var replayQuery = new FakeParsedReplayQuery(
+                new Dictionary<int, ParsedReplay>
+                {
+                    // snapshot[0] anchors PlayerA; item 10 first seen at t=120s, item 20 at t=240s.
+                    [1] = new ParsedReplay
+                    {
+                        GameId = 1,
+                        Snapshots =
+                        [
+                            new()
+                            {
+                                Time = -90,
+                                Teams = [new() { Players = [new() { AccountId = PlayerA }] }],
+                            },
+                            new()
+                            {
+                                Time = 120,
+                                Teams =
+                                [
+                                    new()
+                                    {
+                                        Players =
+                                        [
+                                            new() { Items = [new() { ItemId = 10, Slot = 0 }] },
+                                        ],
+                                    },
+                                ],
+                            },
+                            new()
+                            {
+                                Time = 240,
+                                Teams =
+                                [
+                                    new()
+                                    {
+                                        Players =
+                                        [
+                                            new()
+                                            {
+                                                Items =
+                                                [
+                                                    new() { ItemId = 10, Slot = 0 },
+                                                    new() { ItemId = 20, Slot = 1 },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                }
+            );
+
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddDbContextFactory<HonStatsDbContext>(o =>
+                o.UseSqlite($"Data Source={dbPath}")
+            );
+            services.Configure<IndexingOptions>(o =>
+            {
+                o.RecentMatchesLimit = 50;
+                o.MatchSummaryConcurrency = 2;
+                o.IngestReplays = true;
+            });
+            services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
+            services.AddSingleton<IIndexProgressTracker, IndexProgressTracker>();
+            services.AddScoped<IInsightsRawQuery, InsightsRawQuery>();
+            services.AddScoped<IInsightsAggregateStore, InsightsAggregateStore>();
+            services.AddScoped<IPlayerInsightsQuery, SqlitePlayerInsightsQuery>();
+            services.AddScoped<IPlayerInsightsIndexer, JuvioPlayerInsightsIndexer>();
+            services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildHeroBuildsHandler>();
+            services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
+            services.AddSingleton<IMatchQuery>(matchQuery);
+            services.AddSingleton<IParsedReplayQuery>(replayQuery);
+            services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
+            services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
+                new FakeNameResolver(
+                    new Dictionary<Guid, ResolvedName>
+                    {
+                        [PlayerA] = new()
+                        {
+                            AccountId = PlayerA,
+                            Username = "alpha",
+                            Country = "SE",
+                        },
+                    }
+                ),
+                sp.GetRequiredService<IPlayerNameStore>()
+            ));
+            var sp = services.BuildServiceProvider();
+
+            await using (
+                var db = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                await db.Database.MigrateAsync();
+            }
+
+            using var scope = sp.CreateScope();
+            var indexer = scope.ServiceProvider.GetRequiredService<IPlayerInsightsIndexer>();
+            await indexer.IndexAsync(PlayerA);
+
+            var query = scope.ServiceProvider.GetRequiredService<IPlayerInsightsQuery>();
+            var timing = await query.GetHeroItemTimingAsync(PlayerA, Hero);
+
+            timing
+                .Should()
+                .ContainEquivalentOf(
+                    new ItemTimingEntry
+                    {
+                        ItemId = 10,
+                        AvgSeconds = 120,
+                        Games = 1,
+                    }
+                );
+            timing
+                .Should()
+                .ContainEquivalentOf(
+                    new ItemTimingEntry
+                    {
+                        ItemId = 20,
+                        AvgSeconds = 240,
+                        Games = 1,
                     }
                 );
         }
@@ -238,5 +393,23 @@ public class IndexingPipelineTests
             IReadOnlyDictionary<Guid, ResolvedName> typed = result;
             return Task.FromResult(typed);
         }
+    }
+
+    // If the flag-gated replay path were ever invoked with Indexing:IngestReplays OFF,
+    // this would throw and fail the test — proving the indexer never fetches replays
+    // unless the flag is on.
+    private sealed class ThrowingParsedReplayQuery : IParsedReplayQuery
+    {
+        public Task<ParsedReplay?> GetAsync(int gameId, CancellationToken ct = default) =>
+            throw new InvalidOperationException(
+                "replay query must not be called when IngestReplays is off"
+            );
+    }
+
+    private sealed class FakeParsedReplayQuery(Dictionary<int, ParsedReplay> replays)
+        : IParsedReplayQuery
+    {
+        public Task<ParsedReplay?> GetAsync(int gameId, CancellationToken ct = default) =>
+            Task.FromResult(replays.TryGetValue(gameId, out var r) ? r : null);
     }
 }

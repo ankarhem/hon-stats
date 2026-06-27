@@ -1,4 +1,5 @@
 using HonStats.Domain.Insights;
+using HonStats.Domain.Matches;
 
 namespace HonStats.App.Insights;
 
@@ -139,5 +140,83 @@ public static class MapStatsAggregator
             Wins = wins,
             WinRate = games > 0 ? wins * 100.0 / games : 0,
         };
+    }
+}
+
+// Derives per-(game, player, item) first-seen-second from a parsed replay's snapshot
+// timeline. Pure: no I/O, no DI.
+//
+// Position->player mapping: replay snapshot players are positional (team-index +
+// player-index) and carry NO identity on non-anchor snapshots. But snapshot[0]'s
+// players DO carry AccountId + HeroId (verified empirically for gameId 8008220:
+// mapping each snapshot[0] position->AccountId reproduces the summary's HeroId for
+// that AccountId 10/10, and NetWorth matches within the end-game gold tick). So the
+// replay self-anchors — no external summary is needed for the mapping. The position
+// grid is stable across the timeline (every snapshot keeps the same team/player
+// count), so snapshot[0]'s (teamIdx, playerIdx)->AccountId map applies throughout.
+public static class ItemTimingAggregator
+{
+    // 0xFFFF is juvio's empty-slot sentinel on the replay timeline; 0 is unused.
+    private static readonly HashSet<int> SentinelItemIds = [0, 65535];
+
+    public static IReadOnlyList<ItemBuyTime> Build(ParsedReplay replay)
+    {
+        if (replay.Snapshots.Count == 0)
+            return [];
+
+        var anchor = replay.Snapshots[0];
+        var positionToAccount = new Dictionary<(int Team, int Player), Guid>();
+        for (var ti = 0; ti < anchor.Teams.Count; ti++)
+        {
+            var players = anchor.Teams[ti].Players;
+            for (var pi = 0; pi < players.Count; pi++)
+            {
+                if (players[pi].AccountId is { } id && id != Guid.Empty)
+                    positionToAccount[(ti, pi)] = id;
+            }
+        }
+
+        if (positionToAccount.Count == 0)
+            return [];
+
+        var firstSeen = new Dictionary<(Guid Account, int Item), int>();
+        foreach (
+            var snapshot in replay
+                .Snapshots.OrderBy(s => s.Time)
+                .ThenBy(s => replay.Snapshots.IndexOf(s))
+        )
+        {
+            for (var ti = 0; ti < snapshot.Teams.Count; ti++)
+            {
+                var players = snapshot.Teams[ti].Players;
+                for (var pi = 0; pi < players.Count; pi++)
+                {
+                    if (!positionToAccount.TryGetValue((ti, pi), out var account))
+                        continue;
+
+                    foreach (
+                        var item in players[pi]
+                            .Items.Select(i => i.ItemId)
+                            .Where(id => !SentinelItemIds.Contains(id))
+                    )
+                    {
+                        if (!firstSeen.ContainsKey((account, item)))
+                            firstSeen[(account, item)] = snapshot.Time;
+                    }
+                }
+            }
+        }
+
+        return firstSeen
+            .Select(kv => new ItemBuyTime
+            {
+                GameId = replay.GameId,
+                AccountId = kv.Key.Account,
+                ItemId = kv.Key.Item,
+                FirstSeenSeconds = kv.Value,
+            })
+            .OrderBy(t => t.AccountId)
+            .ThenBy(t => t.ItemId)
+            .ToList();
     }
 }

@@ -21,6 +21,7 @@ internal sealed class JuvioPlayerInsightsIndexer(
     IPlayerNameResolver names,
     IDomainEventDispatcher dispatcher,
     IIndexProgressTracker progressTracker,
+    IParsedReplayQuery replays,
     IOptions<IndexingOptions> options,
     ILogger<JuvioPlayerInsightsIndexer> logger
 ) : IPlayerInsightsIndexer
@@ -216,8 +217,52 @@ internal sealed class JuvioPlayerInsightsIndexer(
                     );
                 }
             }
+
+            if (options.Value.IngestReplays)
+            {
+                await IngestItemTimingAsync(db, summary.GameId, ct);
+            }
         }
 
         await db.SaveChangesAsync(ct);
+    }
+
+    // Optional, flag-gated: derive per-(game,player,item) first-buy seconds from the
+    // replay snapshot timeline. Failures are isolated — a missing/unparseable replay
+    // must never break the core summary ingestion (already persisted above).
+    private async Task IngestItemTimingAsync(HonStatsDbContext db, int gameId, CancellationToken ct)
+    {
+        try
+        {
+            var replay = await replays.GetAsync(gameId, ct);
+            if (replay is null)
+                return;
+
+            var rows = ItemTimingAggregator.Build(replay);
+            if (rows.Count == 0)
+                return;
+
+            var existing = await db.MatchItemTimings.Where(t => t.GameId == gameId).ToListAsync(ct);
+            if (existing.Count > 0)
+                db.MatchItemTimings.RemoveRange(existing);
+
+            db.MatchItemTimings.AddRange(
+                rows.Select(r => new MatchItemTiming
+                {
+                    GameId = r.GameId,
+                    AccountId = r.AccountId,
+                    ItemId = r.ItemId,
+                    FirstSeenSeconds = r.FirstSeenSeconds,
+                })
+            );
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Replay timing ingest failed for game {GameId}", gameId);
+        }
     }
 }

@@ -80,3 +80,21 @@ public sealed class MapStatEntry
     public int Wins { get; set; }
     public double WinRate { get; set; }
 }
+
+// Value object produced by ItemTimingAggregator: first in-game second an item was
+// seen for a (game, player). Maps 1:1 onto a MatchItemTiming row.
+public sealed class ItemBuyTime
+{
+    public int GameId { get; set; }
+    public Guid AccountId { get; set; }
+    public int ItemId { get; set; }
+    public int FirstSeenSeconds { get; set; }
+}
+
+// Read model: mean first-buy second + game count for one item on a player+hero.
+public sealed class ItemTimingEntry
+{
+    public int ItemId { get; set; }
+    public double AvgSeconds { get; set; }
+    public int Games { get; set; }
+}

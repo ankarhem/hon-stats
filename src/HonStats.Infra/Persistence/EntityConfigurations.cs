@@ -105,3 +105,18 @@ public sealed class PlayerConfiguration : IEntityTypeConfiguration<Player>
         b.HasIndex(x => x.Username);
     }
 }
+
+public sealed class MatchItemTimingConfiguration : IEntityTypeConfiguration<MatchItemTiming>
+{
+    public void Configure(EntityTypeBuilder<MatchItemTiming> b)
+    {
+        b.ToTable("match_item_timing");
+        b.HasKey(x => new
+        {
+            x.GameId,
+            x.AccountId,
+            x.ItemId,
+        });
+        b.HasIndex(x => new { x.AccountId, x.ItemId });
+    }
+}
