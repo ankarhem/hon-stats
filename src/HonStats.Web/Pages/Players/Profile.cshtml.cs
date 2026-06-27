@@ -164,7 +164,7 @@ public class ProfileModel(
 
     public async Task<IActionResult> OnPostReindex(Guid accountId, CancellationToken ct = default)
     {
-        var result = await queue.RequestReindexAsync(accountId, ct);
+        var result = await queue.RequestReindexAsync(accountId, forceBackfill: false, ct);
         var indexed = await insights.GetIndexedPlayerAsync(accountId, ct);
         return Partial("_ReindexButton", new ReindexButtonView(accountId, result, indexed));
     }

@@ -22,7 +22,7 @@ internal sealed class PlayerIndexingService(
             {
                 using var scope = services.CreateScope();
                 var indexer = scope.ServiceProvider.GetRequiredService<IPlayerInsightsIndexer>();
-                await indexer.IndexAsync(request.AccountId, stoppingToken);
+                await indexer.IndexAsync(request.AccountId, request.ForceBackfill, stoppingToken);
             }
             catch (OperationCanceledException)
             {

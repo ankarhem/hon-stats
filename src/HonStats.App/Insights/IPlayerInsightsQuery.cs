@@ -47,5 +47,5 @@ public interface IPlayerInsightsQuery
 
 public interface IPlayerInsightsIndexer
 {
-    Task IndexAsync(Guid accountId, CancellationToken ct = default);
+    Task IndexAsync(Guid accountId, bool forceBackfill = false, CancellationToken ct = default);
 }

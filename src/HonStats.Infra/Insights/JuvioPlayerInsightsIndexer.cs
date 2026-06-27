@@ -26,7 +26,11 @@ internal sealed class JuvioPlayerInsightsIndexer(
     ILogger<JuvioPlayerInsightsIndexer> logger
 ) : IPlayerInsightsIndexer
 {
-    public async Task IndexAsync(Guid accountId, CancellationToken ct = default)
+    public async Task IndexAsync(
+        Guid accountId,
+        bool forceBackfill = false,
+        CancellationToken ct = default
+    )
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
 
@@ -41,7 +45,7 @@ internal sealed class JuvioPlayerInsightsIndexer(
 
         try
         {
-            await this.DoIndexAsync(db, indexed, accountId, ct);
+            await this.DoIndexAsync(db, indexed, accountId, forceBackfill, ct);
         }
         catch (OperationCanceledException)
         {
@@ -61,12 +65,13 @@ internal sealed class JuvioPlayerInsightsIndexer(
         HonStatsDbContext db,
         IndexedPlayer indexed,
         Guid accountId,
+        bool forceBackfill,
         CancellationToken ct
     )
     {
         var recent = new List<PlayerMatch>();
         var pageSize = options.Value.RecentMatchesLimit;
-        var lastKnown = indexed.LastIndexedMatchId ?? 0;
+        var lastKnown = forceBackfill ? 0 : indexed.LastIndexedMatchId ?? 0;
         for (var offset = 0; ; offset += pageSize)
         {
             var page = await matches.GetRecentForPlayerAsync(accountId, pageSize, offset, ct);
@@ -102,7 +107,7 @@ internal sealed class JuvioPlayerInsightsIndexer(
 
         var newGameIds = newMatches.Select(m => m.GameId).ToList();
         progressTracker.Start(accountId, newGameIds.Count);
-        await this.IngestSummariesAsync(db, accountId, newGameIds, ct);
+        await this.IngestSummariesAsync(db, accountId, newGameIds, forceBackfill, ct);
 
         // Resolve the player's name to write-through into the players table (the
         // LocalFirstPlayerNameResolver). The result is not assigned to
@@ -131,23 +136,42 @@ internal sealed class JuvioPlayerInsightsIndexer(
         HonStatsDbContext db,
         Guid accountId,
         IReadOnlyList<int> gameIds,
+        bool forceBackfill,
         CancellationToken ct
     )
     {
         if (gameIds.Count == 0)
-            return;
-
-        var alreadyIngested = await db
-            .MatchRoster.Where(r => gameIds.Contains(r.GameId))
-            .Select(r => r.GameId)
-            .Distinct()
-            .ToListAsync(ct);
-        var toIngest = gameIds.Except(alreadyIngested).ToList();
-
-        if (toIngest.Count == 0)
         {
-            progressTracker.AddCompleted(accountId, 0);
-            return;
+            if (forceBackfill)
+            {
+                gameIds = await db
+                    .PlayerMatches.Where(m => m.AccountId == accountId)
+                    .Select(m => m.GameId)
+                    .ToListAsync(ct);
+            }
+            if (gameIds.Count == 0)
+                return;
+        }
+
+        List<int> toIngest;
+        if (forceBackfill)
+        {
+            toIngest = gameIds.ToList();
+        }
+        else
+        {
+            var alreadyIngested = await db
+                .MatchRoster.Where(r => gameIds.Contains(r.GameId))
+                .Select(r => r.GameId)
+                .Distinct()
+                .ToListAsync(ct);
+            toIngest = gameIds.Except(alreadyIngested).ToList();
+
+            if (toIngest.Count == 0)
+            {
+                progressTracker.AddCompleted(accountId, 0);
+                return;
+            }
         }
 
         var concurrency = Math.Max(1, options.Value.MatchSummaryConcurrency);
@@ -177,6 +201,14 @@ internal sealed class JuvioPlayerInsightsIndexer(
 
         foreach (var summary in summaries)
         {
+            if (forceBackfill)
+            {
+                await db.MatchRoster.Where(r => r.GameId == summary.GameId).ExecuteDeleteAsync(ct);
+                await db
+                    .MatchPlayerItems.Where(r => r.GameId == summary.GameId)
+                    .ExecuteDeleteAsync(ct);
+            }
+
             foreach (var player in summary.Players)
             {
                 db.MatchRoster.Add(

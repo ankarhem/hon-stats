@@ -4,5 +4,9 @@ namespace HonStats.App.Indexing;
 
 public interface IReindexQueue
 {
-    Task<ReindexResult> RequestReindexAsync(Guid accountId, CancellationToken ct = default);
+    Task<ReindexResult> RequestReindexAsync(
+        Guid accountId,
+        bool forceBackfill = false,
+        CancellationToken ct = default
+    );
 }

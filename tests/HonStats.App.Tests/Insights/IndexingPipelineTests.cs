@@ -305,6 +305,113 @@ public class IndexingPipelineTests
         }
     }
 
+    [Fact]
+    public async Task Index_Twice_On_SamePlayer_ForceBackfill_ReplacesRosterAndItems()
+    {
+        var dbPath = Path.Combine(Path.GetTempPath(), $"honstats-force-{Guid.NewGuid():N}.db");
+        try
+        {
+            var matchQuery = CreateMatchQuery();
+            var nameResolver = new FakeNameResolver(
+                new Dictionary<Guid, ResolvedName>
+                {
+                    [PlayerA] = new()
+                    {
+                        AccountId = PlayerA,
+                        Username = "alpha",
+                        Country = "SE",
+                    },
+                    [PlayerB] = new()
+                    {
+                        AccountId = PlayerB,
+                        Username = "bravo",
+                        Country = "NO",
+                    },
+                }
+            );
+
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddDbContextFactory<HonStatsDbContext>(o =>
+                o.UseSqlite($"Data Source={dbPath}")
+            );
+            services.Configure<IndexingOptions>(o =>
+            {
+                o.RecentMatchesLimit = 50;
+                o.MatchSummaryConcurrency = 2;
+            });
+            services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
+            services.AddSingleton<IIndexProgressTracker, IndexProgressTracker>();
+            services.AddScoped<IInsightsRawQuery, InsightsRawQuery>();
+            services.AddScoped<IInsightsAggregateStore, InsightsAggregateStore>();
+            services.AddScoped<IPlayerInsightsQuery, SqlitePlayerInsightsQuery>();
+            services.AddScoped<IPlayerInsightsIndexer, JuvioPlayerInsightsIndexer>();
+            services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildHeroBuildsHandler>();
+            services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
+            services.AddSingleton<IMatchQuery>(matchQuery);
+            services.AddSingleton<IParsedReplayQuery>(new ThrowingParsedReplayQuery());
+            services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
+            services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
+                nameResolver,
+                sp.GetRequiredService<IPlayerNameStore>()
+            ));
+            var sp = services.BuildServiceProvider();
+
+            await using (
+                var db = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                await db.Database.MigrateAsync();
+            }
+
+            using var scope = sp.CreateScope();
+            var indexer = scope.ServiceProvider.GetRequiredService<IPlayerInsightsIndexer>();
+
+            // Cold index — ingests games 1+2, fetches each summary once.
+            await indexer.IndexAsync(PlayerA);
+            var callsAfterCold = matchQuery.SummaryCalls;
+            callsAfterCold.Should().BeGreaterThan(0);
+
+            int rosterAfterCold;
+            int itemsAfterCold;
+            await using (
+                var db1 = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                rosterAfterCold = await db1.MatchRoster.CountAsync();
+                itemsAfterCold = await db1.MatchPlayerItems.CountAsync();
+            }
+            rosterAfterCold.Should().BeGreaterThan(0);
+            itemsAfterCold.Should().BeGreaterThan(0);
+
+            // Force-backfill reindex — same fake match query, no new games.
+            await indexer.IndexAsync(PlayerA, forceBackfill: true);
+
+            // RED on current code: summaries are never re-fetched (cursor +
+            // alreadyIngested gates short-circuit the entire pipeline).
+            matchQuery.SummaryCalls.Should().BeGreaterThan(callsAfterCold);
+
+            // Roster/items are replaced (delete-then-insert), not duplicated.
+            await using (
+                var db2 = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                (await db2.MatchRoster.CountAsync()).Should().Be(rosterAfterCold);
+                (await db2.MatchPlayerItems.CountAsync()).Should().Be(itemsAfterCold);
+            }
+        }
+        finally
+        {
+            if (File.Exists(dbPath))
+            {
+                File.Delete(dbPath);
+            }
+        }
+    }
+
     private static FakeMatchQuery CreateMatchQuery() =>
         new(
             recent: new List<PlayerMatch>
@@ -367,6 +474,8 @@ public class IndexingPipelineTests
         Dictionary<int, MatchDetail> summaries
     ) : IMatchQuery
     {
+        public int SummaryCalls;
+
         public Task<IReadOnlyList<PlayerMatch>> GetRecentForPlayerAsync(
             Guid playerId,
             int limit,
@@ -374,8 +483,11 @@ public class IndexingPipelineTests
             CancellationToken ct = default
         ) => Task.FromResult(recent);
 
-        public Task<MatchDetail?> GetSummaryAsync(int gameId, CancellationToken ct = default) =>
-            Task.FromResult(summaries.TryGetValue(gameId, out var s) ? s : null);
+        public Task<MatchDetail?> GetSummaryAsync(int gameId, CancellationToken ct = default)
+        {
+            SummaryCalls++;
+            return Task.FromResult(summaries.TryGetValue(gameId, out var s) ? s : null);
+        }
     }
 
     private sealed class FakeNameResolver(Dictionary<Guid, ResolvedName> names)

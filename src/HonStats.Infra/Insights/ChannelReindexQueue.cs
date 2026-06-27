@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace HonStats.Infra.Insights;
 
-internal sealed record ReindexRequest(Guid AccountId);
+internal sealed record ReindexRequest(Guid AccountId, bool ForceBackfill = false);
 
 // Cooldown-gated queue: rejects a reindex request for a player whose last index
 // completed within ReindexCooldownMinutes, otherwise enqueues it for the
@@ -20,26 +20,30 @@ internal sealed class ChannelReindexQueue(
 {
     public async Task<ReindexResult> RequestReindexAsync(
         Guid accountId,
+        bool forceBackfill = false,
         CancellationToken ct = default
     )
     {
-        await using var db = await dbFactory.CreateDbContextAsync(ct);
-        var indexed = await db.IndexedPlayers.FindAsync(new object?[] { accountId }, ct);
-
-        var cooldown = TimeSpan.FromMinutes(Math.Max(1, options.Value.ReindexCooldownMinutes));
-        if (
-            indexed?.LastReindexAt is DateTimeOffset last
-            && DateTimeOffset.UtcNow - last < cooldown
-        )
+        if (!forceBackfill)
         {
-            return new ReindexResult
+            await using var db = await dbFactory.CreateDbContextAsync(ct);
+            var indexed = await db.IndexedPlayers.FindAsync(new object?[] { accountId }, ct);
+
+            var cooldown = TimeSpan.FromMinutes(Math.Max(1, options.Value.ReindexCooldownMinutes));
+            if (
+                indexed?.LastReindexAt is DateTimeOffset last
+                && DateTimeOffset.UtcNow - last < cooldown
+            )
             {
-                Outcome = ReindexOutcome.CooldownRejected,
-                RetryAfter = cooldown - (DateTimeOffset.UtcNow - last),
-            };
+                return new ReindexResult
+                {
+                    Outcome = ReindexOutcome.CooldownRejected,
+                    RetryAfter = cooldown - (DateTimeOffset.UtcNow - last),
+                };
+            }
         }
 
-        await channel.Writer.WriteAsync(new ReindexRequest(accountId), ct);
+        await channel.Writer.WriteAsync(new ReindexRequest(accountId, forceBackfill), ct);
         return new ReindexResult { Outcome = ReindexOutcome.Enqueued };
     }
 }
