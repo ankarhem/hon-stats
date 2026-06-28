@@ -48,6 +48,28 @@ else
         </div>
     </div>
 
+    <div class="panel card">
+        <p class="eyebrow card__title">Role Suitability</p>
+        <ul class="role-sliders">
+            @foreach (var (label, rating) in new (string, int)[]
+            {
+                ("Carry", h.CarryRating),
+                ("Mid", h.MidRating),
+                ("Offlane", h.OffLaneRating),
+                ("Solo Offlane", h.SoloOfflaneRating),
+                ("Soft Support", h.SoftSupportRating),
+                ("Hard Support", h.HardSupportRating),
+                ("Jungle", h.JungleRating),
+            })
+            {
+                <li class="role-slider">
+                    <span class="role-slider__label">@label</span>
+                    <span class="role-slider__track" style="--rating: @(rating * 20)%"></span>
+                </li>
+            }
+        </ul>
+    </div>
+
     @if (!string.IsNullOrEmpty(h.RoleDescription))
     {
         <div class="panel card">

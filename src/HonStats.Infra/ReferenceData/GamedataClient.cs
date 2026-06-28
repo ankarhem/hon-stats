@@ -38,6 +38,7 @@ internal sealed class HeroDto
     public int HardSupportRating { get; set; }
     public int SoftSupportRating { get; set; }
     public int OffLaneRating { get; set; }
+    public int SoloOfflaneRating { get; set; }
     public int JungleRating { get; set; }
     public List<string>? Inventory0 { get; set; }
     public List<string>? Inventory1 { get; set; }
@@ -264,6 +265,7 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
             HardSupportRating = h.HardSupportRating,
             SoftSupportRating = h.SoftSupportRating,
             OffLaneRating = h.OffLaneRating,
+            SoloOfflaneRating = h.SoloOfflaneRating,
             JungleRating = h.JungleRating,
             Abilities = heroAbilities,
         };

@@ -18,6 +18,7 @@ public class HeroesModel(IReferenceDataQuery reference) : PageModel
         (HeroRole.Carry, "Carry"),
         (HeroRole.Mid, "Mid"),
         (HeroRole.Offlane, "Offlane"),
+        (HeroRole.SoloOfflane, "Solo Offlane"),
         (HeroRole.SoftSupport, "Soft Support"),
         (HeroRole.HardSupport, "Hard Support"),
         (HeroRole.Jungle, "Jungle"),

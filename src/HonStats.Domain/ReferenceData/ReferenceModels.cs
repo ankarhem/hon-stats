@@ -37,6 +37,7 @@ public sealed class Hero
     public int HardSupportRating { get; set; }
     public int SoftSupportRating { get; set; }
     public int OffLaneRating { get; set; }
+    public int SoloOfflaneRating { get; set; }
     public int JungleRating { get; set; }
 
     public List<Ability> Abilities { get; set; } = [];
@@ -66,12 +67,13 @@ public sealed class Hero
     public bool MatchesRole(HeroRole role) =>
         role switch
         {
-            HeroRole.Carry => CarryRating > 0,
-            HeroRole.Mid => MidRating > 0,
-            HeroRole.Offlane => OffLaneRating > 0,
-            HeroRole.SoftSupport => SoftSupportRating > 0,
-            HeroRole.HardSupport => HardSupportRating > 0,
-            HeroRole.Jungle => JungleRating > 0,
+            HeroRole.Carry => CarryRating > 2,
+            HeroRole.Mid => MidRating > 2,
+            HeroRole.Offlane => OffLaneRating > 2,
+            HeroRole.SoloOfflane => SoloOfflaneRating > 2,
+            HeroRole.SoftSupport => SoftSupportRating > 2,
+            HeroRole.HardSupport => HardSupportRating > 2,
+            HeroRole.Jungle => JungleRating > 2,
             _ => false,
         };
 }
@@ -81,6 +83,7 @@ public enum HeroRole
     Carry,
     Mid,
     Offlane,
+    SoloOfflane,
     SoftSupport,
     HardSupport,
     Jungle,
