@@ -147,10 +147,12 @@
                                     ? ProfileModel.FormatBuyTime(timing.AvgSeconds)
                                     : "—";
                                 var anchorName = $"--{tier.ToString().ToLowerInvariant()}-{itemIdx}";
-                                <span class="loadout-item item-tile" style="anchor-name: @anchorName">
+                                <span class="loadout-item item-tile" style="anchor-name: @anchorName"
+                                      hx-on:pointerenter="this.querySelector('[popover]')?.showPopover()"
+                                      hx-on:pointerleave="this.querySelector('[popover]')?.hidePopover()">
                                     <img src="@iconUrl" alt="@(item?.DisplayName ?? "")" class="loadout-item__img" loading="lazy" />
-                                    <div class="item-tooltip" role="tooltip"
-                                         style="position-anchor: @anchorName; bottom: anchor(top); left: anchor(center); translate: -50% 0; position-try-fallbacks: flip-block">
+                                    <div class="item-tooltip" popover="hint" role="tooltip"
+                                         style="position-anchor: @anchorName">
                                         <div class="item-tooltip__head">
                                             <img class="item-tooltip__head-icon" src="@iconUrl" alt="" loading="lazy" />
                                             <div class="item-tooltip__head-text">
@@ -252,10 +254,12 @@
                                             var item = itemsById.GetValueOrDefault(itemId);
                                             if (item is null) { continue; }
                                             var anchorName = $"--loadout{loadoutIndex}-item{itemIndex}";
-                                            <span class="loadout-item item-tile" style="anchor-name: @anchorName">
+                                            <span class="loadout-item item-tile" style="anchor-name: @anchorName"
+                                                  hx-on:pointerenter="this.querySelector('[popover]')?.showPopover()"
+                                                  hx-on:pointerleave="this.querySelector('[popover]')?.hidePopover()">
                                                 <img src="@item.IconUrl" alt="@item.DisplayName" class="loadout-item__img" loading="lazy" />
-                                                <div class="item-tooltip" role="tooltip"
-                                                     style="position-anchor: @anchorName; bottom: anchor(top); left: anchor(center); translate: -50% 0; position-try-fallbacks: flip-block">
+                                                <div class="item-tooltip" popover="hint" role="tooltip"
+                                                     style="position-anchor: @anchorName">
                                                     <div class="item-tooltip__head">
                                                         <img class="item-tooltip__head-icon" src="@item.IconUrl" alt="" loading="lazy" />
                                                         <div class="item-tooltip__head-text">
