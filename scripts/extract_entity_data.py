@@ -25,19 +25,39 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = REPO_ROOT / "src" / "HonStats.Infra" / "ReferenceData" / "entity-overrides.json"
 
 HERO_GLOB = "heroes/*/base/hero.entity"
-ITEM_GLOB = "items/recipes/*/item.entity"
+ITEM_GLOBS = ["items/recipes/*/item.entity", "items/basic/*/item.entity"]
+STATE_GLOBS = ["items/recipes/*/state.entity", "items/basic/*/state.entity"]
 PHOENIX_GLOB = "items/phoenix_rewards/*/item.entity"
 
-ITEM_STAT_KEYS = {
-    "attackspeed", "evasion", "movespeed", "attackrange",
-    "armor", "magicarmor", "damage", "strength", "agility",
-    "intelligence", "healthregen", "maxhealth",
+ITEM_STAT_MAP = {
+    "attackspeed": "attackSpeed",
+    "evasion": "evasion",
+    "movespeed": "moveSpeed",
+    "movespeedmultiplier": "moveSpeedMultiplier",
+    "attackrange": "attackRange",
+    "armor": "armor",
+    "magicarmor": "magicArmor",
+    "damage": "damage",
+    "strength": "strength",
+    "agility": "agility",
+    "intelligence": "intelligence",
+    "healthregen": "healthRegen",
+    "healthregenpercent": "healthRegenPercent",
+    "maxhealth": "maxHealth",
+    "manaregenmultiplier": "manaRegenMultiplier",
+    "lifesteal": "lifesteal",
+    "deflection": "deflection",
+    "reducedabilitycooldowns": "reducedAbilityCooldowns",
+    "stunneddurationmultiplier": "stunnedDurationMultiplier",
+    "debuffdurationmultiplier": "debuffDurationMultiplier",
+    "criticalchance": "criticalChance",
+    "criticalmultiplier": "criticalMultiplier",
 }
 
 
 def extract_entities(jz_path: str, dest: Path) -> None:
     result = subprocess.run(
-        ["7zz", "x", jz_path, HERO_GLOB, ITEM_GLOB, PHOENIX_GLOB, f"-o{dest}", "-y"],
+        ["7zz", "x", jz_path, HERO_GLOB, *ITEM_GLOBS, *STATE_GLOBS, PHOENIX_GLOB, f"-o{dest}", "-y"],
         capture_output=True,
         text=True,
     )
@@ -97,18 +117,33 @@ def parse_phoenix(path: Path) -> str | None:
     return name if name.startswith("Item_") else None
 
 
-def to_camel(snake: str) -> str:
-    parts = snake.split("_") if "_" in snake else [snake]
-    return parts[0] + "".join(p.capitalize() for p in parts[1:])
-
-
 def parse_item_stats(attr: dict[str, str]) -> dict[str, float]:
     stats = {}
-    for key in ITEM_STAT_KEYS:
-        val = num(attr.get(key))
+    for src_key, out_key in ITEM_STAT_MAP.items():
+        val = num(attr.get(src_key))
         if val is not None and val != 0:
-            stats[to_camel(key)] = val
+            if out_key == "attackSpeed":
+                val *= 100
+            stats[out_key] = val
     return stats
+
+
+def parse_modifiers(parent: ET.Element, flat: dict[str, float]) -> dict[str, dict[str, float]]:
+    modifiers = {}
+    for mod in parent.findall("modifier"):
+        mod_stats = parse_item_stats(mod.attrib)
+        if not mod_stats:
+            continue
+        cond = mod.attrib.get("condition")
+        if not cond:
+            flat.update(mod_stats)
+            continue
+        for key in list(mod_stats):
+            if key in flat and flat[key] == mod_stats[key]:
+                del mod_stats[key]
+        if mod_stats:
+            modifiers[cond] = mod_stats
+    return modifiers
 
 
 def parse_item(path: Path) -> dict | None:
@@ -125,17 +160,23 @@ def parse_item(path: Path) -> dict | None:
 
     data = {}
     flat = parse_item_stats(attr)
+
+    modifiers = parse_modifiers(root, flat)
+
+    state_path = path.parent / "state.entity"
+    if state_path.exists():
+        try:
+            state_root = ET.parse(state_path).getroot()
+            for cond, mod_stats in parse_modifiers(state_root, flat).items():
+                if cond in modifiers:
+                    modifiers[cond].update(mod_stats)
+                else:
+                    modifiers[cond] = mod_stats
+        except ET.ParseError:
+            pass
+
     if flat:
         data["stats"] = flat
-
-    modifiers = {}
-    for mod in root.findall("modifier"):
-        cond = mod.attrib.get("condition")
-        if not cond:
-            continue
-        mod_stats = parse_item_stats(mod.attrib)
-        if mod_stats:
-            modifiers[cond] = mod_stats
 
     if modifiers:
         data["modifiers"] = modifiers
@@ -165,10 +206,11 @@ def main() -> None:
                 heroes.update(result)
 
         items = {}
-        for path in sorted(tmp_path.glob(ITEM_GLOB)):
-            result = parse_item(path)
-            if result:
-                items.update(result)
+        for glob in ITEM_GLOBS:
+            for path in sorted(tmp_path.glob(glob)):
+                result = parse_item(path)
+                if result:
+                    items.update(result)
 
         phoenix_rewards = sorted(
             name

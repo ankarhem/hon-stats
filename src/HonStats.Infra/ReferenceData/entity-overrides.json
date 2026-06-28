@@ -1126,19 +1126,38 @@
   "items": {
     "Item_AbyssalFlower": {
       "stats": {
-        "attackspeed": 0.2,
+        "attackSpeed": 20.0,
         "damage": 24.0,
-        "intelligence": 12.0
+        "intelligence": 12.0,
+        "manaRegenMultiplier": 1.0
       }
     },
     "Item_AbyssalSkull": {
+      "modifiers": {
+        "melee": {
+          "lifesteal": 0.12
+        },
+        "ranged !Tower": {
+          "lifesteal": 0.08
+        }
+      },
       "stats": {
-        "armor": 2.0
+        "armor": 3.5
+      }
+    },
+    "Item_AcolytesStaff": {
+      "stats": {
+        "intelligence": 25.0
+      }
+    },
+    "Item_AlacrityBand": {
+      "stats": {
+        "attackSpeed": 30.0
       }
     },
     "Item_AlchemistsBones": {
       "stats": {
-        "attackspeed": 0.3
+        "attackSpeed": 30.0
       }
     },
     "Item_AmuletOfExile": {
@@ -1148,23 +1167,29 @@
         "strength": 3.0
       }
     },
+    "Item_ApprenticesRobe": {
+      "stats": {
+        "intelligence": 6.0
+      }
+    },
     "Item_Arcana": {
       "stats": {
-        "attackspeed": 0.1,
+        "attackSpeed": 10.0,
         "damage": 12.0,
-        "intelligence": 6.0
+        "intelligence": 6.0,
+        "manaRegenMultiplier": 0.5
       }
     },
     "Item_ArmorOfTheMadMage": {
       "stats": {
         "armor": 8.0,
-        "healthregen": 8.0,
+        "healthRegen": 8.0,
         "intelligence": 20.0
       }
     },
     "Item_AssassinsShroud": {
       "stats": {
-        "attackspeed": 0.1,
+        "attackSpeed": 10.0,
         "damage": 30.0
       }
     },
@@ -1172,8 +1197,13 @@
       "stats": {
         "agility": 5.0,
         "intelligence": 5.0,
-        "magicarmor": 1.0,
+        "magicArmor": 1.0,
         "strength": 8.0
+      }
+    },
+    "Item_AxeOfTheMalphai": {
+      "stats": {
+        "strength": 25.0
       }
     },
     "Item_BarbedArmor": {
@@ -1184,26 +1214,60 @@
     },
     "Item_BarrierIdol": {
       "stats": {
-        "healthregen": 12.0,
-        "maxhealth": 200.0
+        "debuffDurationMultiplier": -0.2,
+        "healthRegen": 12.0,
+        "magicArmor": 10.0,
+        "maxHealth": 200.0,
+        "stunnedDurationMultiplier": -0.2
+      }
+    },
+    "Item_Beastheart": {
+      "stats": {
+        "maxHealth": 230.0
       }
     },
     "Item_BehemothsHeart": {
       "stats": {
-        "maxhealth": 350.0,
+        "healthRegenPercent": 0.01,
+        "maxHealth": 350.0,
         "strength": 35.0
       }
     },
     "Item_BeltOfVitality": {
       "stats": {
-        "healthregen": 3.0,
-        "maxhealth": 200.0
+        "debuffDurationMultiplier": -0.08,
+        "healthRegen": 3.0,
+        "maxHealth": 200.0,
+        "stunnedDurationMultiplier": -0.08
+      }
+    },
+    "Item_BlessedOrb": {
+      "stats": {
+        "agility": 10.0,
+        "intelligence": 10.0,
+        "strength": 10.0
       }
     },
     "Item_BloodChalice": {
       "stats": {
         "intelligence": 3.0,
+        "manaRegenMultiplier": 0.5,
         "strength": 3.0
+      }
+    },
+    "Item_BloodRuby": {
+      "stats": {
+        "maxHealth": 150.0
+      }
+    },
+    "Item_BolsteringArmband": {
+      "stats": {
+        "strength": 6.0
+      }
+    },
+    "Item_Broadsword": {
+      "stats": {
+        "damage": 18.0
       }
     },
     "Item_Brutalizer": {
@@ -1214,7 +1278,7 @@
     },
     "Item_ChargedHammer": {
       "stats": {
-        "attackspeed": 0.9
+        "attackSpeed": 90.0
       }
     },
     "Item_CorruptedSword": {
@@ -1225,37 +1289,50 @@
     "Item_CrownGreaves": {
       "stats": {
         "agility": 4.0,
-        "armor": 8.0,
+        "armor": 2.0,
         "intelligence": 4.0,
+        "moveSpeed": 70.0,
         "strength": 4.0
+      }
+    },
+    "Item_CrushingClaws": {
+      "stats": {
+        "strength": 3.0
       }
     },
     "Item_DaemonicBreastplate": {
       "stats": {
         "armor": 10.0,
-        "attackspeed": 0.3
+        "attackSpeed": 30.0
+      }
+    },
+    "Item_DancingBlade": {
+      "stats": {
+        "agility": 25.0
       }
     },
     "Item_Dawnbringer": {
       "stats": {
         "agility": 20.0,
-        "attackspeed": 0.25,
+        "attackSpeed": 25.0,
         "damage": 15.0,
         "intelligence": 20.0,
+        "moveSpeedMultiplier": 0.15,
         "strength": 20.0
       }
     },
     "Item_DesertScream": {
       "stats": {
-        "intelligence": 25.0
+        "intelligence": 25.0,
+        "manaRegenMultiplier": 1.25
       }
     },
     "Item_DevourersGauntlet": {
       "stats": {
         "agility": 3.0,
-        "healthregen": 3.0,
+        "healthRegen": 3.0,
         "intelligence": 3.0,
-        "magicarmor": 1.0,
+        "magicArmor": 3.0,
         "strength": 6.0
       }
     },
@@ -1268,80 +1345,96 @@
       "stats": {
         "agility": 5.0,
         "intelligence": 5.0,
-        "maxhealth": 250.0,
-        "movespeed": 20.0,
+        "maxHealth": 250.0,
+        "moveSpeed": 20.0,
         "strength": 5.0
+      }
+    },
+    "Item_DuckBoots": {
+      "stats": {
+        "agility": 3.0
       }
     },
     "Item_ElderParasite": {
       "stats": {
-        "attackspeed": 0.15,
-        "damage": 5.0
+        "attackSpeed": 15.0,
+        "damage": 5.0,
+        "lifesteal": 0.1
       }
     },
     "Item_Energizer": {
       "stats": {
         "agility": 4.0,
         "intelligence": 4.0,
-        "movespeed": 20.0,
+        "manaRegenMultiplier": 0.75,
+        "moveSpeed": 20.0,
         "strength": 4.0
       }
     },
     "Item_FauxBow": {
       "modifiers": {
         "melee": {
-          "attackrange": 50.0
+          "attackRange": 50.0
         },
         "ranged": {
-          "attackrange": 100.0
+          "attackRange": 100.0
         }
       },
       "stats": {
         "agility": 6.0,
-        "attackspeed": 0.3,
+        "attackSpeed": 30.0,
         "damage": 4.0
       }
     },
     "Item_Firebrand": {
       "stats": {
         "agility": 16.0,
-        "attackspeed": 0.15
+        "attackSpeed": 15.0,
+        "moveSpeedMultiplier": 0.08
       }
     },
     "Item_FlameBelcher": {
       "modifiers": {
         "melee": {
           "armor": 5.0,
-          "attackrange": 75.0
+          "attackRange": 75.0
         },
         "ranged": {
-          "attackrange": 150.0
+          "attackRange": 150.0
         }
       },
       "stats": {
         "agility": 7.0,
-        "attackspeed": 0.3,
+        "attackSpeed": 30.0,
         "damage": 55.0
       }
     },
     "Item_Flayer": {
       "stats": {
+        "criticalChance": 0.2,
+        "criticalMultiplier": 2.4,
         "damage": 75.0
+      }
+    },
+    "Item_Fleetfeet": {
+      "stats": {
+        "agility": 6.0
       }
     },
     "Item_FortifiedBracer": {
       "stats": {
         "agility": 3.0,
         "intelligence": 3.0,
-        "magicarmor": 1.0,
+        "magicArmor": 1.0,
         "strength": 6.0
       }
     },
     "Item_Frostburn": {
       "stats": {
         "agility": 16.0,
-        "attackspeed": 0.2,
+        "attackSpeed": 20.0,
         "damage": 10.0,
+        "moveSpeedMultiplier": 0.1,
         "strength": 16.0
       }
     },
@@ -1371,53 +1464,100 @@
     "Item_Genjuro": {
       "stats": {
         "agility": 30.0,
-        "attackspeed": 0.1,
+        "attackSpeed": 10.0,
         "damage": 30.0
       }
     },
     "Item_GeometersBane": {
       "stats": {
         "agility": 26.0,
-        "attackspeed": 0.25,
+        "attackSpeed": 25.0,
         "intelligence": 10.0,
+        "moveSpeedMultiplier": 0.12,
         "strength": 10.0
       }
     },
     "Item_GhostMarchers": {
+      "modifiers": {
+        "ranged": {
+          "moveSpeedMultiplier": 0.15
+        }
+      },
       "stats": {
-        "damage": 22.0
+        "damage": 22.0,
+        "moveSpeed": 60.0
+      }
+    },
+    "Item_GlovesOfTheSwift": {
+      "stats": {
+        "attackSpeed": 15.0
+      }
+    },
+    "Item_Glowstone": {
+      "stats": {
+        "maxHealth": 200.0
+      }
+    },
+    "Item_GoldenApple": {
+      "stats": {
+        "damage": 1.5
       }
     },
     "Item_GrimoireOfPower": {
       "stats": {
         "agility": 10.0,
         "intelligence": 30.0,
+        "manaRegenMultiplier": 1.0,
+        "reducedAbilityCooldowns": 0.2,
         "strength": 10.0
+      }
+    },
+    "Item_GuardianRing": {
+      "stats": {
+        "armor": 2.0
+      }
+    },
+    "Item_Halberd": {
+      "stats": {
+        "damage": 10.0
       }
     },
     "Item_HarkonsBlade": {
       "stats": {
-        "attackspeed": 0.15,
+        "attackSpeed": 15.0,
         "damage": 20.0,
-        "intelligence": 35.0
+        "intelligence": 35.0,
+        "manaRegenMultiplier": 1.25
       }
     },
     "Item_Hellflower": {
       "stats": {
-        "attackspeed": 0.35,
+        "attackSpeed": 35.0,
         "damage": 40.0,
-        "intelligence": 20.0
+        "intelligence": 20.0,
+        "manaRegenMultiplier": 2.0
       }
     },
     "Item_HelmOfTheBlackLegion": {
       "stats": {
-        "healthregen": 7.0,
-        "maxhealth": 250.0
+        "healthRegen": 7.0,
+        "maxHealth": 250.0
+      }
+    },
+    "Item_HelmOfTheVictim": {
+      "stats": {
+        "armor": 5.0,
+        "healthRegen": 3.0
+      }
+    },
+    "Item_HungrySpirit": {
+      "stats": {
+        "lifesteal": 0.1
       }
     },
     "Item_Hypercrown": {
       "stats": {
-        "attackspeed": 0.9
+        "attackSpeed": 90.0
       }
     },
     "Item_Icebrand": {
@@ -1428,31 +1568,50 @@
     },
     "Item_IconOfTheGoddess": {
       "stats": {
-        "healthregen": 3.0,
-        "maxhealth": 450.0
+        "healthRegen": 3.0,
+        "manaRegenMultiplier": 0.3,
+        "maxHealth": 950.0
       }
     },
     "Item_ImmortalPride": {
       "stats": {
         "armor": 6.0,
-        "attackspeed": 0.3,
+        "attackSpeed": 30.0,
         "damage": 15.0,
-        "healthregen": 10.0,
-        "maxhealth": 250.0
+        "debuffDurationMultiplier": -0.15,
+        "healthRegen": 10.0,
+        "maxHealth": 250.0,
+        "stunnedDurationMultiplier": -0.15
       }
     },
     "Item_InquisitorsFlail": {
       "stats": {
         "damage": 12.0,
+        "magicArmor": 7.0,
         "strength": 8.0
       }
     },
     "Item_Insanitarius": {
       "stats": {
         "armor": 5.0,
-        "attackspeed": 0.25,
+        "attackSpeed": 25.0,
         "damage": 10.0,
-        "healthregen": 5.0
+        "healthRegen": 5.0
+      }
+    },
+    "Item_IoynStone": {
+      "stats": {
+        "maxHealth": 60.0
+      }
+    },
+    "Item_IronBuckler": {
+      "modifiers": {
+        "ranged": {
+          "deflection": 10.0
+        }
+      },
+      "stats": {
+        "deflection": 20.0
       }
     },
     "Item_IronShield": {
@@ -1460,9 +1619,15 @@
         "agility": 8.0
       }
     },
+    "Item_JadeSpire": {
+      "stats": {
+        "manaRegenMultiplier": 1.15
+      }
+    },
     "Item_KuldrasSheepstick": {
       "stats": {
-        "intelligence": 50.0
+        "intelligence": 50.0,
+        "manaRegenMultiplier": 2.0
       }
     },
     "Item_LexTalionis": {
@@ -1472,26 +1637,76 @@
         "intelligence": 3.0
       }
     },
+    "Item_Lifetube": {
+      "stats": {
+        "healthRegen": 4.5
+      }
+    },
     "Item_Lightbrand": {
       "stats": {
         "intelligence": 16.0
       }
     },
+    "Item_LuminousPrism": {
+      "stats": {
+        "intelligence": 15.0
+      }
+    },
+    "Item_LunarTear": {
+      "stats": {
+        "healthRegen": 0.5
+      }
+    },
     "Item_Madfreds_BrassKnuckles": {
       "stats": {
         "agility": 6.0,
-        "attackspeed": 0.05,
+        "attackSpeed": 5.0,
         "damage": 10.0,
         "intelligence": 3.0,
+        "moveSpeed": 15.0,
         "strength": 3.0
+      }
+    },
+    "Item_MajorTotem": {
+      "stats": {
+        "agility": 4.0,
+        "intelligence": 4.0,
+        "strength": 4.0
+      }
+    },
+    "Item_Manatube": {
+      "stats": {
+        "manaRegenMultiplier": 1.0
+      }
+    },
+    "Item_Marchers": {
+      "stats": {
+        "moveSpeed": 45.0
+      }
+    },
+    "Item_MarkOfTheNovice": {
+      "stats": {
+        "intelligence": 3.0
       }
     },
     "Item_MastersLegacy": {
       "stats": {
         "agility": 15.0,
         "intelligence": 15.0,
-        "maxhealth": 200.0,
+        "maxHealth": 200.0,
         "strength": 15.0
+      }
+    },
+    "Item_MightyBlade": {
+      "stats": {
+        "strength": 10.0
+      }
+    },
+    "Item_MinorTotem": {
+      "stats": {
+        "agility": 1.0,
+        "intelligence": 1.0,
+        "strength": 1.0
       }
     },
     "Item_MockOfBrilliance": {
@@ -1500,51 +1715,82 @@
         "evasion": 0.15
       }
     },
+    "Item_MysticVestments": {
+      "stats": {
+        "magicArmor": 5.0
+      }
+    },
+    "Item_NeophytesBook": {
+      "stats": {
+        "intelligence": 10.0
+      }
+    },
     "Item_NomesWisdom": {
       "stats": {
-        "armor": 2.0,
-        "damage": 10.0
+        "armor": 1.0,
+        "damage": 10.0,
+        "magicArmor": 2.0,
+        "manaRegenMultiplier": 1.0
       }
     },
     "Item_NullStone": {
       "stats": {
         "agility": 15.0,
         "damage": 15.0,
-        "healthregen": 6.0,
+        "healthRegen": 6.0,
         "intelligence": 15.0,
+        "manaRegenMultiplier": 1.5,
         "strength": 15.0
       }
     },
     "Item_NullfireBlade": {
       "stats": {
-        "attackspeed": 0.05
+        "attackSpeed": 5.0
       }
     },
     "Item_OblivionHammer": {
       "stats": {
         "damage": 50.0,
-        "healthregen": 10.0,
-        "maxhealth": 300.0,
+        "healthRegen": 10.0,
+        "maxHealth": 300.0,
         "strength": 15.0
       }
     },
     "Item_ObsidianBell": {
       "stats": {
-        "intelligence": 40.0
+        "intelligence": 40.0,
+        "manaRegenMultiplier": 2.0
+      }
+    },
+    "Item_PerpetualCogwheel": {
+      "stats": {
+        "manaRegenMultiplier": 1.5
       }
     },
     "Item_PhantasmalTreads": {
+      "modifiers": {
+        "ranged": {
+          "moveSpeedMultiplier": 0.2
+        }
+      },
       "stats": {
         "agility": 8.0,
-        "damage": 45.0
+        "damage": 45.0,
+        "moveSpeed": 85.0
       }
     },
     "Item_PlatedGreaves": {
       "stats": {
         "agility": 3.0,
-        "armor": 6.0,
+        "armor": 1.0,
         "intelligence": 3.0,
+        "moveSpeed": 55.0,
         "strength": 3.0
+      }
+    },
+    "Item_Platemail": {
+      "stats": {
+        "armor": 10.0
       }
     },
     "Item_PowerSupply": {
@@ -1554,6 +1800,13 @@
         "strength": 3.0
       }
     },
+    "Item_PretendersCrown": {
+      "stats": {
+        "agility": 2.0,
+        "intelligence": 2.0,
+        "strength": 2.0
+      }
+    },
     "Item_ProtectiveTalisman": {
       "stats": {
         "armor": 2.0
@@ -1561,23 +1814,40 @@
     },
     "Item_PsionicHood": {
       "stats": {
-        "healthregen": 5.0,
-        "maxhealth": 250.0
+        "debuffDurationMultiplier": -0.15,
+        "healthRegen": 5.0,
+        "magicArmor": 10.0,
+        "manaRegenMultiplier": 1.0,
+        "maxHealth": 250.0,
+        "reducedAbilityCooldowns": 0.15,
+        "stunnedDurationMultiplier": -0.15
+      }
+    },
+    "Item_Punchdagger": {
+      "stats": {
+        "damage": 9.0
+      }
+    },
+    "Item_Quickblade": {
+      "stats": {
+        "agility": 10.0
       }
     },
     "Item_RefreshingOrnament": {
       "stats": {
         "agility": 2.0,
+        "healthRegen": 3.0,
         "intelligence": 2.0,
         "strength": 2.0
       }
     },
     "Item_RestorationStone": {
       "stats": {
-        "attackspeed": 0.15,
+        "attackSpeed": 15.0,
         "damage": 20.0,
-        "healthregen": 5.0,
-        "intelligence": 10.0
+        "healthRegen": 5.0,
+        "intelligence": 10.0,
+        "manaRegenMultiplier": 2.0
       }
     },
     "Item_RingOfSorcery": {
@@ -1589,20 +1859,26 @@
     },
     "Item_RingOfTheTeacher": {
       "stats": {
-        "armor": 2.0,
+        "armor": 1.0,
         "damage": 5.0
+      }
+    },
+    "Item_Ringmail": {
+      "stats": {
+        "armor": 4.0
       }
     },
     "Item_RunedCleaver": {
       "stats": {
         "damage": 50.0,
-        "healthregen": 6.0
+        "healthRegen": 6.0,
+        "manaRegenMultiplier": 1.5
       }
     },
     "Item_SacrificialStone": {
       "stats": {
         "agility": 7.0,
-        "intelligence": 7.0,
+        "intelligence": 9.0,
         "strength": 7.0
       }
     },
@@ -1613,27 +1889,36 @@
     },
     "Item_SavageMace": {
       "stats": {
-        "attackspeed": 0.3,
+        "attackSpeed": 30.0,
         "damage": 60.0
+      }
+    },
+    "Item_Scarab": {
+      "stats": {
+        "manaRegenMultiplier": 0.5
       }
     },
     "Item_Searinglight": {
       "stats": {
         "agility": 16.0,
-        "attackspeed": 0.2,
-        "intelligence": 16.0
+        "attackSpeed": 20.0,
+        "intelligence": 16.0,
+        "moveSpeedMultiplier": 0.1
       }
     },
     "Item_ShamansHeaddress": {
       "stats": {
-        "healthregen": 5.0,
-        "maxhealth": 200.0
+        "debuffDurationMultiplier": -0.1,
+        "healthRegen": 5.0,
+        "magicArmor": 10.0,
+        "maxHealth": 200.0,
+        "stunnedDurationMultiplier": -0.1
       }
     },
     "Item_ShieldOfTheFive": {
       "stats": {
         "agility": 2.0,
-        "armor": 4.0,
+        "armor": 1.0,
         "intelligence": 2.0,
         "strength": 2.0
       }
@@ -1645,10 +1930,28 @@
       }
     },
     "Item_SinnersInscription": {
+      "modifiers": {
+        "melee": {
+          "lifesteal": 0.15
+        },
+        "ranged !Tower": {
+          "lifesteal": 0.1
+        }
+      },
       "stats": {
-        "armor": 5.0,
+        "armor": 3.5,
         "damage": 10.0,
         "intelligence": 12.0
+      }
+    },
+    "Item_Slayer": {
+      "stats": {
+        "damage": 40.0
+      }
+    },
+    "Item_SnakeBracelet": {
+      "stats": {
+        "evasion": 0.15
       }
     },
     "Item_SolsBulwark": {
@@ -1660,13 +1963,14 @@
       "stats": {
         "agility": 3.0,
         "intelligence": 6.0,
+        "moveSpeed": 65.0,
         "strength": 3.0
       }
     },
     "Item_SoulscreamRing": {
       "stats": {
         "agility": 6.0,
-        "attackspeed": 0.05,
+        "attackSpeed": 5.0,
         "intelligence": 3.0,
         "strength": 3.0
       }
@@ -1680,19 +1984,21 @@
     },
     "Item_SpellShards": {
       "stats": {
-        "intelligence": 8.0
+        "intelligence": 8.0,
+        "manaRegenMultiplier": 1.75
       }
     },
     "Item_SpellSunder": {
       "stats": {
-        "maxhealth": 200.0
+        "manaRegenMultiplier": 2.0,
+        "maxHealth": 200.0
       }
     },
     "Item_SpikedBola": {
       "stats": {
         "agility": 30.0,
         "intelligence": 8.0,
-        "magicarmor": 1.0,
+        "magicArmor": 1.0,
         "strength": 12.0
       }
     },
@@ -1700,7 +2006,7 @@
       "stats": {
         "agility": 10.0,
         "intelligence": 10.0,
-        "maxhealth": 200.0,
+        "maxHealth": 200.0,
         "strength": 10.0
       }
     },
@@ -1708,39 +2014,63 @@
       "stats": {
         "agility": 11.0,
         "intelligence": 14.0,
-        "magicarmor": 1.0,
+        "magicArmor": 1.0,
+        "moveSpeed": 70.0,
         "strength": 14.0
       }
     },
     "Item_Steamboots": {
       "stats": {
-        "attackspeed": 0.2
+        "agility": 10.0,
+        "attackSpeed": 20.0,
+        "intelligence": 10.0,
+        "moveSpeed": 60.0,
+        "strength": 10.0
+      }
+    },
+    "Item_Steamstaff": {
+      "stats": {
+        "attackSpeed": 10.0,
+        "damage": 10.0
       }
     },
     "Item_StormLance": {
       "stats": {
         "agility": 4.0,
         "damage": 12.0,
-        "movespeed": 20.0
+        "moveSpeed": 20.0
       }
     },
     "Item_Stormspirit": {
       "stats": {
         "intelligence": 16.0,
-        "movespeed": 25.0
+        "manaRegenMultiplier": 1.25,
+        "moveSpeed": 25.0
+      }
+    },
+    "Item_Striders": {
+      "stats": {
+        "moveSpeed": 55.0
       }
     },
     "Item_Sustainer": {
       "stats": {
         "damage": 5.0,
-        "healthregen": 5.0
+        "healthRegen": 5.0,
+        "manaRegenMultiplier": 1.25
+      }
+    },
+    "Item_SwordOfTheHigh": {
+      "stats": {
+        "damage": 64.0
       }
     },
     "Item_SymbolOfRage": {
       "stats": {
         "armor": 5.0,
         "damage": 10.0,
-        "healthregen": 3.0,
+        "healthRegen": 3.0,
+        "lifesteal": 0.25,
         "strength": 25.0
       }
     },
@@ -1751,25 +2081,37 @@
         "intelligence": 12.0
       }
     },
+    "Item_TemporalBeads": {
+      "stats": {
+        "manaRegenMultiplier": 0.75,
+        "reducedAbilityCooldowns": 0.08
+      }
+    },
     "Item_Thunderclaw": {
       "stats": {
-        "attackspeed": 0.45
+        "attackSpeed": 45.0
+      }
+    },
+    "Item_TrinketOfRestoration": {
+      "stats": {
+        "healthRegen": 2.0
       }
     },
     "Item_TwinBlades": {
       "stats": {
-        "attackspeed": 0.1,
+        "attackSpeed": 10.0,
         "damage": 30.0,
-        "intelligence": 10.0
+        "intelligence": 10.0,
+        "manaRegenMultiplier": 0.5
       }
     },
     "Item_UltorsHeavyPlate": {
       "stats": {
         "agility": 2.0,
         "armor": 5.0,
-        "healthregen": 8.0,
+        "healthRegen": 8.0,
         "intelligence": 2.0,
-        "maxhealth": 275.0,
+        "maxHealth": 275.0,
         "strength": 2.0
       }
     },
@@ -1780,36 +2122,52 @@
         "strength": 5.0
       }
     },
+    "Item_Warhammer": {
+      "stats": {
+        "damage": 24.0
+      }
+    },
+    "Item_Warpcleft": {
+      "stats": {
+        "attackSpeed": 45.0
+      }
+    },
     "Item_WarsteamBoots": {
       "stats": {
         "agility": 12.0,
-        "attackspeed": 0.25,
+        "attackSpeed": 25.0,
         "intelligence": 12.0,
+        "moveSpeed": 75.0,
         "strength": 12.0
       }
     },
     "Item_WhisperingHelm": {
       "stats": {
         "armor": 5.0,
-        "healthregen": 3.0
+        "healthRegen": 3.0,
+        "lifesteal": 0.15
+      }
+    },
+    "Item_WindWhistle": {
+      "stats": {
+        "moveSpeed": 15.0
       }
     },
     "Item_Wingbow": {
       "modifiers": {
         "melee": {
-          "attackrange": 75.0,
+          "attackRange": 75.0,
           "evasion": 0.35,
-          "movespeed": 25.0
+          "moveSpeed": 25.0
         },
         "ranged": {
-          "agility": 33.0,
-          "attackrange": 150.0,
+          "attackRange": 150.0,
           "evasion": 0.2
         }
       },
       "stats": {
         "agility": 33.0,
-        "attackspeed": 0.3,
+        "attackSpeed": 30.0,
         "damage": 30.0
       }
     }

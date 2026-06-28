@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Html;
 namespace HonStats.Web.Rendering;
 
 // Renders juvio's HoN markup as safe HTML. Markup grammar:
-//   ^X ... ^*       color span (X = single letter; ^* resets). Mapped to .gt-X.
+//   ^X ... ^*       letter color span (X = single letter). Mapped to .gt-X.
+//   ^NNN ... ^*     numeric RGB color span (3 digits, each 0–9 → 0–255).
 //   {a,b,c,d}       per-level values, rendered "a/b/c/d".
 //   \n (literal)    line break (the strings store a literal backslash-n, not a newline).
 // All text content is HTML-encoded; only generated span/br tags are raw, so input
@@ -53,20 +54,46 @@ public static class GameText
                 continue;
             }
 
-            if (c == '^' && i + 1 < raw.Length && (raw[i + 1] == '*' || char.IsLetter(raw[i + 1])))
+            if (c == '^' && i + 1 < raw.Length)
             {
                 var next = raw[i + 1];
-                FlushText();
-                CloseSpan();
-                if (next != '*')
+
+                if (next == '*' || char.IsLetter(next) || char.IsDigit(next))
                 {
-                    sb.Append("<span class=\"gt gt-")
-                        .Append(char.ToLowerInvariant(next))
-                        .Append("\">");
-                    spanOpen = true;
+                    FlushText();
+                    CloseSpan();
+
+                    if (next == '*')
+                    {
+                        i += 2;
+                    }
+                    else if (char.IsLetter(next))
+                    {
+                        sb.Append("<span class=\"gt gt-")
+                            .Append(char.ToLowerInvariant(next))
+                            .Append("\">");
+                        spanOpen = true;
+                        i += 2;
+                    }
+                    else
+                    {
+                        i += 2;
+                        var r = (next - '0') * 255 / 9;
+                        var g =
+                            i < raw.Length && char.IsDigit(raw[i]) ? (raw[i++] - '0') * 255 / 9 : 0;
+                        var b =
+                            i < raw.Length && char.IsDigit(raw[i]) ? (raw[i++] - '0') * 255 / 9 : 0;
+                        sb.Append("<span style=\"color:rgb(")
+                            .Append(r)
+                            .Append(',')
+                            .Append(g)
+                            .Append(',')
+                            .Append(b)
+                            .Append(")\">");
+                        spanOpen = true;
+                    }
+                    continue;
                 }
-                i += 2;
-                continue;
             }
 
             if (c == '{')

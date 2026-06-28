@@ -138,8 +138,17 @@ public sealed class Item
         ("moveSpeed", "Movement Speed", false),
         ("attackRange", "Attack Range", false),
         ("castSpeed", "Cast Speed", true),
-        ("attackSpeed", "Attack Speed", true),
+        ("attackSpeed", "Attack Speed", false),
         ("evasion", "Evasion", true),
+        ("lifesteal", "Lifesteal", true),
+        ("moveSpeedMultiplier", "Move Speed Bonus", true),
+        ("stunnedDurationMultiplier", "Stun Duration", true),
+        ("debuffDurationMultiplier", "Debuff Duration", true),
+        ("deflection", "Damage Block", false),
+        ("reducedAbilityCooldowns", "Cooldown Reduction", true),
+        ("criticalChance", "Crit Chance", true),
+        ("criticalMultiplier", "Crit Multiplier", false),
+        ("healthRegenPercent", "% Max Health / sec", true),
     ];
 
     public IReadOnlyList<string> PassiveBonuses
