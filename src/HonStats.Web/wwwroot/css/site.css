@@ -715,24 +715,24 @@ dialog.modal::backdrop {
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
-    gap: 0.6rem;
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 0.4rem;
 }
 
 .grid-list__item {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.6rem;
-    text-align: center;
+    position: relative;
 }
 
 .grid-list__icon {
-    width: 48px;
-    height: 48px;
+    width: 100%;
+    aspect-ratio: 1;
     border-radius: var(--radius-sm);
     object-fit: cover;
-    margin-bottom: 0.35rem;
+    background: var(--surface-3);
+    display: block;
+    transition:
+        filter 0.15s,
+        opacity 0.15s;
 }
 
 .grid-list__name {
