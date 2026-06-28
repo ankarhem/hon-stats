@@ -376,6 +376,7 @@ p {
 .pill:hover {
     border-color: var(--accent);
     color: var(--accent);
+    text-decoration: none;
 }
 
 .pill[aria-current="true"] {
