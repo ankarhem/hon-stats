@@ -6,6 +6,7 @@
 else
 {
     var d = Model.Detail;
+    var teamIndex = 0;
     <dialog class="modal" closedby="any" aria-label="Match details">
         <div class="modal__bar">
             <span class="modal__title">
@@ -17,16 +18,17 @@ else
             @foreach (var team in d.Players.GroupBy(p => p.Team))
             {
                 var teamLower = team.Key.ToLowerInvariant();
+                var ti = teamIndex++;
                 <section class="match-section">
                     <p class="match-section__title team--@teamLower">
                         @team.Key @(team.Key == d.WinningTeam ? "· Winner" : "")
                     </p>
-                    <table class="table">
+                    <table class="table match-table">
                         <thead>
-                            <tr><th>Hero</th><th>K/D/A</th><th>Wards</th><th>Net worth</th><th>Items</th></tr>
+                            <tr><th>Hero</th><th>K/D/A</th><th>Wards</th><th>Net</th><th>Items</th></tr>
                         </thead>
                         <tbody>
-                            @foreach (var pl in team)
+                            @foreach (var (pl, pi) in team.Select((p, i) => (p, i)))
                             {
                                 var hero = Model.Heroes.GetValueOrDefault(pl.HeroId);
                                 var name = Model.Names.GetValueOrDefault(pl.AccountId);
@@ -47,11 +49,89 @@ else
                                     <td class="muted">@pl.NetWorth</td>
                                     <td>
                                         <div class="item-row">
-                                            @foreach (var itemId in pl.Inventory)
+                                            @foreach (var (itemId, ii) in pl.Inventory.Select((id, i) => (id, i)))
                                             {
                                                 var item = Model.Items.GetValueOrDefault(itemId);
                                                 var iconUrl = item?.IconUrl ?? $"https://gamestorage.juvio.com/items/{itemId}/icon.webp";
-                                                <img class="item-icon" src="@iconUrl" alt="@item?.DisplayName" loading="lazy" />
+                                                var anchorName = $"--m{ti}-p{pi}-i{ii}";
+                                                <span class="loadout-item item-tile" style="anchor-name: @anchorName">
+                                                    <img class="loadout-item__img" src="@iconUrl" alt="@item?.DisplayName" loading="lazy" />
+                                                    <div class="item-tooltip" role="tooltip"
+                                                         style="position-anchor: @anchorName; bottom: anchor(top); left: anchor(center); translate: -50% 0; position-try-fallbacks: flip-block">
+                                                        <div class="item-tooltip__head">
+                                                            <img class="item-tooltip__head-icon" src="@iconUrl" alt="" loading="lazy" />
+                                                            <div class="item-tooltip__head-text">
+                                                                <span class="item-tooltip__name">@(item?.DisplayName ?? ("Item " + itemId))</span>
+                                                                @if (item?.Tier is not null)
+                                                                {
+                                                                    <span class="item-tooltip__tier">@item.Tier</span>
+                                                                }
+                                                            </div>
+                                                            @if (item is not null && item.TotalCost > 0)
+                                                            {
+                                                                <span class="item-tooltip__value gold">Value: @item.TotalCost.ToString("N0")</span>
+                                                            }
+                                                        </div>
+                                                        <div class="item-tooltip__body">
+                                                            @if (item is not null && !string.IsNullOrEmpty(item.Description))
+                                                            {
+                                                                <div class="item-tooltip__desc">@GameText.Render(item.Description)</div>
+                                                            }
+                                                            @if (item is not null && !string.IsNullOrEmpty(item.Description2))
+                                                            {
+                                                                <div class="item-tooltip__note">@GameText.Render(item.Description2)</div>
+                                                            }
+                                                            @if (item is not null && item.IsActive)
+                                                            {
+                                                                <div class="item-tooltip__section">
+                                                                    <p class="eyebrow">Activation</p>
+                                                                    <ul class="item-stat-list">
+                                                                        @if (!string.IsNullOrEmpty(item.TargetType))
+                                                                        {
+                                                                            <li><span class="muted">Target</span> @item.TargetType</li>
+                                                                        }
+                                                                        @if (item.Range is > 0)
+                                                                        {
+                                                                            <li><span class="muted">Range</span> @item.Range</li>
+                                                                        }
+                                                                        @if (item.ManaCost is > 0)
+                                                                        {
+                                                                            <li><span class="muted">Mana cost</span> @item.ManaCost</li>
+                                                                        }
+                                                                        @if (item.Cooldown is > 0)
+                                                                        {
+                                                                            <li><span class="muted">Cooldown</span> <span class="highlight">@item.Cooldown s</span></li>
+                                                                        }
+                                                                    </ul>
+                                                                    @if (!string.IsNullOrEmpty(item.ImpactEffect))
+                                                                    {
+                                                                        <div class="item-tooltip__prose">@GameText.Render(item.ImpactEffect)</div>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                            @if (item is not null && (item.PassiveBonuses.Count > 0 || !string.IsNullOrEmpty(item.AttackImpactEffect)))
+                                                            {
+                                                                <div class="item-tooltip__section">
+                                                                    @if (item.PassiveBonuses.Count > 0)
+                                                                    {
+                                                                        <p class="eyebrow">Passive Bonuses</p>
+                                                                        <ul class="item-bonus-list">
+                                                                            @foreach (var bonus in item.PassiveBonuses)
+                                                                            {
+                                                                                <li>@bonus</li>
+                                                                            }
+                                                                        </ul>
+                                                                    }
+                                                                    @if (!string.IsNullOrEmpty(item.AttackImpactEffect))
+                                                                    {
+                                                                        <p class="eyebrow">On Attack Impact</p>
+                                                                        <div class="item-tooltip__prose">@GameText.Render(item.AttackImpactEffect)</div>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </span>
                                             }
                                         </div>
                                     </td>

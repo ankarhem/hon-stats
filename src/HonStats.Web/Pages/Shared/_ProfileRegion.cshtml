@@ -54,18 +54,35 @@
         }
         else
         {
-            <div class="hero-picker">
-                @foreach (var kv in Model.HeroGames.OrderByDescending(x => x.Value))
-                {
-                    var hero = Model.Heroes.GetValueOrDefault(kv.Key);
-                    var isActive = kv.Key == Model.SelectedHeroId;
-                    <a class="hero-picker__chip" aria-current="@(isActive ? "true" : null)"
-                        hx-get="?tab=heroBuilds&heroId=@kv.Key&map=@Model.SelectedMap"
-                        hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true">
-                        @(hero?.TranslatedName ?? ("Hero " + kv.Key)) <span class="tab__count">(@kv.Value)</span>
-                    </a>
-                }
-            </div>
+            var heroGroups = Model.HeroGames
+                .Select(kv => (HeroId: kv.Key, Games: kv.Value, Hero: Model.Heroes.GetValueOrDefault(kv.Key)))
+                .Where(x => x.Hero is not null)
+                .GroupBy(x => x.Hero!.PrimaryAttributeName)
+                .OrderBy(g => g.Key)
+                .ToDictionary(g => g.Key, g => g.OrderBy(x => x.Hero!.DisplayName).ToList());
+
+            <div class="hero-builds">
+                <aside class="hero-builds__sidebar">
+                    @foreach (var (attrName, heroes) in heroGroups)
+                    {
+                        <div class="hero-attribute-group">
+                            <p class="eyebrow">@attrName</p>
+                            <div class="hero-portraits">
+                                @foreach (var h in heroes)
+                                {
+                                    var isActive = h.HeroId == Model.SelectedHeroId;
+                                    <a class="hero-portrait" aria-current="@(isActive ? "true" : null)"
+                                        hx-get="?tab=heroBuilds&heroId=@h.HeroId&map=@Model.SelectedMap"
+                                        hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true"
+                                        title="@h.Hero!.DisplayName (@h.Games)">
+                                        <img src="@h.Hero!.IconUrl" alt="@h.Hero.DisplayName" loading="lazy" />
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    }
+                </aside>
+                <div class="hero-builds__main">
 
             @if (Model.HeroBuild.Count == 0)
             {
@@ -214,12 +231,17 @@
                     {
                         continue;
                     }
-                    var costs = tierEntries.Select(e => itemsById.GetValueOrDefault(e.ItemId)?.TotalCost ?? 0).OrderBy(c => c).ToList();
-                    var goldRange = costs.Count > 0 ? $"{costs[0]}g – {costs[^1]}g" : "";
+                    var timeLabel = tier switch
+                    {
+                        GuideTier.Early => $"0\u2013{Model.EarlyCutoffMinutes} min",
+                        GuideTier.Core => $"{Model.EarlyCutoffMinutes}\u2013{Model.LateCutoffMinutes} min",
+                        GuideTier.Late => $"{Model.LateCutoffMinutes}+ min",
+                        _ => ""
+                    };
                     <section class="build-tier build-tier--@tier.ToString().ToLowerInvariant()">
                         <div class="build-tier__head">
                             <p class="eyebrow card__title">@tier</p>
-                            <span class="build-tier__total">@goldRange</span>
+                            <span class="build-tier__total">@timeLabel</span>
                         </div>
                         <div class="loadout-row__items">
                             @foreach (var (entry, itemIdx) in tierEntries.Select((e, i) => (e, i)))
@@ -324,6 +346,8 @@
                 }
 
             }
+                </div>
+            </div>
         }
         break;
 

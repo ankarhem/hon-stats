@@ -774,34 +774,69 @@ dialog.modal::backdrop {
     font-size: 0.85rem;
 }
 
-/* ---------- Hero build selector ---------- */
-.hero-picker {
+/* ---------- Hero build layout ---------- */
+.hero-builds {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.hero-builds__sidebar {
+    position: sticky;
+    top: 1rem;
+}
+
+.hero-attribute-group {
+    margin-bottom: 1rem;
+}
+
+.hero-portraits {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-bottom: 1.25rem;
+    gap: 0.25rem;
 }
 
-.hero-picker__chip {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--fg);
-    padding: 0.35rem 0.7rem;
-    border-radius: 999px;
-    font-size: 0.82rem;
+.hero-portrait {
+    display: block;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 2px solid transparent;
     cursor: pointer;
+    transition: border-color 0.15s;
 }
 
-.hero-picker__chip:hover {
-    border-color: var(--accent);
-    text-decoration: none;
+.hero-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.hero-picker__chip[aria-current="true"] {
-    background: oklch(from var(--accent) l c h / 0.2);
-    color: var(--accent);
+.hero-portrait:hover {
+    border-color: oklch(from var(--accent) l c h / 0.5);
+}
+
+.hero-portrait[aria-current="true"] {
     border-color: var(--accent);
 }
+
+/* ---------- Match table (fixed columns) ---------- */
+.match-table {
+    table-layout: fixed;
+}
+
+.match-table th:nth-child(1),
+.match-table td:nth-child(1) { width: 28%; }
+.match-table th:nth-child(2),
+.match-table td:nth-child(2) { width: 10%; }
+.match-table th:nth-child(3),
+.match-table td:nth-child(3) { width: 10%; }
+.match-table th:nth-child(4),
+.match-table td:nth-child(4) { width: 8%; }
+.match-table th:nth-child(5),
+.match-table td:nth-child(5) { width: 44%; }
 
 /* ---------- Hero build tiers (Early / Core / Late) ---------- */
 .build-tier {
