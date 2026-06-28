@@ -4,13 +4,8 @@
     @foreach (var item in Model.Items)
     {
         <li class="grid-list__item item-tile @(Model.IsDimmed(item) ? "item-tile--dimmed" : null)" style="anchor-name: --i@(item.Id)">
-            <a href="/items/@item.Slug">
+            <a href="/items/@item.Slug" aria-label="@item.DisplayName">
                 <img class="grid-list__icon" src="@item.IconUrl" alt="@item.DisplayName" loading="lazy" />
-                <div class="grid-list__name">@item.DisplayName</div>
-                @if (item.TotalCost > 0)
-                {
-                    <div class="grid-list__meta gold">@item.TotalCost</div>
-                }
             </a>
             <div class="item-tooltip" role="tooltip"
                  style="position-anchor: --i@(item.Id); bottom: anchor(top); left: anchor(center); translate: -50% 0; position-try-fallbacks: flip-block">

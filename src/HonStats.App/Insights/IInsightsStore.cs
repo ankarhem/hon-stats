@@ -14,6 +14,13 @@ public interface IInsightsRawQuery
         CancellationToken ct = default
     );
 
+    Task<IReadOnlyList<MatchItemInput>> GetHeroItemsBoughtAsync(
+        Guid accountId,
+        int heroId,
+        string? map = null,
+        CancellationToken ct = default
+    );
+
     Task<IReadOnlyList<MatchTeammateInput>> GetTeammateInputsAsync(
         Guid accountId,
         string? map = null,

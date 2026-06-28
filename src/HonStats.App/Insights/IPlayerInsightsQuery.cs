@@ -31,6 +31,7 @@ public interface IPlayerInsightsQuery
 
     Task<IReadOnlyDictionary<int, int>> GetHeroGamesAsync(
         Guid accountId,
+        string? map = null,
         CancellationToken ct = default
     );
 

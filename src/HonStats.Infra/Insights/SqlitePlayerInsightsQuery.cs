@@ -114,11 +114,15 @@ internal sealed class SqlitePlayerInsightsQuery(
 
     public async Task<IReadOnlyDictionary<int, int>> GetHeroGamesAsync(
         Guid accountId,
+        string? map = null,
         CancellationToken ct = default
     )
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var rows = await db.PlayerMatches.Where(p => p.AccountId == accountId).ToListAsync(ct);
+        if (ShouldFilterByMap(map))
+            rows = rows.Where(r => string.Equals(r.Map, map, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         return rows.GroupBy(r => r.HeroId).ToDictionary(g => g.Key, g => g.Count());
     }
 

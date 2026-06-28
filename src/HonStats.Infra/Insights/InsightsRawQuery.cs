@@ -124,6 +124,77 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
     }
 
     // "all" and null/empty mean "no map filter" — the caller wants every game.
+    public async Task<IReadOnlyList<MatchItemInput>> GetHeroItemsBoughtAsync(
+        Guid accountId,
+        int heroId,
+        string? map = null,
+        CancellationToken ct = default
+    )
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+
+        var heroRows = await db
+            .MatchPlayerItems.Where(i => i.AccountId == accountId && i.HeroId == heroId)
+            .ToListAsync(ct);
+        if (heroRows.Count == 0)
+            return [];
+
+        var gameIds = heroRows.Select(r => r.GameId).Distinct().ToList();
+
+        var wonByGame = await db
+            .MatchRoster.Where(r => r.AccountId == accountId && gameIds.Contains(r.GameId))
+            .ToDictionaryAsync(r => r.GameId, r => r.Won, ct);
+        var mapByGame = await db
+            .PlayerMatches.Where(m => m.AccountId == accountId && gameIds.Contains(m.GameId))
+            .ToDictionaryAsync(m => m.GameId, m => m.Map, ct);
+
+        if (ShouldFilterByMap(map))
+        {
+            var matchingGameIds = mapByGame
+                .Where(kv => string.Equals(kv.Value, map, StringComparison.OrdinalIgnoreCase))
+                .Select(kv => kv.Key)
+                .ToHashSet();
+            heroRows = heroRows.Where(r => matchingGameIds.Contains(r.GameId)).ToList();
+            gameIds = heroRows.Select(r => r.GameId).Distinct().ToList();
+            if (gameIds.Count == 0)
+                return [];
+        }
+
+        var timingRows = await db
+            .MatchItemTimings.Where(t => t.AccountId == accountId && gameIds.Contains(t.GameId))
+            .ToListAsync(ct);
+
+        var timingGameIds = timingRows.Select(t => t.GameId).Distinct().ToHashSet();
+        var itemsByGame = new Dictionary<int, HashSet<int>>();
+
+        foreach (var t in timingRows)
+        {
+            if (!itemsByGame.TryGetValue(t.GameId, out var set))
+                itemsByGame[t.GameId] = set = [];
+            set.Add(t.ItemId);
+        }
+
+        foreach (var r in heroRows)
+        {
+            if (!timingGameIds.Contains(r.GameId))
+            {
+                if (!itemsByGame.TryGetValue(r.GameId, out var set))
+                    itemsByGame[r.GameId] = set = [];
+                set.Add(r.ItemId);
+            }
+        }
+
+        return itemsByGame
+            .Select(kv => new MatchItemInput
+            {
+                GameId = kv.Key,
+                Won = wonByGame.TryGetValue(kv.Key, out var won) && won,
+                Map = mapByGame.TryGetValue(kv.Key, out var m) ? m : string.Empty,
+                ItemIds = kv.Value.ToList(),
+            })
+            .ToList();
+    }
+
     private static bool ShouldFilterByMap(string? map) =>
         !string.IsNullOrWhiteSpace(map)
         && !string.Equals(map, "all", StringComparison.OrdinalIgnoreCase);

@@ -108,31 +108,40 @@ public class ProfileModel(
                 break;
             case "heroBuilds":
                 this.Items = (await reference.GetItemsAsync(ct)).ToDictionary(i => i.Id);
-                this.HeroGames = await insights.GetHeroGamesAsync(this.AccountId, ct);
+                this.HeroGames = await insights.GetHeroGamesAsync(
+                    this.AccountId,
+                    this.SelectedMap == "all" ? null : this.SelectedMap,
+                    ct
+                );
                 this.SelectedHeroId =
                     heroId == 0 && this.HeroGames.Count > 0
                         ? this.HeroGames.OrderByDescending(kv => kv.Value).First().Key
                         : heroId;
                 if (this.SelectedHeroId > 0)
                 {
-                    this.HeroBuild = await insights.GetHeroBuildAsync(
+                    var mapFilter = this.SelectedMap == "all" ? null : this.SelectedMap;
+                    var buildInputs = await rawQuery.GetHeroItemsBoughtAsync(
                         this.AccountId,
                         this.SelectedHeroId,
-                        this.SelectedMap == "all" ? null : this.SelectedMap,
+                        mapFilter,
                         ct
                     );
+                    this.HeroBuild = HeroBuildAggregator.Build(buildInputs);
                     this.HeroItemTiming = await insights.GetHeroItemTimingAsync(
                         this.AccountId,
                         this.SelectedHeroId,
                         ct
                     );
-                    var itemInputs = await rawQuery.GetHeroItemInputsAsync(
+                    var loadoutInputs = await rawQuery.GetHeroItemInputsAsync(
                         this.AccountId,
                         this.SelectedHeroId,
-                        this.SelectedMap == "all" ? null : this.SelectedMap,
+                        mapFilter,
                         ct
                     );
-                    this.Loadouts = LoadoutAggregator.Build(itemInputs, ResolveConsumableItemIds());
+                    this.Loadouts = LoadoutAggregator.Build(
+                        loadoutInputs,
+                        ResolveConsumableItemIds()
+                    );
                 }
                 break;
             default:
