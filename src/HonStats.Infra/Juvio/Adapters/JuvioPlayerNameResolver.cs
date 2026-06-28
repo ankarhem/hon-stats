@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using HonStats.App.Players;
-using HonStats.Infra.Juvio.Adapters;
 
 namespace HonStats.Infra.Juvio.Adapters;
 

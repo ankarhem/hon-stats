@@ -101,7 +101,7 @@ public class ProfileModel(
                     this.AccountId,
                     PageSize,
                     0,
-                    this.SelectedMap == "all" ? null : this.SelectedMap,
+                    MapFilter(this.SelectedMap),
                     ct
                 );
                 this.HasMoreTeammates = this.Teammates.Count == PageSize;
@@ -110,7 +110,7 @@ public class ProfileModel(
                 this.Items = (await reference.GetItemsAsync(ct)).ToDictionary(i => i.Id);
                 this.HeroGames = await insights.GetHeroGamesAsync(
                     this.AccountId,
-                    this.SelectedMap == "all" ? null : this.SelectedMap,
+                    MapFilter(this.SelectedMap),
                     ct
                 );
                 this.SelectedHeroId =
@@ -119,7 +119,7 @@ public class ProfileModel(
                         : heroId;
                 if (this.SelectedHeroId > 0)
                 {
-                    var mapFilter = this.SelectedMap == "all" ? null : this.SelectedMap;
+                    var mapFilter = MapFilter(this.SelectedMap);
                     var buildInputs = await rawQuery.GetHeroItemsBoughtAsync(
                         this.AccountId,
                         this.SelectedHeroId,
@@ -218,7 +218,7 @@ public class ProfileModel(
             accountId,
             PageSize,
             offset,
-            selectedMap == "all" ? null : selectedMap,
+            MapFilter(selectedMap),
             ct
         );
         return Partial(
@@ -309,6 +309,8 @@ public class ProfileModel(
             "MidWars" => "MW",
             _ => map,
         };
+
+    private static string? MapFilter(string map) => map == "all" ? null : map;
 
     // Formats a mean first-buy second as M:SS. Pre-game purchases (negative seconds,
     // during the pre-creep phase) clamp to 0:00.

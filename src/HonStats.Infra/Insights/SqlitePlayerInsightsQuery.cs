@@ -170,9 +170,6 @@ internal sealed class SqlitePlayerInsightsQuery(
     )
     {
         var inputs = await GetStatInputsAsync(accountId, ct);
-        if (inputs.Count == 0)
-            return new MapStatEntry { Map = "all" };
-
         return MapStatsAggregator.BuildOverall(inputs);
     }
 

@@ -1,3 +1,4 @@
+@* /* noqa: SIZE_OK */ Intentionally single large HTMX fragment; splitting would break hx-swap boundaries. *@
 @model ProfileModel
 @using HonStats.App.Insights
 <nav class="tabs" aria-label="Profile sections">
@@ -95,7 +96,6 @@
                 var timingByItem = Model.HeroItemTiming.ToDictionary(t => t.ItemId);
                 var itemsById = Model.Items;
 
-                // Split the build into Early / Core / Late tiers by mean buy time.
                 var tierItems = Model.HeroBuild
                     .Select(b => (
                         ItemId: b.ItemId,

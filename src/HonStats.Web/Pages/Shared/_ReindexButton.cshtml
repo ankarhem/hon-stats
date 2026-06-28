@@ -18,11 +18,13 @@
 {
     var total = Model.Total;
     var fetched = Model.Fetched;
-    var label = total > 0 && fetched < total
-        ? $"Gathering {fetched}/{total}"
-        : total > 0 && fetched >= total
-            ? "Processing"
-            : "Gathering matches";
+    string label;
+    if (total > 0 && fetched < total)
+        label = $"Gathering {fetched}/{total}";
+    else if (total > 0 && fetched >= total)
+        label = "Processing";
+    else
+        label = "Gathering matches";
 
     if (total > 0 && fetched < total && Model.ProgressStartedAt is DateTimeOffset started && fetched > 0)
     {
@@ -43,39 +45,31 @@
         </button>
     </div>
 }
-else if (failed)
-{
-    <form method="post"
-          hx-post="?handler=Reindex&accountId=@Model.AccountId"
-          hx-target="this" hx-swap="outerHTML"
-          hx-disabled-elt="button">
-        <button class="btn btn--sm" type="submit">Retry</button>
-    </form>
-    @if (showOob)
-    {
-        <p id="last-indexed" hx-swap-oob="true" class="profile-indexed-row muted">
-            Last indexed @TimeDisplay.Relative(lastReindex)
-        </p>
-    }
-}
-else if (onCooldown)
-{
-    <button class="btn btn--sm" disabled>Cooldown ~@(Math.Max(1, (int)Math.Ceiling(cooldownLeft.TotalMinutes)))m</button>
-    @if (showOob)
-    {
-        <p id="last-indexed" hx-swap-oob="true" class="profile-indexed-row muted">
-            Last indexed @TimeDisplay.Relative(lastReindex)
-        </p>
-    }
-}
 else
 {
-    <form method="post"
-          hx-post="?handler=Reindex&accountId=@Model.AccountId"
-          hx-target="this" hx-swap="outerHTML"
-          hx-disabled-elt="button">
-        <button class="btn btn--sm" type="submit">@(lastReindex is null ? "Index" : "Reindex")</button>
-    </form>
+    @if (failed)
+    {
+        <form method="post"
+              hx-post="?handler=Reindex&accountId=@Model.AccountId"
+              hx-target="this" hx-swap="outerHTML"
+              hx-disabled-elt="button">
+            <button class="btn btn--sm" type="submit">Retry</button>
+        </form>
+    }
+    else if (onCooldown)
+    {
+        <button class="btn btn--sm" disabled>Cooldown ~@(Math.Max(1, (int)Math.Ceiling(cooldownLeft.TotalMinutes)))m</button>
+    }
+    else
+    {
+        <form method="post"
+              hx-post="?handler=Reindex&accountId=@Model.AccountId"
+              hx-target="this" hx-swap="outerHTML"
+              hx-disabled-elt="button">
+            <button class="btn btn--sm" type="submit">@(lastReindex is null ? "Index" : "Reindex")</button>
+        </form>
+    }
+
     @if (showOob)
     {
         <p id="last-indexed" hx-swap-oob="true" class="profile-indexed-row muted">

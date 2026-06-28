@@ -24,27 +24,7 @@ public static class SearchMatcher
     /// normalized substring, token-level fuzzy, or whole-string fuzzy. A null/blank
     /// query matches everything (callers gate dimming on a separate blank check).
     /// </summary>
-    public static bool Matches(string? query, string name)
-    {
-        if (string.IsNullOrWhiteSpace(query))
-            return true;
-
-        var q = Normalize(query);
-        if (q.Length == 0)
-            return true;
-
-        var n = Normalize(name);
-        if (n.Length == 0)
-            return false;
-
-        if (n.Contains(q, StringComparison.Ordinal))
-            return true;
-
-        if (TokensMatch(q, n))
-            return true;
-
-        return Levenshtein(q, n) <= MaxDistanceFor(q.Length);
-    }
+    public static bool Matches(string? query, string name) => Score(query, name) > 0;
 
     /// <summary>
     /// Scores how well <paramref name="query"/> matches <paramref name="name"/> on

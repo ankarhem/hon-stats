@@ -50,10 +50,7 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
         // "all" and null are treated identically (no filtering).
         if (ShouldFilterByMap(map))
         {
-            var matchingGameIds = mapByGame
-                .Where(kv => string.Equals(kv.Value, map, StringComparison.OrdinalIgnoreCase))
-                .Select(kv => kv.Key)
-                .ToHashSet();
+            var matchingGameIds = MatchingGameIds(mapByGame, map!);
             rows = rows.Where(r => matchingGameIds.Contains(r.GameId)).ToList();
             if (rows.Count == 0)
                 return [];
@@ -88,16 +85,12 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
         if (ShouldFilterByMap(map))
         {
             var subjectGameIds = subjectGames.Select(g => g.GameId).Distinct().ToList();
-            var matchingGameIds = (
-                await db
-                    .PlayerMatches.Where(m =>
-                        m.AccountId == accountId
-                        && subjectGameIds.Contains(m.GameId)
-                        && m.Map == map
-                    )
-                    .Select(m => m.GameId)
-                    .ToListAsync(ct)
-            ).ToHashSet();
+            var matchingGameIds = await db
+                .PlayerMatches.Where(m =>
+                    m.AccountId == accountId && subjectGameIds.Contains(m.GameId) && m.Map == map
+                )
+                .Select(m => m.GameId)
+                .ToHashSetAsync(ct);
             subjectGames = subjectGames.Where(g => matchingGameIds.Contains(g.GameId)).ToList();
             if (subjectGames.Count == 0)
                 return [];
@@ -150,10 +143,7 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
 
         if (ShouldFilterByMap(map))
         {
-            var matchingGameIds = mapByGame
-                .Where(kv => string.Equals(kv.Value, map, StringComparison.OrdinalIgnoreCase))
-                .Select(kv => kv.Key)
-                .ToHashSet();
+            var matchingGameIds = MatchingGameIds(mapByGame, map!);
             heroRows = heroRows.Where(r => matchingGameIds.Contains(r.GameId)).ToList();
             gameIds = heroRows.Select(r => r.GameId).Distinct().ToList();
             if (gameIds.Count == 0)
@@ -198,4 +188,13 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
     private static bool ShouldFilterByMap(string? map) =>
         !string.IsNullOrWhiteSpace(map)
         && !string.Equals(map, "all", StringComparison.OrdinalIgnoreCase);
+
+    private static HashSet<int> MatchingGameIds(
+        IReadOnlyDictionary<int, string> mapByGame,
+        string map
+    ) =>
+        mapByGame
+            .Where(kv => string.Equals(kv.Value, map, StringComparison.OrdinalIgnoreCase))
+            .Select(kv => kv.Key)
+            .ToHashSet();
 }

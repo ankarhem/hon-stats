@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using System.Text.Json;
 using HonStats.App.Players;
 using HonStats.Domain.Players;
@@ -46,51 +45,26 @@ internal sealed class JuvioPlayerProfileQuery(
         };
     }
 
-    private async Task<ProfileOverviewDto?> GetOverviewAsync(Guid accountId, CancellationToken ct)
-    {
-        var client = httpClientFactory.CreateClient(JuvioHttpClients.Stats);
-        using var response = await client.GetAsync(
-            $"/v1/stats/getprofilestats?userId={accountId}",
-            ct
-        );
-        if (!response.IsSuccessStatusCode)
-            return null;
-        await using var stream = await response.Content.ReadAsStreamAsync(ct);
-        return await JsonSerializer.DeserializeAsync<ProfileOverviewDto>(
-            stream,
-            JuvioJson.Options,
-            ct
-        );
-    }
+    private async Task<ProfileOverviewDto?> GetOverviewAsync(
+        Guid accountId,
+        CancellationToken ct
+    ) => await GetAsync<ProfileOverviewDto>($"/v1/stats/getprofilestats?userId={accountId}", ct);
 
-    private async Task<ProfileSummaryDto?> GetSummaryAsync(Guid accountId, CancellationToken ct)
-    {
-        var client = httpClientFactory.CreateClient(JuvioHttpClients.Stats);
-        using var response = await client.GetAsync(
-            $"/v1/stats/getplayersummary?accountId={accountId}",
-            ct
-        );
-        if (!response.IsSuccessStatusCode)
-            return null;
-        await using var stream = await response.Content.ReadAsStreamAsync(ct);
-        return await JsonSerializer.DeserializeAsync<ProfileSummaryDto>(
-            stream,
-            JuvioJson.Options,
-            ct
-        );
-    }
+    private async Task<ProfileSummaryDto?> GetSummaryAsync(Guid accountId, CancellationToken ct) =>
+        await GetAsync<ProfileSummaryDto>($"/v1/stats/getplayersummary?accountId={accountId}", ct);
 
-    private async Task<PlayerRankDto?> GetRankAsync(Guid accountId, CancellationToken ct)
+    private async Task<PlayerRankDto?> GetRankAsync(Guid accountId, CancellationToken ct) =>
+        await GetAsync<PlayerRankDto>($"/v1/stats/getplayerrank?accountId={accountId}", ct);
+
+    private async Task<T?> GetAsync<T>(string path, CancellationToken ct)
+        where T : class
     {
         var client = httpClientFactory.CreateClient(JuvioHttpClients.Stats);
-        using var response = await client.GetAsync(
-            $"/v1/stats/getplayerrank?accountId={accountId}",
-            ct
-        );
+        using var response = await client.GetAsync(path, ct);
         if (!response.IsSuccessStatusCode)
             return null;
         await using var stream = await response.Content.ReadAsStreamAsync(ct);
-        return await JsonSerializer.DeserializeAsync<PlayerRankDto>(stream, JuvioJson.Options, ct);
+        return await JsonSerializer.DeserializeAsync<T>(stream, JuvioJson.Options, ct);
     }
 
     private static ProfileOverview MapOverview(ProfileOverviewDto? dto)

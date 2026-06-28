@@ -13,17 +13,8 @@ internal sealed class JuvioMatchQuery(IHttpClientFactory httpClientFactory) : IM
         CancellationToken ct = default
     )
     {
-        var client = httpClientFactory.CreateClient(JuvioHttpClients.Stats);
-        using var response = await client.GetAsync(
+        var dto = await GetAsync<RecentMatchesDto>(
             $"/v1/stats/getrecentmatchesforplayer?playerId={playerId}&limit={limit}&offset={offset}",
-            ct
-        );
-        response.EnsureSuccessStatusCode();
-
-        await using var stream = await response.Content.ReadAsStreamAsync(ct);
-        var dto = await JsonSerializer.DeserializeAsync<RecentMatchesDto>(
-            stream,
-            JuvioJson.Options,
             ct
         );
         return (dto?.MatchesValue ?? []).Select(m => MapRecent(m, playerId)).ToList();
@@ -31,20 +22,18 @@ internal sealed class JuvioMatchQuery(IHttpClientFactory httpClientFactory) : IM
 
     public async Task<MatchDetail?> GetSummaryAsync(int gameId, CancellationToken ct = default)
     {
-        var client = httpClientFactory.CreateClient(JuvioHttpClients.Stats);
-        using var response = await client.GetAsync(
-            $"/v1/stats/getmatchsummary?gameId={gameId}",
-            ct
-        );
-        response.EnsureSuccessStatusCode();
-
-        await using var stream = await response.Content.ReadAsStreamAsync(ct);
-        var dto = await JsonSerializer.DeserializeAsync<MatchSummaryDto>(
-            stream,
-            JuvioJson.Options,
-            ct
-        );
+        var dto = await GetAsync<MatchSummaryDto>($"/v1/stats/getmatchsummary?gameId={gameId}", ct);
         return dto is null ? null : MapSummary(dto);
+    }
+
+    private async Task<T?> GetAsync<T>(string path, CancellationToken ct)
+        where T : class
+    {
+        var client = httpClientFactory.CreateClient(JuvioHttpClients.Stats);
+        using var response = await client.GetAsync(path, ct);
+        response.EnsureSuccessStatusCode();
+        await using var stream = await response.Content.ReadAsStreamAsync(ct);
+        return await JsonSerializer.DeserializeAsync<T>(stream, JuvioJson.Options, ct);
     }
 
     private static PlayerMatch MapRecent(RecentMatchDto m, Guid playerId) =>

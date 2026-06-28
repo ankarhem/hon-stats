@@ -1,3 +1,6 @@
+/* noqa: SIZE_OK — single global stylesheet per AGENTS.md (CSS isolation rejected:
+   HTMX partials + shared _Layout cross page boundaries, :root tokens and shared
+   classes must match across all scopes). Do NOT split into per-component files. */
 /* HoN Reborn Stats — design system. Dark, game-stats themed. No framework. */
 
 :root {

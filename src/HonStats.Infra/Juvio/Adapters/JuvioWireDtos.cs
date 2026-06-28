@@ -1,5 +1,4 @@
 using System.Text.Json;
-using HonStats.Domain.Players;
 
 namespace HonStats.Infra.Juvio.Adapters;
 

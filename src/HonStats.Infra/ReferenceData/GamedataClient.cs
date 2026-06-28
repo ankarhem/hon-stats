@@ -1,3 +1,4 @@
+// noqa: SIZE_OK — intentional single gamedata client joining all public endpoints per AGENTS.md.
 using System.Text.Json;
 using HonStats.Domain.ReferenceData;
 using HonStats.Infra.Juvio;
@@ -345,27 +346,26 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
             stats[key] = values;
     }
 
-    // IMPACT_effect = active cast effect text. Prefer the exact key (no colon
-    // suffix); fall back to any colon variant that isn't a _shopdescription.
-    private static string? ResolveImpactEffect(string itemName, Dictionary<string, string> strings)
-    {
-        var baseKey = $"{itemName}_IMPACT_effect";
-        if (strings.TryGetValue(baseKey, out var exact))
-            return exact;
-        return strings
-            .Keys.Where(k => k.StartsWith($"{baseKey}:", StringComparison.Ordinal))
-            .Where(k => !k.EndsWith("_shopdescription", StringComparison.OrdinalIgnoreCase))
-            .Select(k => strings[k])
-            .FirstOrDefault();
-    }
+    // IMPACT_effect = active cast effect text; ATTACK_IMPACT_effect = on-hit combat text.
+    // Prefer the exact key (no colon suffix); fall back to any colon variant that
+    // isn't a _shopdescription.
+    private static string? ResolveImpactEffect(
+        string itemName,
+        Dictionary<string, string> strings
+    ) => ResolveEffect(itemName, "IMPACT_effect", strings);
 
-    // ATTACK_IMPACT_effect = on-hit combat text. Same resolution strategy as above.
     private static string? ResolveAttackImpactEffect(
         string itemName,
         Dictionary<string, string> strings
+    ) => ResolveEffect(itemName, "ATTACK_IMPACT_effect", strings);
+
+    private static string? ResolveEffect(
+        string itemName,
+        string suffix,
+        Dictionary<string, string> strings
     )
     {
-        var baseKey = $"{itemName}_ATTACK_IMPACT_effect";
+        var baseKey = $"{itemName}_{suffix}";
         if (strings.TryGetValue(baseKey, out var exact))
             return exact;
         return strings

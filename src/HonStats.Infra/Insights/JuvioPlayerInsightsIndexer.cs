@@ -37,7 +37,7 @@ internal sealed class JuvioPlayerInsightsIndexer(
         var indexed =
             await db.IndexedPlayers.FindAsync(new object?[] { accountId }, ct)
             ?? new IndexedPlayer { AccountId = accountId };
-        if (indexed.AccountId == accountId && db.Entry(indexed).State == EntityState.Detached)
+        if (db.Entry(indexed).State == EntityState.Detached)
             db.IndexedPlayers.Add(indexed);
 
         indexed.Status = IndexingStatus.Indexing;
@@ -91,12 +91,10 @@ internal sealed class JuvioPlayerInsightsIndexer(
             if (hitKnown || page.Count < pageSize)
                 break;
         }
-        var stored = (
-            await db
-                .PlayerMatches.Where(pm => pm.AccountId == accountId)
-                .Select(pm => pm.GameId)
-                .ToListAsync(ct)
-        ).ToHashSet();
+        var stored = await db
+            .PlayerMatches.Where(pm => pm.AccountId == accountId)
+            .Select(pm => pm.GameId)
+            .ToHashSetAsync(ct);
         var newMatches = recent.Where(r => !stored.Contains(r.GameId)).ToList();
 
         if (newMatches.Count > 0)

@@ -33,18 +33,18 @@ else
             <li><span class="muted">Sight D/N</span><strong>@h.SightRangeDay / @h.SightRangeNight</strong></li>
         </ul>
         <div class="attr-boxes">
-            <div class="attr-box @(h.PrimaryAttribute == 0 ? "attr-box--primary" : null)">
-                <span class="muted">STR</span><strong>@h.Strength</strong>
-                <span class="attr-box__growth">+@h.StrengthPerLevel.ToString("0.#")</span>
-            </div>
-            <div class="attr-box @(h.PrimaryAttribute == 1 ? "attr-box--primary" : null)">
-                <span class="muted">AGI</span><strong>@h.Agility</strong>
-                <span class="attr-box__growth">+@h.AgilityPerLevel.ToString("0.#")</span>
-            </div>
-            <div class="attr-box @(h.PrimaryAttribute == 2 ? "attr-box--primary" : null)">
-                <span class="muted">INT</span><strong>@h.Intelligence</strong>
-                <span class="attr-box__growth">+@h.IntelligencePerLevel.ToString("0.#")</span>
-            </div>
+            @foreach (var attr in new (string Label, int Value, double Growth, int Index)[]
+            {
+                ("STR", h.Strength, h.StrengthPerLevel, 0),
+                ("AGI", h.Agility, h.AgilityPerLevel, 1),
+                ("INT", h.Intelligence, h.IntelligencePerLevel, 2),
+            })
+            {
+                <div class="attr-box @(h.PrimaryAttribute == attr.Index ? "attr-box--primary" : null)">
+                    <span class="muted">@attr.Label</span><strong>@attr.Value</strong>
+                    <span class="attr-box__growth">+@attr.Growth.ToString("0.#")</span>
+                </div>
+            }
         </div>
     </div>
 

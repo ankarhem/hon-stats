@@ -110,15 +110,15 @@ public static class MapStatsAggregator
         {
             Map = matches[0].Map,
             Games = games,
-            AvgKills = games > 0 ? matches.Sum(m => m.Kills) / (double)games : 0,
-            AvgDeaths = games > 0 ? matches.Sum(m => m.Deaths) / (double)games : 0,
-            AvgAssists = games > 0 ? matches.Sum(m => m.Assists) / (double)games : 0,
-            AvgWards = games > 0 ? matches.Sum(m => m.WardsPlaced) / (double)games : 0,
+            AvgKills = matches.Sum(m => m.Kills) / (double)games,
+            AvgDeaths = matches.Sum(m => m.Deaths) / (double)games,
+            AvgAssists = matches.Sum(m => m.Assists) / (double)games,
+            AvgWards = matches.Sum(m => m.WardsPlaced) / (double)games,
             AvgGPM = avgGpm,
             AvgXPM = avgXpm,
             AvgDPM = avgDpm,
             Wins = wins,
-            WinRate = games > 0 ? (double)wins / games : 0,
+            WinRate = (double)wins / games,
         };
     }
 
@@ -131,9 +131,7 @@ public static class MapStatsAggregator
             .Where(m => selector(m).HasValue && m.DurationSeconds > 0)
             .ToList();
         var minutes = bearingGames.Sum(m => m.DurationSeconds / 60.0);
-        return bearingGames.Count > 0 && minutes > 0
-            ? bearingGames.Sum(m => selector(m)!.Value) / minutes
-            : null;
+        return bearingGames.Count > 0 ? bearingGames.Sum(m => selector(m)!.Value) / minutes : null;
     }
 }
 
@@ -174,11 +172,13 @@ public static class ItemTimingAggregator
             return [];
 
         var firstSeen = new Dictionary<(Guid Account, int Item), int>();
-        foreach (
-            var snapshot in replay
-                .Snapshots.OrderBy(s => s.Time)
-                .ThenBy(s => replay.Snapshots.IndexOf(s))
-        )
+        var orderedSnapshots = replay
+            .Snapshots.Select((snapshot, index) => new { snapshot, index })
+            .OrderBy(x => x.snapshot.Time)
+            .ThenBy(x => x.index)
+            .Select(x => x.snapshot);
+
+        foreach (var snapshot in orderedSnapshots)
         {
             for (var ti = 0; ti < snapshot.Teams.Count; ti++)
             {
