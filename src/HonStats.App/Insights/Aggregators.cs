@@ -151,6 +151,13 @@ public static class ItemTimingAggregator
     // 0xFFFF is juvio's empty-slot sentinel on the replay timeline; 0 is unused.
     private static readonly HashSet<int> SentinelItemIds = [0, 65535];
 
+    /// <summary>
+    /// A degenerate replay has 0 or 1 snapshots — the replay parser hasn't finished
+    /// processing the demo file yet (happens when queried too soon after match end).
+    /// A healthy replay always has many snapshots at ~30s intervals starting at Time=-90.
+    /// </summary>
+    public static bool IsDegenerate(ParsedReplay replay) => replay.Snapshots.Count <= 1;
+
     public static IReadOnlyList<ItemBuyTime> Build(ParsedReplay replay)
     {
         if (replay.Snapshots.Count == 0)

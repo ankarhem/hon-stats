@@ -106,6 +106,7 @@ internal sealed class JuvioPlayerInsightsIndexer(
         var newGameIds = newMatches.Select(m => m.GameId).ToList();
         progressTracker.Start(accountId, newGameIds.Count);
         await this.IngestSummariesAsync(db, accountId, newGameIds, forceBackfill, ct);
+        await this.ReprocessStaleItemTimingsAsync(db, accountId, ct);
 
         // Resolve the player's name to write-through into the players table (the
         // LocalFirstPlayerNameResolver). The result is not assigned to
@@ -267,14 +268,22 @@ internal sealed class JuvioPlayerInsightsIndexer(
             if (replay is null)
                 return;
 
+            if (ItemTimingAggregator.IsDegenerate(replay))
+            {
+                logger.LogWarning(
+                    "Replay for game {GameId} not ready ({SnapshotCount} snapshots), skipping item timing",
+                    gameId,
+                    replay.Snapshots.Count
+                );
+                await db.MatchItemTimings.Where(t => t.GameId == gameId).ExecuteDeleteAsync(ct);
+                return;
+            }
+
             var rows = ItemTimingAggregator.Build(replay);
             if (rows.Count == 0)
                 return;
 
-            var existing = await db.MatchItemTimings.Where(t => t.GameId == gameId).ToListAsync(ct);
-            if (existing.Count > 0)
-                db.MatchItemTimings.RemoveRange(existing);
-
+            await db.MatchItemTimings.Where(t => t.GameId == gameId).ExecuteDeleteAsync(ct);
             db.MatchItemTimings.AddRange(
                 rows.Select(r => new MatchItemTiming
                 {
@@ -293,5 +302,37 @@ internal sealed class JuvioPlayerInsightsIndexer(
         {
             logger.LogWarning(ex, "Replay timing ingest failed for game {GameId}", gameId);
         }
+    }
+
+    // Detects games whose item timings carry the degenerate-replay fingerprint
+    // (all rows for a game share one FirstSeenSeconds) and re-attempts their replays.
+    // If the replay is now ready, good data replaces bad; if still degenerate, the bad
+    // rows are cleaned up by IngestItemTimingAsync's ExecuteDeleteAsync.
+    private async Task ReprocessStaleItemTimingsAsync(
+        HonStatsDbContext db,
+        Guid accountId,
+        CancellationToken ct
+    )
+    {
+        var staleGames = await db
+            .MatchItemTimings.Where(t => t.AccountId == accountId)
+            .GroupBy(t => t.GameId)
+            .Where(g => g.Min(t => t.FirstSeenSeconds) == g.Max(t => t.FirstSeenSeconds))
+            .Select(g => g.Key)
+            .ToListAsync(ct);
+
+        if (staleGames.Count == 0)
+            return;
+
+        logger.LogInformation(
+            "Re-processing {Count} games with stale item timings for {AccountId}",
+            staleGames.Count,
+            accountId
+        );
+
+        foreach (var gameId in staleGames)
+            await IngestItemTimingAsync(db, gameId, ct);
+
+        await db.SaveChangesAsync(ct);
     }
 }

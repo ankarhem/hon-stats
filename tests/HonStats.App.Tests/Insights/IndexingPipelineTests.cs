@@ -412,6 +412,358 @@ public class IndexingPipelineTests
         }
     }
 
+    [Fact]
+    public async Task Index_DegenerateReplay_WritesNoTimingRows()
+    {
+        var dbPath = Path.Combine(Path.GetTempPath(), $"honstats-degenerate-{Guid.NewGuid():N}.db");
+        try
+        {
+            var matchQuery = CreateMatchQuery();
+            // Single-snapshot replay — degenerate (replay not ready yet)
+            var replayQuery = new FakeParsedReplayQuery(
+                new Dictionary<int, ParsedReplay>
+                {
+                    [1] = new ParsedReplay
+                    {
+                        GameId = 1,
+                        Snapshots =
+                        [
+                            new()
+                            {
+                                Time = 300,
+                                Teams =
+                                [
+                                    new()
+                                    {
+                                        Players =
+                                        [
+                                            new()
+                                            {
+                                                AccountId = PlayerA,
+                                                Items = [new() { ItemId = 10 }],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    [2] = new ParsedReplay
+                    {
+                        GameId = 2,
+                        Snapshots =
+                        [
+                            new()
+                            {
+                                Time = 300,
+                                Teams =
+                                [
+                                    new()
+                                    {
+                                        Players =
+                                        [
+                                            new()
+                                            {
+                                                AccountId = PlayerA,
+                                                Items = [new() { ItemId = 20 }],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                }
+            );
+
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddDbContextFactory<HonStatsDbContext>(o =>
+                o.UseSqlite($"Data Source={dbPath}")
+            );
+            services.Configure<IndexingOptions>(o =>
+            {
+                o.RecentMatchesLimit = 50;
+                o.MatchSummaryConcurrency = 2;
+            });
+            services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
+            services.AddSingleton<IIndexProgressTracker, IndexProgressTracker>();
+            services.AddScoped<IInsightsRawQuery, InsightsRawQuery>();
+            services.AddScoped<IInsightsAggregateStore, InsightsAggregateStore>();
+            services.AddScoped<IPlayerInsightsQuery, SqlitePlayerInsightsQuery>();
+            services.AddScoped<IPlayerInsightsIndexer, JuvioPlayerInsightsIndexer>();
+            services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildHeroBuildsHandler>();
+            services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
+            services.AddSingleton<IMatchQuery>(matchQuery);
+            services.AddSingleton<IParsedReplayQuery>(replayQuery);
+            services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
+            services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
+                new FakeNameResolver(
+                    new Dictionary<Guid, ResolvedName>
+                    {
+                        [PlayerA] = new()
+                        {
+                            AccountId = PlayerA,
+                            Username = "alpha",
+                            Country = "SE",
+                        },
+                    }
+                ),
+                sp.GetRequiredService<IPlayerNameStore>()
+            ));
+            var sp = services.BuildServiceProvider();
+
+            await using (
+                var db = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                await db.Database.MigrateAsync();
+            }
+
+            using var scope = sp.CreateScope();
+            var indexer = scope.ServiceProvider.GetRequiredService<IPlayerInsightsIndexer>();
+            await indexer.IndexAsync(PlayerA);
+
+            await using (
+                var assertDb = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                (await assertDb.MatchItemTimings.ToListAsync()).Should().BeEmpty();
+            }
+        }
+        finally
+        {
+            if (File.Exists(dbPath))
+                File.Delete(dbPath);
+        }
+    }
+
+    [Fact]
+    public async Task Index_ReprocessesStaleItemTimings_OnReindex()
+    {
+        var dbPath = Path.Combine(Path.GetTempPath(), $"honstats-reprocess-{Guid.NewGuid():N}.db");
+        try
+        {
+            var matchQuery = CreateMatchQuery();
+            // Healthy replay now available for game 1 — item 10 at 120s, item 20 at 240s
+            var replayQuery = new FakeParsedReplayQuery(
+                new Dictionary<int, ParsedReplay>
+                {
+                    [1] = new ParsedReplay
+                    {
+                        GameId = 1,
+                        Snapshots =
+                        [
+                            new()
+                            {
+                                Time = -90,
+                                Teams = [new() { Players = [new() { AccountId = PlayerA }] }],
+                            },
+                            new()
+                            {
+                                Time = 120,
+                                Teams =
+                                [
+                                    new()
+                                    {
+                                        Players =
+                                        [
+                                            new() { Items = [new() { ItemId = 10, Slot = 0 }] },
+                                        ],
+                                    },
+                                ],
+                            },
+                            new()
+                            {
+                                Time = 240,
+                                Teams =
+                                [
+                                    new()
+                                    {
+                                        Players =
+                                        [
+                                            new()
+                                            {
+                                                Items =
+                                                [
+                                                    new() { ItemId = 10, Slot = 0 },
+                                                    new() { ItemId = 20, Slot = 1 },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                }
+            );
+
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddDbContextFactory<HonStatsDbContext>(o =>
+                o.UseSqlite($"Data Source={dbPath}")
+            );
+            services.Configure<IndexingOptions>(o =>
+            {
+                o.RecentMatchesLimit = 50;
+                o.MatchSummaryConcurrency = 2;
+            });
+            services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
+            services.AddSingleton<IIndexProgressTracker, IndexProgressTracker>();
+            services.AddScoped<IInsightsRawQuery, InsightsRawQuery>();
+            services.AddScoped<IInsightsAggregateStore, InsightsAggregateStore>();
+            services.AddScoped<IPlayerInsightsQuery, SqlitePlayerInsightsQuery>();
+            services.AddScoped<IPlayerInsightsIndexer, JuvioPlayerInsightsIndexer>();
+            services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildHeroBuildsHandler>();
+            services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
+            services.AddSingleton<IMatchQuery>(matchQuery);
+            services.AddSingleton<IParsedReplayQuery>(replayQuery);
+            services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
+            services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
+                new FakeNameResolver(
+                    new Dictionary<Guid, ResolvedName>
+                    {
+                        [PlayerA] = new()
+                        {
+                            AccountId = PlayerA,
+                            Username = "alpha",
+                            Country = "SE",
+                        },
+                    }
+                ),
+                sp.GetRequiredService<IPlayerNameStore>()
+            ));
+            var sp = services.BuildServiceProvider();
+
+            // Migrate + seed pre-fix state: game 1 fully indexed with DEGENERATE timing
+            // data (all items share one FirstSeenSeconds — the fingerprint).
+            await using (
+                var seedDb = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                await seedDb.Database.MigrateAsync();
+
+                seedDb.IndexedPlayers.Add(
+                    new IndexedPlayer
+                    {
+                        AccountId = PlayerA,
+                        LastIndexedMatchId = 2,
+                        Status = IndexingStatus.Indexed,
+                    }
+                );
+                seedDb.PlayerMatches.Add(
+                    new PlayerMatch
+                    {
+                        AccountId = PlayerA,
+                        GameId = 1,
+                        HeroId = Hero,
+                        Team = "Legion",
+                        WinningTeam = "Legion",
+                    }
+                );
+                seedDb.PlayerMatches.Add(
+                    new PlayerMatch
+                    {
+                        AccountId = PlayerA,
+                        GameId = 2,
+                        HeroId = Hero,
+                        Team = "Legion",
+                        WinningTeam = "Hellbourne",
+                    }
+                );
+                seedDb.MatchRoster.Add(
+                    new MatchRoster
+                    {
+                        GameId = 1,
+                        AccountId = PlayerA,
+                        Team = "Legion",
+                        Won = true,
+                    }
+                );
+                seedDb.MatchRoster.Add(
+                    new MatchRoster
+                    {
+                        GameId = 2,
+                        AccountId = PlayerA,
+                        Team = "Legion",
+                        Won = false,
+                    }
+                );
+                // Degenerate fingerprint: both items at the SAME timestamp
+                seedDb.MatchItemTimings.Add(
+                    new MatchItemTiming
+                    {
+                        GameId = 1,
+                        AccountId = PlayerA,
+                        ItemId = 10,
+                        FirstSeenSeconds = 300,
+                    }
+                );
+                seedDb.MatchItemTimings.Add(
+                    new MatchItemTiming
+                    {
+                        GameId = 1,
+                        AccountId = PlayerA,
+                        ItemId = 20,
+                        FirstSeenSeconds = 300,
+                    }
+                );
+                await seedDb.SaveChangesAsync();
+            }
+
+            using var scope = sp.CreateScope();
+            var indexer = scope.ServiceProvider.GetRequiredService<IPlayerInsightsIndexer>();
+
+            // Normal reindex — no new games, but ReprocessStaleItemTimingsAsync
+            // should detect game 1's degenerate fingerprint and re-fetch the replay.
+            await indexer.IndexAsync(PlayerA);
+
+            await using (
+                var assertDb = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                var timings = await assertDb
+                    .MatchItemTimings.Where(t => t.GameId == 1)
+                    .ToListAsync();
+
+                timings.Should().HaveCount(2);
+                timings.Select(t => t.FirstSeenSeconds).Distinct().Should().HaveCountGreaterThan(1);
+                timings
+                    .Should()
+                    .ContainEquivalentOf(
+                        new
+                        {
+                            GameId = 1,
+                            AccountId = PlayerA,
+                            ItemId = 10,
+                            FirstSeenSeconds = 120,
+                        }
+                    );
+                timings
+                    .Should()
+                    .ContainEquivalentOf(
+                        new
+                        {
+                            GameId = 1,
+                            AccountId = PlayerA,
+                            ItemId = 20,
+                            FirstSeenSeconds = 240,
+                        }
+                    );
+            }
+        }
+        finally
+        {
+            if (File.Exists(dbPath))
+                File.Delete(dbPath);
+        }
+    }
+
     private static FakeMatchQuery CreateMatchQuery() =>
         new(
             recent: new List<PlayerMatch>

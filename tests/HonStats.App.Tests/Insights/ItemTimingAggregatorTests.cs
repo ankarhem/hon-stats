@@ -177,6 +177,23 @@ public class ItemTimingAggregatorTests
         result.Should().OnlyContain(t => t.FirstSeenSeconds <= 0);
     }
 
+    [Fact]
+    public void IsDegenerate_True_ForZeroOrOneSnapshots()
+    {
+        ItemTimingAggregator.IsDegenerate(new ParsedReplay { GameId = 1 }).Should().BeTrue();
+        ItemTimingAggregator
+            .IsDegenerate(new ParsedReplay { GameId = 1, Snapshots = [new()] })
+            .Should()
+            .BeTrue();
+    }
+
+    [Fact]
+    public void IsDegenerate_False_ForMultipleSnapshots()
+    {
+        var replay = Replay(1, Anchor(AnchorTeam(LegionA)), Snap(0, Pos()));
+        ItemTimingAggregator.IsDegenerate(replay).Should().BeFalse();
+    }
+
     private static ParsedReplay FixtureReplay()
     {
         var path = Path.Combine(AppContext.BaseDirectory, "fixtures", "parsedreplay.json");
