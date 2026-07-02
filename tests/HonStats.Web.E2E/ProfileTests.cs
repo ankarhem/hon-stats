@@ -127,8 +127,12 @@ public class ProfileTests
     }
 
     private Task AssertNavigationKeepsScroll(ILocator link, string expectedQuery) =>
-        _e2e.AssertNavigationKeepsScroll(
-            link,
-            $"{_e2e.BaseUrl}/players/{TestPlayers.ManyGames}{expectedQuery}"
-        );
+        _e2e.AssertNavigationKeepsScroll(async () =>
+        {
+            await link.ClickAsync();
+            await Assertions
+                .Expect(Page)
+                .ToHaveURLAsync($"{_e2e.BaseUrl}/players/{TestPlayers.ManyGames}{expectedQuery}");
+            await Assertions.Expect(link).ToHaveAttributeAsync("aria-current", "true");
+        });
 }
