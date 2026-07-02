@@ -178,7 +178,7 @@ public class ProfileModel(
         var recent =
             selectedMap == "all" ? fetched : fetched.Where(m => m.Map == selectedMap).ToList();
         return Partial(
-            "_MatchesRows",
+            "Players/Partials/_MatchesRows",
             new MatchesView(
                 accountId,
                 recent,
@@ -207,7 +207,7 @@ public class ProfileModel(
             ct
         );
         return Partial(
-            "_TeammatesRows",
+            "Players/Partials/_TeammatesRows",
             new TeammatesView(
                 accountId,
                 teammates,
@@ -265,7 +265,7 @@ public class ProfileModel(
         }
 
         return Partial(
-            "_ReindexButton",
+            "Players/Partials/_ReindexButton",
             new ReindexButtonView(accountId, null, indexed, p.Fetched, p.Total, p.Done, p.StartedAt)
         );
     }
