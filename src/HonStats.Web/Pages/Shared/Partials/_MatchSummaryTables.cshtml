@@ -14,7 +14,7 @@
         </p>
         <table class="table match-table">
             <thead>
-                <tr><th>Hero</th><th>K/D/A</th><th>Wards</th><th>Net</th><th>GPM</th><th>XPM</th><th>DPM</th><th>Items</th></tr>
+                <tr><th>Hero</th><th>K/D/A</th><th>Wards</th><th>GPM</th><th>XPM</th><th>DPM</th><th>Items</th></tr>
             </thead>
             <tbody>
                 @foreach (var (pl, pi) in team.Select((p, i) => (p, i)))
@@ -41,7 +41,6 @@
                         </td>
                         <td class="kda">@pl.Kills/@pl.Deaths/@pl.Assists</td>
                         <td class="muted">👁 @pl.WardOfSightPlaced / @pl.WardOfRevelationPlaced</td>
-                        <td class="muted">@pl.NetWorth</td>
                         <td class="muted">@ProfileModel.PerMinute(pl.NetWorth, d.Duration).ToString("0")</td>
                         <td class="muted">@ProfileModel.PerMinute(pl.Experience, d.Duration).ToString("0")</td>
                         <td class="muted">@ProfileModel.PerMinute(Model.HeroDamageByAccount.GetValueOrDefault(pl.AccountId), d.Duration).ToString("0")</td>

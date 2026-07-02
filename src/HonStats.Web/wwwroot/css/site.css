@@ -914,21 +914,19 @@ dialog.modal::backdrop {
 }
 
 .match-table th:nth-child(1),
-.match-table td:nth-child(1) { width: 20%; }
+.match-table td:nth-child(1) { width: 22%; }
 .match-table th:nth-child(2),
-.match-table td:nth-child(2) { width: 8%; }
+.match-table td:nth-child(2) { width: 9%; }
 .match-table th:nth-child(3),
-.match-table td:nth-child(3) { width: 9%; }
+.match-table td:nth-child(3) { width: 10%; }
 .match-table th:nth-child(4),
-.match-table td:nth-child(4) { width: 7%; }
+.match-table td:nth-child(4),
 .match-table th:nth-child(5),
 .match-table td:nth-child(5),
 .match-table th:nth-child(6),
-.match-table td:nth-child(6),
+.match-table td:nth-child(6) { width: 6%; }
 .match-table th:nth-child(7),
-.match-table td:nth-child(7) { width: 6%; }
-.match-table th:nth-child(8),
-.match-table td:nth-child(8) { width: 38%; }
+.match-table td:nth-child(7) { width: 41%; }
 
 /* ---------- Hero build tiers (Early / Core / Late) ---------- */
 .build-tier {
