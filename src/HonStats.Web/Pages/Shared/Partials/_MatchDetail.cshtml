@@ -7,69 +7,16 @@
 else
 {
     var d = Model.Detail;
-    var teamIndex = 0;
     <dialog class="modal" closedby="any" aria-label="Match details">
         <div class="modal__bar">
             <span class="modal__title">
                 Match #@d.GameId · @d.Map · @(d.Duration / 60)m @(d.Duration % 60)s · @TimeDisplay.Relative(d.Date)
             </span>
+            <a class="btn btn--ghost" href="/match/@d.GameId">View full match →</a>
             <form method="dialog"><button class="btn btn--ghost" type="submit">Close ✕</button></form>
         </div>
         <div class="modal__body">
-            @foreach (var team in d.Players.GroupBy(p => p.Team))
-            {
-                var teamLower = team.Key.ToLowerInvariant();
-                var ti = teamIndex++;
-                <section class="match-section">
-                    <p class="match-section__title team--@teamLower">
-                        @team.Key @(team.Key == d.WinningTeam ? "· Winner" : "")
-                    </p>
-                    <table class="table match-table">
-                        <thead>
-                            <tr><th>Hero</th><th>K/D/A</th><th>Wards</th><th>Net</th><th>Items</th></tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var (pl, pi) in team.Select((p, i) => (p, i)))
-                            {
-                                var hero = Model.Heroes.GetValueOrDefault(pl.HeroId);
-                                var name = Model.Names.GetValueOrDefault(pl.AccountId);
-                                <tr>
-                                    <td>
-                                        <div class="match-row__hero">
-                                            <img class="hero-icon" src="@hero?.IconUrl" alt="" loading="lazy" />
-                                            <div>
-                                                <span class="hero-name">@(hero?.TranslatedName ?? pl.HeroId.ToString())</span>
-                                                <a class="match-row__player" href="/players/@System.Uri.EscapeDataString(name?.Username ?? pl.AccountId.ToString())">
-                                                    <span class="flag">@ProfileModel.Flag(name?.Country)</span>@(name?.DisplayName ?? name?.Username ?? pl.AccountId.ToString())
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="kda">@pl.Kills/@pl.Deaths/@pl.Assists</td>
-                                    <td class="muted">👁 @pl.WardOfSightPlaced / @pl.WardOfRevelationPlaced</td>
-                                    <td class="muted">@pl.NetWorth</td>
-                                    <td>
-                                        <div class="item-row">
-                                            @foreach (var (itemId, ii) in pl.Inventory.Select((id, i) => (id, i)))
-                                            {
-                                                var item = Model.Items.GetValueOrDefault(itemId);
-                                                var iconUrl = item?.IconUrl ?? $"https://gamestorage.juvio.com/items/{itemId}/icon.webp";
-                                                <span class="loadout-item item-tile">
-                                                    <img class="loadout-item__img" src="@iconUrl" alt="@item?.DisplayName" loading="lazy" />
-                                                    @if (item is not null)
-                                                    {
-                                                        <partial name="Shared/_ItemTooltip" model="new ItemTooltipView(item, iconUrl)" />
-                                                    }
-                                                </span>
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </section>
-            }
+            <partial name="Shared/Partials/_MatchSummaryTables" model="Model" />
         </div>
     </dialog>
 }

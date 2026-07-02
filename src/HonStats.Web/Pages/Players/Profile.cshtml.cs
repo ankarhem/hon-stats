@@ -310,6 +310,35 @@ public class ProfileModel(
         var clamped = Math.Max(0, (int)Math.Round(seconds));
         return $"{clamped / 60}:{clamped % 60:D2}";
     }
+
+    public static double PerMinute(double total, int durationSeconds) =>
+        durationSeconds > 0 ? total * 60.0 / durationSeconds : 0;
+
+    public static string RoleLabel(int roleIndex) =>
+        roleIndex switch
+        {
+            1 => "Carry",
+            2 => "Mid",
+            3 => "Offlane",
+            4 => "Soft Support",
+            5 => "Hard Support",
+            6 => "Solo Offlane",
+            7 => "Jungle",
+            _ => "Unassigned",
+        };
+
+    public static string RoleColor(int roleIndex) =>
+        roleIndex switch
+        {
+            1 => "#5591ff",
+            2 => "#68fff6",
+            3 => "#e462ff",
+            4 => "#ffff3b",
+            5 => "#ffc95a",
+            6 => "#a647ba",
+            7 => "#b5ab24",
+            _ => "#ffffff",
+        };
 }
 
 public record MatchesView(

@@ -1,0 +1,26 @@
+@model BuildTimelineView
+@using HonStats.Web
+@{
+    var p = Model.Player;
+    var items = Model.Items;
+}
+@if (p.Items.Count > 0)
+{
+    <div class="build-timeline">
+        @foreach (var buy in p.Items)
+        {
+            var item = items.GetValueOrDefault(buy.ItemId);
+            var iconUrl = item?.IconUrl ?? $"https://gamestorage.juvio.com/items/{buy.ItemId}/icon.webp";
+            <div class="build-timeline__item">
+                <span class="loadout-item item-tile">
+                    <img class="loadout-item__img" src="@iconUrl" alt="@item?.DisplayName" loading="lazy" />
+                    @if (item is not null)
+                    {
+                        <partial name="Shared/_ItemTooltip" model="new ItemTooltipView(item, iconUrl)" />
+                    }
+                </span>
+                <span class="build-timeline__time">@ProfileModel.FormatBuyTime(buy.FirstSeenSeconds)</span>
+            </div>
+        }
+    </div>
+}

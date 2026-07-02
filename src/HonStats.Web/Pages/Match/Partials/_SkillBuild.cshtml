@@ -1,0 +1,20 @@
+@model SkillBuildView
+@using HonStats.Web
+@{
+    var p = Model.Player;
+    var abilities = Model.Abilities;
+}
+@if (p.Skills.Count > 0)
+{
+    <div class="skill-build">
+        @foreach (var s in p.Skills)
+        {
+            var ability = abilities.GetValueOrDefault(s.SkillId);
+            var iconUrl = ability?.IconUrl ?? $"https://gamestorage.juvio.com/abilities/{s.SkillId}/icon.webp";
+            <span class="skill-build__ability" title="@ability?.TranslatedName">
+                <img src="@iconUrl" alt="@ability?.TranslatedName" loading="lazy" />
+                <span class="skill-build__level">@s.Level</span>
+            </span>
+        }
+    </div>
+}

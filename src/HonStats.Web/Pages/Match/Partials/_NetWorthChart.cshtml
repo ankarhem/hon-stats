@@ -1,0 +1,77 @@
+@model IReadOnlyList<PlayerSeries>
+@using Microsoft.AspNetCore.Html
+@using System.Net
+@{
+    IHtmlContent SvgLabel(double x, double y, string anchor, string content, string? baseline = null)
+    {
+        var baselineAttr = baseline is null ? "" : $" dominant-baseline=\"{baseline}\"";
+        return new HtmlString(
+            $"<text class=\"match-chart__label\" x=\"{x:0.##}\" y=\"{y:0.##}\" text-anchor=\"{anchor}\"{baselineAttr}>{WebUtility.HtmlEncode(content)}</text>"
+        );
+    }
+
+    const int width = 760;
+    const int height = 220;
+    const int padTop = 16;
+    const int padRight = 16;
+    const int padBottom = 28;
+    const int padLeft = 48;
+    var plotWidth = width - padLeft - padRight;
+    var plotHeight = height - padTop - padBottom;
+
+    var points = Model.SelectMany(p => p.Timeline).Where(t => t.NetWorth.HasValue).ToList();
+    if (points.Count == 0)
+    {
+        return;
+    }
+    var maxTime = points.Max(t => t.TimeSeconds);
+    if (maxTime <= 0)
+        maxTime = 1;
+    var minNw = (double)points.Min(t => t.NetWorth!.Value);
+    var maxNw = (double)points.Max(t => t.NetWorth!.Value);
+    var lo = Math.Floor(minNw / 1000.0) * 1000;
+    var hi = Math.Ceiling(maxNw / 1000.0) * 1000;
+    if (hi <= lo)
+        hi = lo + 1000;
+    var range = hi - lo;
+
+    double X(int time) => padLeft + plotWidth * time / (double)maxTime;
+    double Y(double val) => padTop + plotHeight - ((val - lo) / range * plotHeight);
+    string LinePoints(PlayerSeries p) => string.Join(
+        " ",
+        p.Timeline.Where(t => t.NetWorth.HasValue).Select(t => $"{X(t.TimeSeconds):0.##},{Y(t.NetWorth!.Value):0.##}")
+    );
+
+    const int gridLines = 4;
+    var tickTimes = new[] { 0, maxTime / 2, maxTime };
+}
+<svg viewBox="0 0 @width @height" class="match-chart" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Net worth over time">
+    @for (var i = 0; i <= gridLines; i++)
+    {
+        var gv = lo + range * i / gridLines;
+        var gy = Y(gv);
+        <line class="match-chart__grid" x1="@padLeft" y1="@gy.ToString("0.##")" x2="@(width - padRight)" y2="@gy.ToString("0.##")" />
+        @SvgLabel(padLeft - 6, gy, "end", (gv / 1000.0).ToString("0.#") + "k", "middle")
+    }
+    @foreach (var p in Model)
+    {
+        var pts = LinePoints(p);
+        if (string.IsNullOrEmpty(pts))
+        {
+            continue;
+        }
+        var teamClass = p.Team == "Legion" ? "match-chart__line--legion" : "match-chart__line--hellbourne";
+        <polyline class="match-chart__line @teamClass" points="@pts" />
+    }
+    @SvgLabel(padLeft, height - 6, "start", "0m")
+    @SvgLabel(X(maxTime), height - 6, "end", (maxTime / 60) + "m")
+</svg>
+<div class="match-chart__legend">
+    @foreach (var p in Model)
+    {
+        var dotClass = p.Team == "Legion" ? "match-chart__legend-dot--legion" : "match-chart__legend-dot--hellbourne";
+        <span class="match-chart__legend-item">
+            <span class="match-chart__legend-dot @dotClass"></span>@p.DisplayName
+        </span>
+    }
+</div>

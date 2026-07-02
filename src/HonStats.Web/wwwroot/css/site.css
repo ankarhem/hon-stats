@@ -896,15 +896,21 @@ dialog.modal::backdrop {
 }
 
 .match-table th:nth-child(1),
-.match-table td:nth-child(1) { width: 28%; }
+.match-table td:nth-child(1) { width: 20%; }
 .match-table th:nth-child(2),
-.match-table td:nth-child(2) { width: 10%; }
+.match-table td:nth-child(2) { width: 8%; }
 .match-table th:nth-child(3),
-.match-table td:nth-child(3) { width: 10%; }
+.match-table td:nth-child(3) { width: 9%; }
 .match-table th:nth-child(4),
-.match-table td:nth-child(4) { width: 8%; }
+.match-table td:nth-child(4) { width: 7%; }
 .match-table th:nth-child(5),
-.match-table td:nth-child(5) { width: 44%; }
+.match-table td:nth-child(5),
+.match-table th:nth-child(6),
+.match-table td:nth-child(6),
+.match-table th:nth-child(7),
+.match-table td:nth-child(7) { width: 6%; }
+.match-table th:nth-child(8),
+.match-table td:nth-child(8) { width: 38%; }
 
 /* ---------- Hero build tiers (Early / Core / Late) ---------- */
 .build-tier {
@@ -1775,6 +1781,185 @@ li.loading-row {
 
 .mmr-chart__legend-dot--midwars {
     background: var(--gold);
+}
+
+/* ---------- Match charts (generalized from MMR chart) ---------- */
+.match-chart {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.match-chart__grid {
+    stroke: var(--border);
+    stroke-width: 0.5;
+}
+
+.match-chart__line {
+    stroke: var(--fg);
+    stroke-width: 1.5;
+    fill: none;
+}
+
+.match-chart__line--legion {
+    stroke: var(--legion);
+}
+
+.match-chart__line--hellbourne {
+    stroke: var(--hellbourne);
+}
+
+.match-chart__point {
+    fill: var(--fg);
+    stroke: var(--surface);
+    stroke-width: 1.5;
+}
+
+.match-chart__point--legion {
+    fill: var(--legion);
+}
+
+.match-chart__point--hellbourne {
+    fill: var(--hellbourne);
+}
+
+.match-chart__hit {
+    fill: transparent;
+    cursor: pointer;
+}
+
+.match-chart__guide {
+    stroke: var(--muted);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+    opacity: 0;
+    transition: opacity 0.08s ease;
+}
+
+.match-chart__col:hover .match-chart__guide {
+    opacity: 0.6;
+}
+
+.match-chart__label {
+    fill: var(--muted);
+    font-size: 14px;
+}
+
+.match-chart__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.match-chart__legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.match-chart__legend-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    display: inline-block;
+    background: var(--fg);
+}
+
+.match-chart__legend-dot--legion {
+    background: var(--legion);
+}
+
+.match-chart__legend-dot--hellbourne {
+    background: var(--hellbourne);
+}
+
+/* ---------- Match detail enrichment ---------- */
+.role-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: oklch(from var(--role, var(--muted)) l c h / 0.18);
+    color: var(--role, var(--muted));
+    border: 1px solid oklch(from var(--role, var(--muted)) l c h / 0.4);
+}
+
+.build-timeline {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+}
+
+.build-timeline__phase {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-right: 0.5rem;
+    white-space: nowrap;
+}
+
+.build-timeline__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    flex-shrink: 0;
+}
+
+.build-timeline__time {
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.skill-build {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+}
+
+.skill-build__ability {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.skill-build__ability img {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    background: var(--surface-3);
+}
+
+.skill-build__level {
+    position: absolute;
+    right: -0.2rem;
+    bottom: -0.2rem;
+    min-width: 1rem;
+    height: 1rem;
+    padding: 0 0.2rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: oklch(16.96% 0.0253 251.15);
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1rem;
+    text-align: center;
 }
 
 /* ---------- Responsive ---------- */

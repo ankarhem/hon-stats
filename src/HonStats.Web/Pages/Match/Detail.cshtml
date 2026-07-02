@@ -1,0 +1,54 @@
+@page "/match/{gameId:int}"
+@model MatchDetailModel
+@using HonStats.Web
+@{
+    var v = Model.View!;
+    var d = v.Summary.Detail!;
+    ViewData["Title"] = $"Match #{d.GameId}";
+}
+
+<div class="detail-header">
+    <h1 class="detail-header__name">Match #@d.GameId</h1>
+    <p class="detail-header__meta">@d.Map · @(d.Duration / 60)m @(d.Duration % 60)s · @TimeDisplay.Relative(d.Date)</p>
+</div>
+
+<partial name="Shared/Partials/_MatchSummaryTables" model="v.Summary" />
+
+@if (v.HasReplay)
+{
+    <section class="panel card">
+        <p class="eyebrow card__title">Net Worth Over Time</p>
+        <partial name="Match/Partials/_NetWorthChart" model="v.Players" />
+    </section>
+    <section class="panel card">
+        <p class="eyebrow card__title">Hero Damage Over Time</p>
+        <partial name="Match/Partials/_DamageChart" model="v.Players" />
+    </section>
+
+    <section class="panel card">
+        <p class="eyebrow card__title">Builds &amp; Skill Order</p>
+        @foreach (var team in v.Players.GroupBy(p => p.Team))
+        {
+            <p class="match-section__title team--@(team.Key.ToLowerInvariant())">
+                @team.Key @(team.Key == d.WinningTeam ? "· Winner" : "")
+            </p>
+            @foreach (var p in team)
+            {
+                var hero = v.Summary.Heroes.GetValueOrDefault(p.HeroId);
+                <div class="match-build">
+                    <div class="match-build__head">
+                        <img class="hero-icon" src="@hero?.IconUrl" alt="" loading="lazy" />
+                        <span class="hero-name">@(hero?.TranslatedName ?? ("Hero " + p.HeroId))</span>
+                        <span class="muted">@p.DisplayName</span>
+                    </div>
+                    <partial name="Match/Partials/_BuildTimeline" model="new BuildTimelineView(p, v.Summary.Items)" />
+                    <partial name="Match/Partials/_SkillBuild" model="new SkillBuildView(p, v.Abilities)" />
+                </div>
+            }
+        }
+    </section>
+}
+else
+{
+    <p class="muted">Replay timeline unavailable for this match.</p>
+}

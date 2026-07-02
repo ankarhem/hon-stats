@@ -1,0 +1,67 @@
+@using HonStats.Web
+@model MatchDetailView
+@{
+    var d = Model.Detail!;
+    var teamIndex = 0;
+}
+@foreach (var team in d.Players.GroupBy(p => p.Team))
+{
+    var teamLower = team.Key.ToLowerInvariant();
+    var ti = teamIndex++;
+    <section class="match-section">
+        <p class="match-section__title team--@teamLower">
+            @team.Key @(team.Key == d.WinningTeam ? "· Winner" : "")
+        </p>
+        <table class="table match-table">
+            <thead>
+                <tr><th>Hero</th><th>K/D/A</th><th>Wards</th><th>Net</th><th>GPM</th><th>XPM</th><th>DPM</th><th>Items</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var (pl, pi) in team.Select((p, i) => (p, i)))
+                {
+                    var hero = Model.Heroes.GetValueOrDefault(pl.HeroId);
+                    var name = Model.Names.GetValueOrDefault(pl.AccountId);
+                    <tr>
+                        <td>
+                            <div class="match-row__hero">
+                                <img class="hero-icon" src="@hero?.IconUrl" alt="" loading="lazy" />
+                                <div>
+                                    <span class="hero-name">@(hero?.TranslatedName ?? pl.HeroId.ToString())</span>
+                                    @if (pl.RoleIndex != 0)
+                                    {
+                                        <span class="role-chip" style="--role:@ProfileModel.RoleColor(pl.RoleIndex)">@ProfileModel.RoleLabel(pl.RoleIndex)</span>
+                                    }
+                                    <a class="match-row__player" href="/players/@System.Uri.EscapeDataString(name?.Username ?? pl.AccountId.ToString())">
+                                        <span class="flag">@ProfileModel.Flag(name?.Country)</span>@(name?.DisplayName ?? name?.Username ?? pl.AccountId.ToString())
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="kda">@pl.Kills/@pl.Deaths/@pl.Assists</td>
+                        <td class="muted">👁 @pl.WardOfSightPlaced / @pl.WardOfRevelationPlaced</td>
+                        <td class="muted">@pl.NetWorth</td>
+                        <td class="muted">@ProfileModel.PerMinute(pl.NetWorth, d.Duration).ToString("0")</td>
+                        <td class="muted">@ProfileModel.PerMinute(pl.Experience, d.Duration).ToString("0")</td>
+                        <td class="muted">@ProfileModel.PerMinute(pl.HeroDamage, d.Duration).ToString("0")</td>
+                        <td>
+                            <div class="item-row">
+                                @foreach (var (itemId, ii) in pl.Inventory.Select((id, i) => (id, i)))
+                                {
+                                    var item = Model.Items.GetValueOrDefault(itemId);
+                                    var iconUrl = item?.IconUrl ?? $"https://gamestorage.juvio.com/items/{itemId}/icon.webp";
+                                    <span class="loadout-item item-tile">
+                                        <img class="loadout-item__img" src="@iconUrl" alt="@item?.DisplayName" loading="lazy" />
+                                        @if (item is not null)
+                                        {
+                                            <partial name="Shared/_ItemTooltip" model="new ItemTooltipView(item, iconUrl)" />
+                                        }
+                                    </span>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+}
