@@ -18,6 +18,7 @@ namespace HonStats.Web.Pages;
 public class ProfileModel(
     IPlayerProfileQuery profiles,
     IMatchQuery matches,
+    IParsedReplayQuery parsedReplays,
     IPlayerInsightsQuery insights,
     IInsightsRawQuery rawQuery,
     IReferenceDataQuery reference,
@@ -231,9 +232,10 @@ public class ProfileModel(
         var names = detail is null
             ? new Dictionary<Guid, ResolvedName>()
             : await nameResolver.ResolveAsync(detail.Players.Select(p => p.AccountId).ToList(), ct);
+        var heroDamage = HeroDamageAggregator.Build(await parsedReplays.GetAsync(gameId, ct));
         return Partial(
             "Shared/Partials/_MatchDetail",
-            new MatchDetailView(detail, heroes, items, names)
+            new MatchDetailView(detail, heroes, items, names, heroDamage)
         );
     }
 
@@ -377,7 +379,8 @@ public record MatchDetailView(
     MatchDetail? Detail,
     Dictionary<int, Hero> Heroes,
     Dictionary<int, Item> Items,
-    IReadOnlyDictionary<Guid, ResolvedName> Names
+    IReadOnlyDictionary<Guid, ResolvedName> Names,
+    IReadOnlyDictionary<Guid, int> HeroDamageByAccount
 );
 
 public record ReindexButtonView(

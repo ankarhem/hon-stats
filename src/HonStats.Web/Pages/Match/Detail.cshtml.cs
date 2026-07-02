@@ -70,7 +70,7 @@ public class MatchDetailModel(
             .ToList();
 
         View = new MatchPageView(
-            new MatchDetailView(detail, heroes, items, names),
+            new MatchDetailView(detail, heroes, items, names, HeroDamageAggregator.Build(replay)),
             hasReplay,
             abilities,
             players

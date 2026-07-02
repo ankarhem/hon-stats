@@ -44,7 +44,7 @@
                         <td class="muted">@pl.NetWorth</td>
                         <td class="muted">@ProfileModel.PerMinute(pl.NetWorth, d.Duration).ToString("0")</td>
                         <td class="muted">@ProfileModel.PerMinute(pl.Experience, d.Duration).ToString("0")</td>
-                        <td class="muted">@ProfileModel.PerMinute(pl.HeroDamage, d.Duration).ToString("0")</td>
+                        <td class="muted">@ProfileModel.PerMinute(Model.HeroDamageByAccount.GetValueOrDefault(pl.AccountId), d.Duration).ToString("0")</td>
                         <td>
                             <div class="item-row">
                                 @foreach (var (itemId, ii) in pl.Inventory.Select((id, i) => (id, i)))

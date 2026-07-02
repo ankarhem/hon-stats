@@ -284,3 +284,49 @@ public static class SkillBuildAggregator
         return events;
     }
 }
+
+// getmatchsummary's heroDamage is a dead field (always 0); the real cumulative
+// hero damage per player only lives in parsedReplay snapshots. This returns the
+// per-account end-game total (the max reached, since the value is monotonic).
+public static class HeroDamageAggregator
+{
+    public static IReadOnlyDictionary<Guid, int> Build(ParsedReplay? replay)
+    {
+        if (replay is null || replay.Snapshots.Count == 0)
+            return new Dictionary<Guid, int>();
+
+        var anchor = replay.Snapshots[0];
+        var positionToAccount = new Dictionary<(int Team, int Player), Guid>();
+        for (var ti = 0; ti < anchor.Teams.Count; ti++)
+        {
+            var players = anchor.Teams[ti].Players;
+            for (var pi = 0; pi < players.Count; pi++)
+            {
+                if (players[pi].AccountId is { } id && id != Guid.Empty)
+                    positionToAccount[(ti, pi)] = id;
+            }
+        }
+
+        if (positionToAccount.Count == 0)
+            return new Dictionary<Guid, int>();
+
+        var max = new Dictionary<Guid, int>();
+        foreach (var snapshot in replay.Snapshots)
+        {
+            for (var ti = 0; ti < snapshot.Teams.Count; ti++)
+            {
+                var players = snapshot.Teams[ti].Players;
+                for (var pi = 0; pi < players.Count; pi++)
+                {
+                    if (!positionToAccount.TryGetValue((ti, pi), out var account))
+                        continue;
+                    var hd = players[pi].HeroDamage;
+                    if (hd is int v && v > max.GetValueOrDefault(account))
+                        max[account] = v;
+                }
+            }
+        }
+
+        return max;
+    }
+}
