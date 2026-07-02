@@ -716,7 +716,10 @@ dialog.modal {
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    overflow: auto;
+    /* Vertical only: a horizontal scroll offset here makes anchor() mis-place the
+       popover tooltips inside (top-layer + transformed CB quirk). Table fits instead. */
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 dialog.modal::backdrop {
