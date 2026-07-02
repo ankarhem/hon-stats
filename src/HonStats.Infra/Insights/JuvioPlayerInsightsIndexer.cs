@@ -301,9 +301,11 @@ internal sealed class JuvioPlayerInsightsIndexer(
         await db.SaveChangesAsync(ct);
     }
 
-    // Optional: derive per-(game,player,item) first-buy seconds from the replay
-    // snapshot timeline. Failures are isolated — a missing/unparseable replay must
-    // never break the core summary ingestion (already persisted above).
+    // Optional replay-derived data: per-(game,player,item) first-buy seconds, and
+    // end-game hero damage (getmatchsummary's heroDamage is a dead field, so the
+    // real total is read from the replay snapshot timeline). Failures are isolated
+    // — a missing/unparseable replay must never break the core summary ingestion
+    // (already persisted above).
     private async Task IngestItemTimingAsync(HonStatsDbContext db, int gameId, CancellationToken ct)
     {
         try
@@ -322,6 +324,13 @@ internal sealed class JuvioPlayerInsightsIndexer(
                 await db.MatchItemTimings.Where(t => t.GameId == gameId).ExecuteDeleteAsync(ct);
                 return;
             }
+
+            var heroDamage = HeroDamageAggregator.Build(replay);
+            var rosterRows = db.MatchRoster.Local.Where(r => r.GameId == gameId).ToList();
+            if (rosterRows.Count == 0)
+                rosterRows = await db.MatchRoster.Where(r => r.GameId == gameId).ToListAsync(ct);
+            foreach (var r in rosterRows)
+                r.HeroDamage = heroDamage.TryGetValue(r.AccountId, out var hd) ? hd : null;
 
             var rows = ItemTimingAggregator.Build(replay);
             if (rows.Count == 0)
