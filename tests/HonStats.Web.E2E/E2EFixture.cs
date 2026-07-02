@@ -86,33 +86,15 @@ public sealed class E2EFixture : IAsyncLifetime
     // auto-scroll to click them, which moves scrollY and poisons the measurement.
     public async Task AssertNavigationKeepsScroll(Func<Task> navigate)
     {
+        await Page.InstallHtmxSupportAsync();
         await Page.EvaluateAsync(
-            """
-            () => {
-              window.__htmxSettled = false;
-              window.addEventListener('htmx:afterSettle', () => { window.__htmxSettled = true; }, { once: true });
-              document.body.style.minHeight = '3000px';
-              window.scrollTo(0, 200);
-            }
-            """
+            "() => { document.body.style.minHeight = '3000px'; window.scrollTo(0, 200); }"
         );
         var before = await GetScrollYAsync();
         Assert.True(before > 0, $"setup failed: page did not scroll (scrollY={before})");
 
         await navigate();
-
-        try
-        {
-            await Page.WaitForFunctionAsync(
-                "() => window.__htmxSettled === true",
-                null,
-                new() { Timeout = 10_000 }
-            );
-        }
-        catch (TimeoutException)
-        {
-            Assert.Fail("navigation did not settle via htmx (full page load or no swap?)");
-        }
+        await Page.WaitForHtmxSettledAsync();
 
         var after = await GetScrollYAsync();
         Assert.True(after == before, $"navigation moved scroll from {before} to {after}");
