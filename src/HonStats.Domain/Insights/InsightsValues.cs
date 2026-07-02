@@ -100,3 +100,12 @@ public sealed class ItemTimingEntry
     public double AvgSeconds { get; set; }
     public int Games { get; set; }
 }
+
+public sealed class SkillLevelEvent
+{
+    public int GameId { get; set; }
+    public Guid AccountId { get; set; }
+    public int SkillId { get; set; }
+    public int Level { get; set; }
+    public int TimeSeconds { get; set; }
+}

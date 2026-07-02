@@ -241,7 +241,10 @@ internal sealed class ParsedReplayPlayerDto
     public int? RavenPlaced { get; set; }
     public int? SlotIndex { get; set; }
     public int? StartingGold { get; set; }
-    public List<object>? Skills { get; set; }
+    public List<ParsedReplaySkillDto>? Skills { get; set; }
+    public int? HeroDamage { get; set; }
+    public int? BuildingDamage { get; set; }
+    public int? CreepKills { get; set; }
     public List<ParsedReplayItemDto> ItemsValue => this.Items ?? [];
 }
 
@@ -249,4 +252,10 @@ internal sealed class ParsedReplayItemDto
 {
     public int ItemId { get; set; }
     public int Slot { get; set; }
+}
+
+internal sealed class ParsedReplaySkillDto
+{
+    public int SkillId { get; set; }
+    public int Level { get; set; }
 }

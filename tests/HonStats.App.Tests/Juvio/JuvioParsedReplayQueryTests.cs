@@ -49,6 +49,76 @@ public class JuvioParsedReplayQueryTests
     }
 
     [Fact]
+    public async Task MapsSkillsAndDamageFields_OnPopulatedSnapshot()
+    {
+        const string json = """
+            {
+              "parsedReplay": {
+                "gameId": 8008220,
+                "winningTeam": "Legion",
+                "snapshots": [
+                  {
+                    "time": 600,
+                    "teams": [
+                      {
+                        "players": [
+                          {
+                            "netWorth": 5000,
+                            "skills": [ { "skillId": 1017, "level": 3 } ],
+                            "heroDamage": 12345,
+                            "buildingDamage": 678,
+                            "creepKills": 42
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+            """;
+        var query = QueryReturning(
+            new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) }
+        );
+
+        var replay = await query.GetAsync(8008220);
+
+        replay.Should().NotBeNull();
+        var player = replay!.Snapshots[0].Teams[0].Players[0];
+        player.Skills.Should().ContainSingle();
+        player.Skills[0].SkillId.Should().Be(1017);
+        player.Skills[0].Level.Should().Be(3);
+        player.HeroDamage.Should().Be(12345);
+        player.BuildingDamage.Should().Be(678);
+        player.CreepKills.Should().Be(42);
+    }
+
+    [Fact]
+    public async Task DefaultsSkillsToEmpty_WhenAbsent()
+    {
+        const string json = """
+            {
+              "parsedReplay": {
+                "gameId": 1,
+                "snapshots": [
+                  { "time": 0, "teams": [ { "players": [ { "netWorth": 100 } ] } ] }
+                ]
+              }
+            }
+            """;
+        var query = QueryReturning(
+            new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) }
+        );
+
+        var replay = await query.GetAsync(1);
+
+        var player = replay!.Snapshots[0].Teams[0].Players[0];
+        player.Skills.Should().NotBeNull();
+        player.Skills.Should().BeEmpty();
+        player.HeroDamage.Should().BeNull();
+    }
+
+    [Fact]
     public async Task ReturnsNull_OnNotFound()
     {
         var query = QueryReturning(new HttpResponseMessage(HttpStatusCode.NotFound));

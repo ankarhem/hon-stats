@@ -182,6 +182,19 @@ internal sealed class GamedataClient(IHttpClientFactory httpClientFactory)
         return items;
     }
 
+    public async Task<IReadOnlyList<Ability>> GetAbilitiesAsync(CancellationToken ct)
+    {
+        var abilitiesTask = Get<GetAllAbilitiesDto>("/entities/abilities", ct);
+        var stringsTask = GetStrings(ct);
+        await Task.WhenAll(abilitiesTask, stringsTask);
+
+        var strings = stringsTask.Result;
+
+        return (abilitiesTask.Result?.AbilitiesValue ?? [])
+            .Select(a => MapAbility(a, strings))
+            .ToList();
+    }
+
     private static IEnumerable<string> ParseComponentNames(List<string>? components) =>
         (components ?? []).SelectMany(s =>
             s.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)

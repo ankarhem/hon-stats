@@ -60,5 +60,9 @@ internal sealed class JuvioParsedReplayQuery(IHttpClientFactory httpClientFactor
             RavenPlaced = p.RavenPlaced,
             SlotIndex = p.SlotIndex,
             StartingGold = p.StartingGold,
+            Skills = p.Skills?.Select(s => new ReplaySkill(s.SkillId, s.Level)).ToList() ?? [],
+            HeroDamage = p.HeroDamage,
+            BuildingDamage = p.BuildingDamage,
+            CreepKills = p.CreepKills,
         };
 }

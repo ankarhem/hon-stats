@@ -221,3 +221,66 @@ public static class ItemTimingAggregator
             .ToList();
     }
 }
+
+public static class SkillBuildAggregator
+{
+    public static bool IsDegenerate(ParsedReplay replay) =>
+        ItemTimingAggregator.IsDegenerate(replay);
+
+    public static IReadOnlyList<SkillLevelEvent> Build(ParsedReplay replay)
+    {
+        if (replay.Snapshots.Count == 0)
+            return [];
+
+        var anchor = replay.Snapshots[0];
+        var positionToAccount = new Dictionary<(int Team, int Player), Guid>();
+        for (var ti = 0; ti < anchor.Teams.Count; ti++)
+        {
+            var players = anchor.Teams[ti].Players;
+            for (var pi = 0; pi < players.Count; pi++)
+            {
+                if (players[pi].AccountId is { } id && id != Guid.Empty)
+                    positionToAccount[(ti, pi)] = id;
+            }
+        }
+
+        if (positionToAccount.Count == 0)
+            return [];
+
+        var events = new List<SkillLevelEvent>();
+        var orderedSnapshots = replay
+            .Snapshots.Select((snapshot, index) => new { snapshot, index })
+            .OrderBy(x => x.snapshot.Time)
+            .ThenBy(x => x.index)
+            .Select(x => x.snapshot);
+
+        foreach (var snapshot in orderedSnapshots)
+        {
+            for (var ti = 0; ti < snapshot.Teams.Count; ti++)
+            {
+                var players = snapshot.Teams[ti].Players;
+                for (var pi = 0; pi < players.Count; pi++)
+                {
+                    if (!positionToAccount.TryGetValue((ti, pi), out var account))
+                        continue;
+
+                    foreach (var skill in players[pi].Skills)
+                    {
+                        events.Add(
+                            new SkillLevelEvent
+                            {
+                                GameId = replay.GameId,
+                                AccountId = account,
+                                SkillId = skill.SkillId,
+                                Level = skill.Level,
+                                TimeSeconds = snapshot.Time,
+                            }
+                        );
+                    }
+                }
+            }
+        }
+
+        return events;
+    }
+}

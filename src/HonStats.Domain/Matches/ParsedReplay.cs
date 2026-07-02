@@ -12,6 +12,8 @@ public sealed class ReplayItem
     public int Slot { get; set; }
 }
 
+public sealed record ReplaySkill(int SkillId, int Level);
+
 public sealed class ReplayPlayer
 {
     public List<ReplayItem> Items { get; set; } = [];
@@ -22,6 +24,10 @@ public sealed class ReplayPlayer
     public int? RavenPlaced { get; set; }
     public int? SlotIndex { get; set; }
     public int? StartingGold { get; set; } = null;
+    public IReadOnlyList<ReplaySkill> Skills { get; set; } = [];
+    public int? HeroDamage { get; set; }
+    public int? BuildingDamage { get; set; }
+    public int? CreepKills { get; set; }
 
     // Identity anchor: present only on snapshot[0]'s players. Null on later
     // snapshots, which are positional-only (mapped via snapshot[0]).

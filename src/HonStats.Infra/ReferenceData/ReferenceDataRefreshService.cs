@@ -41,10 +41,12 @@ internal sealed class ReferenceDataRefreshService(
             await cache.RefreshAsync(ct);
             var heroes = await cache.GetHeroesAsync(ct);
             var items = await cache.GetItemsAsync(ct);
+            var abilities = await cache.GetAbilitiesAsync(ct);
             logger.LogInformation(
-                "Reference data refreshed: {Heroes} heroes, {Items} items",
+                "Reference data refreshed: {Heroes} heroes, {Items} items, {Abilities} abilities",
                 heroes.Count,
-                items.Count
+                items.Count,
+                abilities.Count
             );
         }
         catch (Exception ex)
