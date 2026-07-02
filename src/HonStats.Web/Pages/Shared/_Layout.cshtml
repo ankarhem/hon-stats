@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] · HoN Reborn Stats</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+    <script src="https://unpkg.com/htmx.org@2.0.10" defer></script>
+    <script src="https://unpkg.com/htmx-ext-preload@2.1.2" defer></script>
 </head>
-<body>
+<body hx-ext="preload" preload>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
         <div class="site-header__inner">
