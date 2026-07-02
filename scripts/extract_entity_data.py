@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
-"""Extract hero stat growth + item stats from HoN Reborn entity files.
+"""Extract hero stat growth + item stats + role icons from HoN Reborn files.
 
 The juvio gamedata API doesn't expose several fields that the game client reads
 from local .entity files inside resources0.jz (a Zstd-compressed zip, the .s2z
 successor). This script extracts those missing fields so they can be shipped as
-static reference data.
+static reference data. It also extracts the matchmaking role-pick icons, which
+juvio serves no CDN path for (gamestorage is heroes/items only).
 
 Usage:
     python3 scripts/extract_entity_data.py <path-to-resources0.jz>
 
 Requires 7zz on PATH (available via: nix shell nixpkgs#python3 nixpkgs#_7zz).
 
-Output: src/HonStats.Infra/ReferenceData/entity-overrides.json
+Output:
+    src/HonStats.Infra/ReferenceData/entity-overrides.json
+    src/HonStats.Web/wwwroot/img/roles/role-*.png
 """
 
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -28,6 +32,9 @@ HERO_GLOB = "heroes/*/base/hero.entity"
 ITEM_GLOBS = ["items/recipes/*/item.entity", "items/basic/*/item.entity"]
 STATE_GLOBS = ["items/recipes/*/state.entity", "items/basic/*/state.entity"]
 PHOENIX_GLOB = "items/phoenix_rewards/*/item.entity"
+
+ROLE_ICON_GLOB = "preact/dist/assets/roles/*.png"
+ROLE_ICON_OUTPUT = REPO_ROOT / "src" / "HonStats.Web" / "wwwroot" / "img" / "roles"
 
 ITEM_STAT_MAP = {
     "attackspeed": "attackSpeed",
@@ -64,6 +71,28 @@ def extract_entities(jz_path: str, dest: Path) -> None:
     if result.returncode != 0:
         print(result.stderr, file=sys.stderr)
         sys.exit(1)
+
+
+def extract_role_icons(jz_path: str) -> int:
+    with tempfile.TemporaryDirectory(prefix="hon-roles-") as tmp:
+        tmp_path = Path(tmp)
+        result = subprocess.run(
+            ["7zz", "x", jz_path, ROLE_ICON_GLOB, f"-o{tmp_path}", "-y"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            print(result.stderr, file=sys.stderr)
+            sys.exit(1)
+        src_dir = tmp_path / "preact" / "dist" / "assets" / "roles"
+        icons = sorted(src_dir.glob("role-*.png"))
+        if not icons:
+            print("Warning: no role icons found in archive", file=sys.stderr)
+            return 0
+        ROLE_ICON_OUTPUT.mkdir(parents=True, exist_ok=True)
+        for icon in icons:
+            shutil.copy2(icon, ROLE_ICON_OUTPUT / icon.name)
+        return len(icons)
 
 
 def num(text: str | None) -> float | None:
@@ -221,9 +250,13 @@ def main() -> None:
     output = {"heroes": heroes, "items": items, "phoenixRewards": phoenix_rewards}
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(output, indent=2, sort_keys=True) + "\n")
+
+    role_icons = extract_role_icons(jz_path)
+
     print(
         f"Wrote {len(heroes)} heroes, {len(items)} items, "
         f"{len(phoenix_rewards)} phoenix rewards to {OUTPUT}"
+        + (f", {role_icons} role icons to {ROLE_ICON_OUTPUT}" if role_icons else "")
     )
 
 
