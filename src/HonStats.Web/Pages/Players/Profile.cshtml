@@ -37,7 +37,7 @@ else
                         @p.Rank.RankName <span class="rank-badge__stars">@ProfileModel.Stars(p.Rank.StarLevel)</span>
                     </span>
                 }
-                <partial name="_ReindexButton" model="new ReindexButtonView(Model.AccountId, null, Model.Indexed)" />
+                <partial name="Players/Partials/_ReindexButton" model="new ReindexButtonView(Model.AccountId, null, Model.Indexed)" />
             </div>
             <p id="last-indexed" class="profile-indexed-row muted">
                 Last indexed @TimeDisplay.Relative(Model.Indexed?.LastReindexAt)
@@ -46,12 +46,12 @@ else
         @if (p.Rank is not null)
         {
             <aside class="profile-layout__aside">
-                <partial name="_MmrPanel" model="Model" />
+                <partial name="Players/_MmrPanel" model="Model" />
             </aside>
         }
     </div>
 
     <div id="profile-context">
-        <partial name="_ProfileContext" model="Model" />
+        <partial name="Players/_ProfileContext" model="Model" />
     </div>
 }

@@ -39,7 +39,7 @@ public class HeroesModel(IReferenceDataQuery reference) : PageModel
             .Select(r => r!.Value)
             .ToHashSet();
 
-        return Request.IsHtmxNonBoosted() ? Partial("_HeroGrid", this) : Page();
+        return Request.IsHtmxNonBoosted() ? Partial("Shared/Partials/_HeroGrid", this) : Page();
     }
 
     public bool IsDimmed(Hero h)

@@ -231,14 +231,20 @@ public class ProfileModel(
         var names = detail is null
             ? new Dictionary<Guid, ResolvedName>()
             : await nameResolver.ResolveAsync(detail.Players.Select(p => p.AccountId).ToList(), ct);
-        return Partial("_MatchDetail", new MatchDetailView(detail, heroes, items, names));
+        return Partial(
+            "Shared/Partials/_MatchDetail",
+            new MatchDetailView(detail, heroes, items, names)
+        );
     }
 
     public async Task<IActionResult> OnPostReindex(Guid accountId, CancellationToken ct = default)
     {
         var result = await queue.RequestReindexAsync(accountId, forceBackfill: false, ct);
         var indexed = await insights.GetIndexedPlayerAsync(accountId, ct);
-        return Partial("_ReindexButton", new ReindexButtonView(accountId, result, indexed));
+        return Partial(
+            "Players/Partials/_ReindexButton",
+            new ReindexButtonView(accountId, result, indexed)
+        );
     }
 
     public async Task<IActionResult> OnGetIndexProgress(

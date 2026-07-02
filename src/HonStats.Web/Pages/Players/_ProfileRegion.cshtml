@@ -39,7 +39,7 @@
         else
         {
             <ul class="roster">
-                    <partial name="_TeammatesRows" model="new TeammatesView(Model.AccountId, Model.Teammates, 0, ProfileModel.PageSize, Model.HasMoreTeammates, Model.SelectedMap)" />
+                    <partial name="Players/Partials/_TeammatesRows" model="new TeammatesView(Model.AccountId, Model.Teammates, 0, ProfileModel.PageSize, Model.HasMoreTeammates, Model.SelectedMap)" />
             </ul>
         }
         break;
@@ -339,7 +339,7 @@
                     <tr><th>Hero</th><th>Result</th><th>K/D/A</th><th>Duration</th><th>Map</th><th>Date</th></tr>
                 </thead>
                 <tbody>
-                    <partial name="_MatchesRows" model="new MatchesView(Model.AccountId, Model.RecentMatches, Model.Heroes, 0, ProfileModel.PageSize, Model.HasMoreMatches, Model.SelectedMap)" />
+                    <partial name="Players/Partials/_MatchesRows" model="new MatchesView(Model.AccountId, Model.RecentMatches, Model.Heroes, 0, ProfileModel.PageSize, Model.HasMoreMatches, Model.SelectedMap)" />
                 </tbody>
             </table>
         }

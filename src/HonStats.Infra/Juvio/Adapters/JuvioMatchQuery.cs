@@ -15,22 +15,24 @@ internal sealed class JuvioMatchQuery(IHttpClientFactory httpClientFactory, IMem
         CancellationToken ct = default
     )
     {
-        return await cache.GetOrCreateAsync(
-            $"juvio:recentmatches:{playerId}:{limit}:{offset}",
-            async _ =>
-            {
-                var dto = await GetAsync<RecentMatchesDto>(
-                    $"/v1/stats/getrecentmatchesforplayer?playerId={playerId}&limit={limit}&offset={offset}",
-                    ct
-                );
-                return (IReadOnlyList<PlayerMatch>)
-                    (dto?.MatchesValue ?? []).Select(m => MapRecent(m, playerId)).ToList();
-            },
-            new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60),
-            }
-        );
+        return (
+                await cache.GetOrCreateAsync(
+                    $"juvio:recentmatches:{playerId}:{limit}:{offset}",
+                    async _ =>
+                    {
+                        var dto = await GetAsync<RecentMatchesDto>(
+                            $"/v1/stats/getrecentmatchesforplayer?playerId={playerId}&limit={limit}&offset={offset}",
+                            ct
+                        );
+                        return (IReadOnlyList<PlayerMatch>)
+                            (dto?.MatchesValue ?? []).Select(m => MapRecent(m, playerId)).ToList();
+                    },
+                    new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60),
+                    }
+                )
+            ) ?? [];
     }
 
     public async Task<MatchDetail?> GetSummaryAsync(int gameId, CancellationToken ct = default)
