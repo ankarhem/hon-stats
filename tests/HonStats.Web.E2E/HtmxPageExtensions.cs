@@ -3,34 +3,29 @@ using Xunit;
 
 namespace HonStats.Web.E2E;
 
-// Deterministic HTMX settle-gate: call InstallHtmxSupportAsync BEFORE the
-// action that triggers a swap, then WaitForHtmxSettledAsync after it.
-// Server-rendered markers (aria-current etc.) can appear before htmx finishes
-// settling — and also pass on an accidental full-page navigation.
+// Call WaitForHtmxEventAsync right AFTER the action that triggers the swap.
+// For network-backed swaps the event fires after the round-trip, so a listener
+// registered at call time still catches it; if a no-network swap ever races it,
+// revert to pre-arming a flag before the action.
 internal static class HtmxPageExtensions
 {
-    public static Task InstallHtmxSupportAsync(this IPage page) =>
-        page.EvaluateAsync(
-            """
-            () => {
-              window.__htmxSettled = false;
-              if (!window.__htmxSettleListener) {
-                window.__htmxSettleListener = true;
-                window.addEventListener('htmx:afterSettle', () => { window.__htmxSettled = true; });
-              }
-            }
-            """
-        );
-
-    public static async Task WaitForHtmxSettledAsync(this IPage page)
+    public static async Task WaitForHtmxEventAsync(this IPage page, string eventName)
     {
         try
         {
-            await page.WaitForFunctionAsync("() => window.__htmxSettled === true");
+            await page.EvaluateAsync(
+                """
+                (e) => Promise.race([
+                  new Promise(r => window.addEventListener('htmx:' + e, () => r(), { once: true })),
+                  new Promise((_, rej) => setTimeout(() => rej('timeout'), 10000))
+                ])
+                """,
+                eventName
+            );
         }
-        catch (TimeoutException)
+        catch (PlaywrightException)
         {
-            Assert.Fail("htmx did not settle (full page load or no swap?)");
+            Assert.Fail($"htmx:{eventName} did not fire (full page load or no swap?)");
         }
     }
 }

@@ -126,6 +126,70 @@ public class ProfileTests
         );
     }
 
+    [Fact]
+    public async Task Map_filter_restricts_match_rows_to_the_selected_map()
+    {
+        await _e2e.GotoProfileAsync(TestPlayers.ManyGames);
+        var mapCells = Page.Locator("[data-testid=match-row] td:nth-child(5)");
+        await Assertions.Expect(mapCells.First).ToBeVisibleAsync();
+
+        var presentMaps = (await mapCells.AllTextContentsAsync())
+            .Distinct()
+            .Where(m => m is "ForestsOfCaldavar" or "MidWars")
+            .ToList();
+        Assert.NotEmpty(presentMaps);
+
+        foreach (var map in presentMaps)
+        {
+            await Page.GetByRole(AriaRole.Link, new() { Name = MapPillLabel(map) }).ClickAsync();
+            await Page.WaitForHtmxEventAsync("afterSettle");
+
+            var filtered = await mapCells.AllTextContentsAsync();
+            Assert.NotEmpty(filtered);
+            Assert.All(filtered, cell => Assert.Equal(map, cell));
+        }
+    }
+
+    [Fact]
+    public async Task Switching_tabs_renders_the_matching_region()
+    {
+        await _e2e.GotoProfileAsync(TestPlayers.ManyGames);
+        await Assertions.Expect(Page.GetByTestId("match-row").First).ToBeVisibleAsync();
+
+        // Fresh DB → player is unindexed, so Teammates / Hero Builds show their
+        // empty-state rather than data; that still proves the region swapped.
+        await ClickTabAndSettle("Teammates");
+        await Assertions
+            .Expect(Page.GetByText("Index this player to see who they usually play with."))
+            .ToBeVisibleAsync();
+
+        await ClickTabAndSettle("Hero Builds");
+        await Assertions
+            .Expect(Page.GetByText("Index this player to see what they buy on each hero."))
+            .ToBeVisibleAsync();
+
+        await ClickTabAndSettle("Matches");
+        await Assertions.Expect(Page.GetByTestId("match-row").First).ToBeVisibleAsync();
+    }
+
+    private async Task ClickTabAndSettle(string name)
+    {
+        await Page.GetByRole(AriaRole.Link, new() { Name = name }).ClickAsync();
+        await Page.WaitForHtmxEventAsync("afterSettle");
+    }
+
+    private static string MapPillLabel(string mapValue) =>
+        mapValue switch
+        {
+            "ForestsOfCaldavar" => "Forests of Caldavar",
+            "MidWars" => "Mid Wars",
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(mapValue),
+                mapValue,
+                "unexpected map value"
+            ),
+        };
+
     private Task AssertNavigationKeepsScroll(ILocator link, string expectedQuery) =>
         _e2e.AssertNavigationKeepsScroll(async () =>
         {
