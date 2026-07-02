@@ -55,7 +55,12 @@ credentials in user-secrets). **Locators: prefer user-facing over CSS classes** 
 `GetByPlaceholder` for the search box (NOTE: `<input type="search">` is role
 `searchbox`, not `textbox`), `GetByTestId(...)` (`data-testid` on `.match-row` /
 teammate rows) where role/text aren't unique. NEVER `WaitForTimeoutAsync` — use
-auto-retrying web-first assertions (`Expect(locator).ToBeVisibleAsync`).
+auto-retrying web-first assertions (`Expect(locator).ToBeVisibleAsync`). To wait
+for an HTMX swap deterministically, arm `window.addEventListener('htmx:afterSettle', …)`
+BEFORE the action and `WaitForFunctionAsync` the flag after (see
+`E2EFixture.AssertNavigationKeepsScroll`) — server-rendered markers like
+`aria-current` can appear before htmx finishes settling (and also pass on an
+accidental full-page navigation).
 
 ## Notes
 

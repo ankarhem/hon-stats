@@ -81,27 +81,41 @@ public sealed class E2EFixture : IAsyncLifetime
         return Page;
     }
 
-    // The navigate callback must not return until the page has settled (e.g.
-    // assert on URL/aria-current), or the scroll may be measured mid-swap.
     // Scrolls far enough that a reset-to-top is detectable, but not so far that
     // nav links slide under the sticky header — Playwright would then have to
     // auto-scroll to click them, which moves scrollY and poisons the measurement.
     public async Task AssertNavigationKeepsScroll(Func<Task> navigate)
     {
         await Page.EvaluateAsync(
-            "() => { window.__scrollProbe = true; document.body.style.minHeight = '3000px'; window.scrollTo(0, 200); }"
+            """
+            () => {
+              window.__htmxSettled = false;
+              window.addEventListener('htmx:afterSettle', () => { window.__htmxSettled = true; }, { once: true });
+              document.body.style.minHeight = '3000px';
+              window.scrollTo(0, 200);
+            }
+            """
         );
         var before = await GetScrollYAsync();
         Assert.True(before > 0, $"setup failed: page did not scroll (scrollY={before})");
 
         await navigate();
 
+        try
+        {
+            await Page.WaitForFunctionAsync(
+                "() => window.__htmxSettled === true",
+                null,
+                new() { Timeout = 10_000 }
+            );
+        }
+        catch (TimeoutException)
+        {
+            Assert.Fail("navigation did not settle via htmx (full page load or no swap?)");
+        }
+
         var after = await GetScrollYAsync();
-        var sameDocument = await Page.EvaluateAsync<bool>("() => window.__scrollProbe === true");
-        Assert.True(
-            after == before,
-            $"navigation moved scroll from {before} to {after} (sameDocument={sameDocument})"
-        );
+        Assert.True(after == before, $"navigation moved scroll from {before} to {after}");
     }
 
     private Task<int> GetScrollYAsync() =>
