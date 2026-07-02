@@ -50,7 +50,7 @@ public class ProfileTests
     [Fact]
     public async Task Reindexing_populates_the_teammates_tab()
     {
-        await Page.GotoAsync(_e2e.BaseUrl + "/players/" + IndexPlayer);
+        await GotoProfileAsync(IndexPlayer);
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Index" })
             .Or(Page.GetByRole(AriaRole.Button, new() { Name = "Reindex" }))
@@ -66,7 +66,7 @@ public class ProfileTests
             await teammatesTab.ClickAsync();
             try
             {
-                await Assertions.Expect(firstTeammate).ToBeVisibleAsync(new() { Timeout = 5000 });
+                await Assertions.Expect(firstTeammate).ToBeVisibleAsync();
                 return;
             }
             catch (PlaywrightException) { }
@@ -75,18 +75,98 @@ public class ProfileTests
         throw new TimeoutException("Teammates did not populate within 240s (indexing)");
     }
 
+    [Fact]
+    public async Task Match_list_loads_more_rows_on_scroll()
+    {
+        await GotoProfileAsync();
+        var matchRows = Page.GetByTestId("match-row");
+        var initial = await matchRows.CountAsync();
+        var sentinel = Page.Locator(".loading-row");
+        await Assertions.Expect(sentinel).ToBeAttachedAsync();
+
+        await sentinel.ScrollIntoViewIfNeededAsync();
+
+        await Assertions
+            .Expect(matchRows.Nth(initial))
+            .ToBeAttachedAsync(new() { Timeout = 15000 });
+    }
+
+    [Fact]
+    public async Task Switching_tabs_does_not_scroll_back_to_top()
+    {
+        await GotoProfileAsync();
+
+        await AssertNavigationKeepsScroll(
+            Page.GetByRole(AriaRole.Link, new() { Name = "Teammates" }),
+            "?tab=teammates&map=all"
+        );
+        await AssertNavigationKeepsScroll(
+            Page.GetByRole(AriaRole.Link, new() { Name = "Hero Builds" }),
+            "?tab=heroBuilds&map=all"
+        );
+        await AssertNavigationKeepsScroll(
+            Page.GetByRole(AriaRole.Link, new() { Name = "Matches" }),
+            "?tab=matches&map=all"
+        );
+    }
+
+    [Fact]
+    public async Task Changing_map_filter_does_not_scroll_back_to_top()
+    {
+        await GotoProfileAsync();
+
+        await AssertNavigationKeepsScroll(
+            Page.GetByRole(AriaRole.Link, new() { Name = "Mid Wars" }),
+            "?map=MidWars&tab=matches"
+        );
+        await AssertNavigationKeepsScroll(
+            Page.GetByRole(AriaRole.Link, new() { Name = "Forests of Caldavar" }),
+            "?map=ForestsOfCaldavar&tab=matches"
+        );
+        await AssertNavigationKeepsScroll(
+            Page.GetByRole(AriaRole.Link, new() { Name = "All" }),
+            "?map=all&tab=matches"
+        );
+    }
+
+    private async Task AssertNavigationKeepsScroll(ILocator link, string expectedQuery)
+    {
+        // Scroll far enough that a reset-to-top is detectable, but not so far that
+        // the nav links slide under the sticky header — Playwright would then have
+        // to auto-scroll to click, which moves scrollY and poisons the measurement.
+        await Page.EvaluateAsync(
+            "() => { document.body.style.minHeight = '3000px'; window.scrollTo(0, 200); }"
+        );
+        var before = await GetScrollYAsync();
+        Assert.True(before > 0, $"setup failed: page did not scroll (scrollY={before})");
+
+        await link.ClickAsync();
+        await Assertions
+            .Expect(Page)
+            .ToHaveURLAsync(_e2e.BaseUrl + "/players/" + ModalPlayer + expectedQuery);
+        await Assertions.Expect(link).ToHaveAttributeAsync("aria-current", "true");
+
+        var after = await GetScrollYAsync();
+        Assert.True(after == before, $"navigation moved scroll from {before} to {after}");
+    }
+
+    private async Task<int> GetScrollYAsync() =>
+        int.Parse(await Page.EvaluateAsync<string>("() => String(Math.round(window.scrollY))"));
+
+    private async Task GotoProfileAsync(string username = ModalPlayer)
+    {
+        await Page.GotoAsync(_e2e.BaseUrl + "/players/" + username);
+        await Assertions.Expect(Page.GetByTestId("match-row").First).ToBeVisibleAsync();
+    }
+
     private async Task OpenMatchModalAsync()
     {
         await Page.GotoAsync(_e2e.BaseUrl + "/players/" + ModalPlayer);
 
         var firstMatch = Page.GetByTestId("match-row").First;
-        await Assertions.Expect(firstMatch).ToBeVisibleAsync(new() { Timeout = 60_000 });
+        await Assertions.Expect(firstMatch).ToBeVisibleAsync();
         await firstMatch.ClickAsync();
 
-        // The match-detail payload is a separate juvio fetch, so give the dialog
-        // its own window rather than the default 5s (which flakes under load).
-        await Assertions
-            .Expect(Page.GetByRole(AriaRole.Dialog))
-            .ToBeVisibleAsync(new() { Timeout = 30_000 });
+        await Assertions.Expect(Page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
     }
 }
