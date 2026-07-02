@@ -3,7 +3,7 @@
 @{
     var item = Model.Item;
 }
-<div class="item-tooltip@(Model.Hover ? " item-tooltip--hover" : "")" popover="@(Model.Hover ? null : "hint")" role="tooltip" style="position-anchor: --item-anchor">
+<div class="item-tooltip" role="tooltip" style="position-anchor: --item-anchor">
     <div class="item-tooltip__head">
         <img class="item-tooltip__head-icon" src="@Model.IconUrl" alt="" loading="lazy" />
         <div class="item-tooltip__head-text">

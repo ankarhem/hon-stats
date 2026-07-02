@@ -3,9 +3,7 @@
 <ul class="grid-list">
     @foreach (var item in Model.Items)
     {
-        <li class="grid-list__item item-tile @(Model.IsDimmed(item) ? "item-tile--dimmed" : null)"
-            hx-on:pointerenter="this.querySelector('[popover]')?.showPopover()"
-            hx-on:pointerleave="this.querySelector('[popover]')?.hidePopover()">
+        <li class="grid-list__item item-tile @(Model.IsDimmed(item) ? "item-tile--dimmed" : null)">
             <a href="/items/@item.Slug" aria-label="@item.DisplayName">
                 <img class="grid-list__icon" src="@item.IconUrl" alt="@item.DisplayName" loading="lazy" />
             </a>

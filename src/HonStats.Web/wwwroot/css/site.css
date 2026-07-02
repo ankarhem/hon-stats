@@ -1262,26 +1262,28 @@ li.loading-row {
         overlay 200ms allow-discrete;
 }
 
-.hero-tooltip:popover-open,
-.item-tooltip:popover-open {
+.hero-tooltip:popover-open {
     opacity: 1;
     @starting-style {
         opacity: 0;
     }
 }
 
-/* In-dialog variant: Firefox can't resolve an anchor across top-layer roots
-   (tooltip popover ↔ the modal <dialog> holding its anchor), so these skip the
-   popover API and live in the dialog's own top-layer root. position: fixed
-   resolves against the dialog (its transform makes it the fixed containing
-   block), so position-area + try fallbacks work against the dialog box. */
-.item-tooltip--hover {
+/* Item tooltips are CSS :hover panels, not popovers: Firefox can't resolve a
+   CSS anchor across top-layer roots (a popover tooltip vs the modal <dialog>
+   holding its anchor), so they skip the popover API entirely and live in their
+   host's stacking context. position: fixed escapes overflow clipping; inside the
+   modal the dialog's transform makes it the fixed containing block, so
+   position-area + try fallbacks compute against the dialog box and edge tooltips
+   flip above / span-left and stay inside. z-index sits above the sticky
+   site-header (100) but below the search dropdown (200). */
+.item-tooltip {
     position: fixed;
     display: none;
-    z-index: 1;
+    z-index: 150;
 }
 
-.item-tile:hover > .item-tooltip--hover {
+.item-tile:hover > .item-tooltip {
     display: block;
     opacity: 1;
     @starting-style {

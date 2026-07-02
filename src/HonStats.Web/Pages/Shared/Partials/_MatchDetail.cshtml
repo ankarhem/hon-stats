@@ -58,7 +58,7 @@ else
                                                     <img class="loadout-item__img" src="@iconUrl" alt="@item?.DisplayName" loading="lazy" />
                                                     @if (item is not null)
                                                     {
-                                                        <partial name="Shared/_ItemTooltip" model="new ItemTooltipView(item, iconUrl, Hover: true)" />
+                                                        <partial name="Shared/_ItemTooltip" model="new ItemTooltipView(item, iconUrl)" />
                                                     }
                                                 </span>
                                             }
