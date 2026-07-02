@@ -15,13 +15,11 @@
             <div class="hero-column__grid">
                 @foreach (var h in Model.ByAttribute(col.Attr))
                 {
-                    <div class="hero-tile @(Model.IsDimmed(h) ? "hero-tile--dimmed" : null)"
-                         hx-on:pointerenter="this.querySelector('[popover]')?.showPopover()"
-                         hx-on:pointerleave="this.querySelector('[popover]')?.hidePopover()">
+                    <div class="hero-tile @(Model.IsDimmed(h) ? "hero-tile--dimmed" : null)">
                         <a class="hero-tile__link" href="/heroes/@h.Slug" aria-label="@h.TranslatedName">
                             <img class="hero-tile__icon" src="@h.IconUrl" alt="@h.TranslatedName" loading="lazy" />
                         </a>
-                        <div class="hero-tooltip" popover="hint" role="tooltip"
+                        <div class="hero-tooltip" role="tooltip"
                              style="position-anchor: --hero-anchor">
                             <div class="hero-tooltip__head">
                                 <img class="hero-tooltip__icon" src="@h.IconUrl" alt="" loading="lazy" />
