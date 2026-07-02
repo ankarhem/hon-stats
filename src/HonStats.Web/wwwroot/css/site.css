@@ -1731,12 +1731,12 @@ li.loading-row {
 }
 
 .mmr-chart__pill--caldavar .mmr-chart__pill-bg {
-    fill: oklch(from var(--accent) l c h / 0.2);
+    fill: color-mix(in oklch, var(--accent) 20%, var(--surface));
     stroke: var(--accent);
 }
 
 .mmr-chart__pill--midwars .mmr-chart__pill-bg {
-    fill: oklch(from var(--gold) l c h / 0.2);
+    fill: color-mix(in oklch, var(--gold) 20%, var(--surface));
     stroke: var(--gold);
 }
 

@@ -99,6 +99,7 @@
     @{
         const double pillW = 28;
         const double pillH = 13;
+        const double pillGap = 5;
     }
     @for (var i = 0; i < Model.Count; i++)
     {
@@ -109,14 +110,34 @@
         var pillX = Math.Clamp(cx - pillW / 2, padLeft, width - padRight - pillW);
         var caldY = Y(caldavar[i]);
         var midY = Y(midwars[i]);
+
+        // Default: each pill floats just above its own point. If the two points
+        // are close enough that the pills would overlap, split them — the higher
+        // line's pill stays above its point, the lower line's pill drops below —
+        // so colliding values render separated instead of stacked.
+        var caldTop = caldY - pillH - pillGap;
+        var midTop = midY - pillH - pillGap;
+        if (Math.Abs(caldY - midY) < pillH + pillGap)
+        {
+            if (caldY <= midY)
+            {
+                caldTop = caldY - pillH - pillGap;
+                midTop = midY + pillGap;
+            }
+            else
+            {
+                caldTop = caldY + pillGap;
+                midTop = midY - pillH - pillGap;
+            }
+        }
         <g class="mmr-chart__col">
             <line class="mmr-chart__guide" x1="@cx.ToString("0.##")" y1="@padTop" x2="@cx.ToString("0.##")" y2="@(padTop + plotHeight)" />
             <rect class="mmr-chart__hit" x="@rectX.ToString("0.##")" y="@padTop" width="@rectW.ToString("0.##")" height="@plotHeight" />
-            <g class="mmr-chart__pill mmr-chart__pill--caldavar" transform="translate(@pillX.ToString("0.##") @((caldY - pillH - 5).ToString("0.##")))">
+            <g class="mmr-chart__pill mmr-chart__pill--caldavar" transform="translate(@pillX.ToString("0.##") @caldTop.ToString("0.##"))">
                 <rect class="mmr-chart__pill-bg" width="@pillW" height="@pillH" rx="6.5" />
                 @SvgLabel(pillW / 2, pillH / 2 + 0.5, "middle", caldavar[i].ToString("0"), "middle")
             </g>
-            <g class="mmr-chart__pill mmr-chart__pill--midwars" transform="translate(@pillX.ToString("0.##") @((midY - pillH - 5).ToString("0.##")))">
+            <g class="mmr-chart__pill mmr-chart__pill--midwars" transform="translate(@pillX.ToString("0.##") @midTop.ToString("0.##"))">
                 <rect class="mmr-chart__pill-bg" width="@pillW" height="@pillH" rx="6.5" />
                 @SvgLabel(pillW / 2, pillH / 2 + 0.5, "middle", midwars[i].ToString("0"), "middle")
             </g>
