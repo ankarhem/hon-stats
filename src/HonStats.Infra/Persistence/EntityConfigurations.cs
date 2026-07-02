@@ -104,3 +104,13 @@ public sealed class MatchItemTimingConfiguration : IEntityTypeConfiguration<Matc
         b.HasIndex(x => new { x.AccountId, x.ItemId });
     }
 }
+
+public sealed class MmrSnapshotConfiguration : IEntityTypeConfiguration<MmrSnapshot>
+{
+    public void Configure(EntityTypeBuilder<MmrSnapshot> b)
+    {
+        b.ToTable("mmr_snapshots");
+        b.HasKey(x => new { x.AccountId, x.CapturedDate });
+        b.HasIndex(x => x.AccountId);
+    }
+}

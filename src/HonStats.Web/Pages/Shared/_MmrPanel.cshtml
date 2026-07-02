@@ -1,0 +1,29 @@
+@model ProfileModel
+@{
+    var o = Model.Profile?.Overview;
+    var history = Model.MmrHistory;
+}
+
+<div class="panel card mmr-panel">
+    <p class="eyebrow card__title">MMR</p>
+
+    <div class="mmr-panel__values">
+        <div class="mmr-panel__value">
+            <div class="eyebrow">Caldavar</div>
+            <div class="mmr-panel__number">@(o is null ? "—" : o.RankedCaldavarRating.ToString("0"))</div>
+        </div>
+        <div class="mmr-panel__value">
+            <div class="eyebrow">Mid Wars</div>
+            <div class="mmr-panel__number">@(o is null ? "—" : o.RankedMidwarsRating.ToString("0"))</div>
+        </div>
+    </div>
+
+    @if (history.Count >= 2)
+    {
+        <partial name="_MmrChart" model="history" />
+    }
+    else
+    {
+        <p class="mmr-panel__empty muted">No MMR history yet — chart appears after a few days of tracking.</p>
+    }
+</div>

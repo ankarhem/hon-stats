@@ -26,7 +26,8 @@ public class ProfileModel(
     IPlayerSearch playerSearch,
     IReindexQueue queue,
     IIndexProgressTracker progressTracker,
-    IOptions<TierTimingOptions> tierTiming
+    IOptions<TierTimingOptions> tierTiming,
+    IMmrHistoryQuery mmrHistory
 ) : PageModel
 {
     public const int PageSize = 25;
@@ -36,6 +37,7 @@ public class ProfileModel(
     public string Tab { get; set; } = "matches";
     public string SelectedMap { get; set; } = "all";
     public PlayerProfile? Profile { get; set; }
+    public IReadOnlyList<MmrSnapshot> MmrHistory { get; set; } = [];
     public IndexedPlayer? Indexed { get; set; }
     public Dictionary<int, Hero> Heroes { get; set; } = new();
 
@@ -83,6 +85,7 @@ public class ProfileModel(
         if (!Request.IsHtmx())
         {
             this.Profile = await profiles.GetAsync(this.AccountId, ct);
+            this.MmrHistory = await mmrHistory.GetAsync(this.AccountId, ct: ct);
         }
 
         // Stats panel numbers now come entirely from indexed data. "all" aggregates

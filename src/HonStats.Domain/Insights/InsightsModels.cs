@@ -89,3 +89,14 @@ public sealed class MatchItemTiming
     public int ItemId { get; set; }
     public int FirstSeenSeconds { get; set; }
 }
+
+// Persisted MMR snapshot: one row per (player, UTC date). Captured during reindex
+// via getprofilestats. Upsert semantics — if reindexed again same day, the row is updated.
+public sealed class MmrSnapshot
+{
+    public Guid AccountId { get; set; }
+    public DateOnly CapturedDate { get; set; }
+    public double CurrentMmr { get; set; }
+    public double RankedCaldavarRating { get; set; }
+    public double RankedMidwarsRating { get; set; }
+}

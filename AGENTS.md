@@ -49,8 +49,8 @@ xUnit + **AwesomeAssertions** (fluent) + **Snapper** (snapshots). Tests in
 Persisted model behavior validated via `Database.MigrateAsync()` + table asserts.
 
 **E2E** (`tests/HonStats.Web.E2E`, Playwright + xUnit): `E2EFixture` spawns the
-real app + headless Chromium; run via `just e2e` (separate from `just validate` —
-needs browsers + live juvio). **Locators: prefer user-facing over CSS classes** —
+real app + headless Chromium; included in `just validate` (needs live juvio
+credentials in user-secrets). **Locators: prefer user-facing over CSS classes** —
 `GetByRole(AriaRole.Dialog)` for the modal, `GetByRole(AriaRole.Link/Button, Name)`,
 `GetByPlaceholder` for the search box (NOTE: `<input type="search">` is role
 `searchbox`, not `textbox`), `GetByTestId(...)` (`data-testid` on `.match-row` /
@@ -78,6 +78,14 @@ auto-retrying web-first assertions (`Expect(locator).ToBeVisibleAsync`).
 
 Hosts: `auth|gamedata|stats|player|economy|chat|gamestorage .juvio.com`.
 Swagger: `https://<svc>.juvio.com/swagger/v1/swagger.json` (gamestorage has none — CDN).
+Explicit swagger URLs (all return `swagger.json`; gamestorage is a CDN, no swagger):
+- `https://auth.juvio.com/swagger/v1/swagger.json`
+- `https://gamedata.juvio.com/swagger/v1/swagger.json`
+- `https://stats.juvio.com/swagger/v1/swagger.json`
+- `https://player.juvio.com/swagger/v1/swagger.json` — **EXPLORED**: social/behavioral only (ignore/avoid lists, hero bans, roles, honor config, penalty points, game votes). **No MMR/rank endpoints.**
+- `https://economy.juvio.com/swagger/v1/swagger.json` — **UNEXPLORED**
+- `https://chat.juvio.com/swagger/v1/swagger.json` — **UNEXPLORED**
+- `gamestorage.juvio.com` — image CDN (`heroes/{id}/icon.webp`, `items/{id}/icon.webp`), no API.
 
 **Auth** (one server-side service account token for ALL calls):
 `POST auth.juvio.com/v1/auth/plainauth?username=&password=&deviceInfo.installId=<uuid>&clientName=`
@@ -89,9 +97,9 @@ setting `Authorization: Bearer`.
 **Endpoints by feature** (param names vary per endpoint — see notes):
 - Search: `GET auth /v1/userinfo/getidbyusername?Usernames=<name>` → exact match → accountId.
 - Bulk name resolve: `POST auth /v1/userinfo/getuserinfo` body `{accountIds:[...]}` → displayName, username, **country**.
-- Profile overview: `GET stats /v1/stats/getprofilestats?userId=<uuid>` → avgKDA/DPM/GPM/XPM, winRate, `allTimeRecord.wardsPlaced`, topRoles, topHeroes (heroImageUrl pre-populated).
-- Profile totals: `GET stats /v1/stats/getplayersummary?accountId=<uuid>` → totalK/D/A, KDR, winRate.
-- Rank: `GET stats /v1/stats/getplayerrank?accountId=<uuid>` → rankName, starLevel, icon, color.
+- Profile overview: `GET stats /v1/stats/getprofilestats?userId=<uuid>` → avgKDA/DPM/GPM/XPM, winRate, `allTimeRecord.wardsPlaced`, topRoles, topHeroes (heroImageUrl pre-populated). **MMR fields** (all populated, verified): `currentMMR`/`publicSkillRating` (overall public rating — same value), `rankedCaldavarRating`, `rankedMidwarsRating` (per-mode ranked MMR, decimal).
+- Profile totals: `GET stats /v1/stats/getplayersummary?accountId=<uuid>` → totalK/D/A, KDR, winRate. Also carries `skillRating` (=currentMMR), `rankedCaldavarRating`, `rankedMidwarsRating` (same values as getprofilestats).
+- Rank: `GET stats /v1/stats/getplayerrank?accountId=<uuid>` → `rankName`, `starLevel`, `icon`, `color`, `currentMmr` (Caldavar-specific, matches rankedCaldavarRating rounded), `minMmr`/`maxMmr` (tier band), `isTopRank`, `lastUpdated`. **NOTE:** `currentMmr` is NOT dead — it returns the live Caldavar MMR (previously documented as "always 0"; that was wrong — re-verified 2025-07 for idealpink: currentMmr=1689 ≈ rankedCaldavarRating 1688.85).
 - Matches: `GET stats /v1/stats/getrecentmatchesforplayer?playerId=<uuid>&limit=&offset=`.
 - Match detail: `GET stats /v1/stats/getmatchsummary?gameId=<int>` → players[10] with `inventory48Id`–`inventory64Id` (item ids), `wardOfSight/RevelationPlaced`, netWorth, RoleIndex.
 - Teammates: `GET stats /v1/stats/getrecentplayers?playerId=<uuid>` → flat `{playerId,matchId}[]`, aggregate by count, exclude self, resolve names via getuserinfo.
@@ -110,8 +118,9 @@ setting `Authorization: Bearer`.
 - gamedata entities are public (no bearer needed). **MANY fields are single-element arrays** (not just `icon`): `attackType`, `inventory0-4`, `moveSpeed`, `maxHealth`, `maxMana`, `magicArmor`, `attackRange`, `attackDamageMin/Max`, `sightRangeDay/Night`, etc. Always check the actual JSON — assume arrays, use `[0]`. `translatedName` (not `name`) is the display name.
 - `getrecentmatchesforplayer` rejects a large `limit` with **400** (e.g. 200 fails; 25 works, max unknown). The indexer pages via `offset` at `Indexing:RecentMatchesLimit` (25) to ingest full history.
 - `POST auth /v1/userinfo/getuserinfo` rejects a large `accountIds` array with **400** (somewhere in (50, 200]; ≤50 works, exact max unknown). The name resolver chunks at 50 (`JuvioPlayerNameResolver`).
-- **Leaderboard endpoints** (`stats /v1/stats/getleaderboard`, `getgamesplayedleaderboard`): `topPlayers` is **HARD-CAPPED at 100** — no pagination. `limit`/`offset`/`cursor`/`page` params are silently ignored (verified). Response also carries `requestingPlayer` + `playersAbove[10]` + `playersBelow[10]`, but that window is anchored to the **calling token's** account (the service account, rank ~163k) — useless for arbitrary visitors since you can't auth as them. So a community leaderboard page = top 100, full stop. Per-entry already has everything (no enrichment): `rank, accountId, displayName, mmr, country, rankName, rankIcon, starLevel, avatar` (games-played board swaps `mmr`→`gamesPlayed`, and notably LACKS `rankName`/`icon`/`mmr` — use `getplayerranksbulk` to add tier badges to those rows). Only real filters: `map` (`ForestsOfCaldavar` default, `MidWars` confirmed → two independent boards) and `seasonId` (`1` populated; `2`/`3` nascent; `10`+ empty; **omitting seasonId ≠ seasonId=1** — default is a different/larger board, ~163k vs ~99k players). No total-player-count field; the service account's `requestingPlayer.rank` is a free lower bound on the ranked population. No ordinal global rank exists for arbitrary players outside top 100 — `getplayerrank`/`getplayerranksbulk` return only the tier (`rankName`/`starLevel`/`icon`/`color` + tier's `minMmr`/`maxMmr` band), not a numeric position; and their `currentMmr` field is **always 0** (dead — verified across 199 accounts), so real per-player MMR only comes from leaderboard `topPlayers[].mmr`. `POST getplayerranksbulk` body `{accountIds:[…],seasonId?}` → `{ranks:[PlayerRank…]}`; tolerates ≥150 ids/call (unlike getuserinfo's 50 cap) — use it to batch-attach tier badges to player lists.
+- **Leaderboard endpoints** (`stats /v1/stats/getleaderboard`, `getgamesplayedleaderboard`): `topPlayers` is **HARD-CAPPED at 100** — no pagination. `limit`/`offset`/`cursor`/`page` params are silently ignored (verified). Response also carries `requestingPlayer` + `playersAbove[10]` + `playersBelow[10]`, but that window is anchored to the **calling token's** account (the service account, rank ~163k) — useless for arbitrary visitors since you can't auth as them. So a community leaderboard page = top 100, full stop. Per-entry already has everything (no enrichment): `rank, accountId, displayName, mmr, country, rankName, rankIcon, starLevel, avatar` (games-played board swaps `mmr`→`gamesPlayed`, and notably LACKS `rankName`/`icon`/`mmr` — use `getplayerranksbulk` to add tier badges to those rows). Only real filters: `map` (`ForestsOfCaldavar` default, `MidWars` confirmed → two independent boards) and `seasonId` (`1` populated; `2`/`3` nascent; `10`+ empty; **omitting seasonId ≠ seasonId=1** — default is a different/larger board, ~163k vs ~99k players). No total-player-count field; the service account's `requestingPlayer.rank` is a free lower bound on the ranked population. No ordinal global rank exists for arbitrary players outside top 100 — `getplayerrank`/`getplayerranksbulk` return only the tier (`rankName`/`starLevel`/`icon`/`color` + tier's `minMmr`/`maxMmr` band), not a numeric position. `POST getplayerranksbulk` body `{accountIds:[…],seasonId?}` → `{ranks:[PlayerRank…]}`; tolerates ≥150 ids/call (unlike getuserinfo's 50 cap) — use it to batch-attach tier badges to player lists. NOTE: `getplayerrank`/`getplayerranksbulk` `currentMmr` IS populated with live Caldavar MMR (re-verified 2025-07, was wrongly documented as dead), but it only gives Caldavar MMR — for MidWars MMR use `getprofilestats`/`getplayersummary` `rankedMidwarsRating`.
 - Razor Pages PageModels don't auto-associate by convention when `_ViewImports` sets `@namespace` — each page `.cshtml` needs an explicit `@model <PageModel>` or its `OnGet*` handlers silently don't run (page renders as an empty shell).
+- **Per-match MMR delta is NOT available**: neither `getrecentmatchesforplayer` (fields: gameId/heroId/winningTeam/team/kills/deaths/assists/date/duration/map/isArranged) nor `getmatchsummary` player objects (fields: KDA/gold/XP/items/wards/netWorth — no mmr/rating/skill) carry any MMR data. The only path to MMR history is self-collected snapshots of `getprofilestats` ratings over time.
 
 ## HTMX patterns (cross-checked against the JetBrains htmx+ASP.NET tutorial)
 

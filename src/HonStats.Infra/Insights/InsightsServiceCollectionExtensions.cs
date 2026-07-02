@@ -36,6 +36,7 @@ public static class InsightsServiceCollectionExtensions
         );
         services.AddScoped<IReindexQueue, ChannelReindexQueue>();
         services.AddHostedService<PlayerIndexingService>();
+        services.AddHostedService<ScheduledReindexService>();
 
         return services;
     }

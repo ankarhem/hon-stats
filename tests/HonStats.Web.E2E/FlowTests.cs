@@ -6,7 +6,7 @@ namespace HonStats.Web.E2E;
 [Collection("E2E")]
 public class FlowTests
 {
-    private const string KnownPlayer = "idealpink";
+    private const string KnownPlayer = "Testie";
 
     private readonly E2EFixture _e2e;
 
@@ -25,9 +25,11 @@ public class FlowTests
         await Assertions
             .Expect(page.GetByRole(AriaRole.Heading, new() { Name = KnownPlayer }))
             .ToBeVisibleAsync();
-        await Assertions.Expect(page.GetByText("Wards placed")).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByText("Avg wards")).ToBeVisibleAsync();
 
-        await page.GetByRole(AriaRole.Button, new() { Name = "Reindex" }).ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Index" })
+            .Or(page.GetByRole(AriaRole.Button, new() { Name = "Reindex" }))
+            .ClickAsync();
 
         // The tab content is static once loaded, so re-open Teammates to re-fetch
         // as background indexing completes; the roster renders once it finishes.

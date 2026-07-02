@@ -71,6 +71,7 @@ public static class JuvioServiceCollectionExtensions
             sp.GetRequiredService<IPlayerNameStore>()
         ));
         services.AddScoped<IPlayerProfileQuery, JuvioPlayerProfileQuery>();
+        services.AddScoped<IPlayerRatingsQuery, JuvioPlayerRatingsQuery>();
         services.AddScoped<IMatchQuery, JuvioMatchQuery>();
         services.AddScoped<IParsedReplayQuery, JuvioParsedReplayQuery>();
 

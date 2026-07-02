@@ -1,0 +1,97 @@
+@using HonStats.Domain.Insights
+@using Microsoft.AspNetCore.Html
+@using System.Net
+@model IReadOnlyList<MmrSnapshot>
+@{
+    // Razor's "<text>" tag is a reserved pseudo-element for literal-text
+    // transitions and can't carry attributes, so the SVG <text> label is built
+    // as an encoded string here instead of as inline markup (avoids RZ1023).
+    IHtmlContent SvgLabel(double x, double y, string anchor, string content, string? baseline = null)
+    {
+        var baselineAttr = baseline is null ? "" : $" dominant-baseline=\"{baseline}\"";
+        return new HtmlString(
+            $"<text class=\"mmr-chart__label\" x=\"{x:0.##}\" y=\"{y:0.##}\" text-anchor=\"{anchor}\"{baselineAttr}>{WebUtility.HtmlEncode(content)}</text>"
+        );
+    }
+
+    const int width = 400;
+    const int height = 160;
+    const int padTop = 16;
+    const int padRight = 16;
+    const int padBottom = 24;
+    const int padLeft = 40;
+
+    var plotWidth = width - padLeft - padRight;
+    var plotHeight = height - padTop - padBottom;
+
+    var caldavar = Model.Select(m => m.RankedCaldavarRating).ToList();
+    var midwars = Model.Select(m => m.RankedMidwarsRating).ToList();
+
+    var rawMin = Math.Min(caldavar.Min(), midwars.Min());
+    var rawMax = Math.Max(caldavar.Max(), midwars.Max());
+    var min = Math.Floor(rawMin / 50) * 50;
+    var max = Math.Ceiling(rawMax / 50) * 50;
+    if (max <= min)
+        max = min + 50;
+    var range = max - min;
+
+    double X(int index) =>
+        Model.Count <= 1 ? padLeft : padLeft + (plotWidth * index / (double)(Model.Count - 1));
+
+    double Y(double value) => padTop + plotHeight - ((value - min) / range * plotHeight);
+
+    string PolylinePoints(IReadOnlyList<double> series) =>
+        string.Join(" ", series.Select((v, i) => $"{X(i):0.##},{Y(v):0.##}"));
+
+    string AreaPoints(IReadOnlyList<double> series) =>
+        $"{X(0):0.##},{padTop + plotHeight:0.##} "
+        + PolylinePoints(series)
+        + $" {X(series.Count - 1):0.##},{padTop + plotHeight:0.##}";
+
+    var gridLineCount = 4;
+    var gridValues = Enumerable
+        .Range(0, gridLineCount + 1)
+        .Select(i => min + (range * i / gridLineCount))
+        .ToList();
+
+    var firstDate = Model[0].CapturedDate.ToDateTime(TimeOnly.MinValue).ToString("MMM d");
+    var lastDate = Model[^1].CapturedDate.ToDateTime(TimeOnly.MinValue).ToString("MMM d");
+}
+
+<svg viewBox="0 0 @width @height" class="mmr-chart" preserveAspectRatio="xMidYMid meet" role="img" aria-label="MMR history for the last @Model.Count days">
+    @foreach (var gv in gridValues)
+    {
+        var gy = Y(gv);
+        <line class="mmr-chart__grid" x1="@padLeft" y1="@gy.ToString("0.##")" x2="@(width - padRight)" y2="@gy.ToString("0.##")" />
+        @SvgLabel(padLeft - 6, gy, "end", gv.ToString("0"), "middle")
+    }
+
+    <polygon class="mmr-chart__area--caldavar" points="@AreaPoints(caldavar)" />
+    <polygon class="mmr-chart__area--midwars" points="@AreaPoints(midwars)" />
+
+    <polyline class="mmr-chart__line--caldavar" points="@PolylinePoints(caldavar)" />
+    <polyline class="mmr-chart__line--midwars" points="@PolylinePoints(midwars)" />
+
+    @for (var i = 0; i < caldavar.Count; i++)
+    {
+        <circle class="mmr-chart__point--caldavar" cx="@X(i).ToString("0.##")" cy="@Y(caldavar[i]).ToString("0.##")" r="2.5" />
+    }
+    @for (var i = 0; i < midwars.Count; i++)
+    {
+        <circle class="mmr-chart__point--midwars" cx="@X(i).ToString("0.##")" cy="@Y(midwars[i]).ToString("0.##")" r="2.5" />
+    }
+
+    @SvgLabel(padLeft, height - 6, "start", firstDate)
+    @SvgLabel(width - padRight, height - 6, "end", lastDate)
+</svg>
+
+<div class="mmr-chart__legend">
+    <span class="mmr-chart__legend-item">
+        <span class="mmr-chart__legend-dot mmr-chart__legend-dot--caldavar"></span>
+        Caldavar
+    </span>
+    <span class="mmr-chart__legend-item">
+        <span class="mmr-chart__legend-dot mmr-chart__legend-dot--midwars"></span>
+        Mid Wars
+    </span>
+</div>

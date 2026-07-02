@@ -398,6 +398,20 @@ p {
     font-size: 0.78rem;
 }
 
+/* ---------- Profile two-column layout ---------- */
+.profile-layout {
+    display: grid;
+    grid-template-columns: 1fr 20rem;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ---------- Profile header ---------- */
 .profile-header {
     display: flex;
@@ -1619,6 +1633,106 @@ li.loading-row {
     border-radius: var(--radius);
     background: var(--surface-2);
     font-weight: 700;
+}
+
+/* ---------- MMR panel / chart ---------- */
+.mmr-panel {
+    height: 100%;
+}
+
+.mmr-panel__values {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.mmr-panel__value {
+    flex: 1;
+}
+
+.mmr-panel__number {
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.mmr-panel__empty {
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 1.5rem 0;
+}
+
+.mmr-chart {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.mmr-chart__grid {
+    stroke: var(--border);
+    stroke-width: 0.5;
+}
+
+.mmr-chart__label {
+    fill: var(--muted);
+    font-size: 10px;
+}
+
+.mmr-chart__line--caldavar {
+    stroke: var(--accent);
+    stroke-width: 2;
+    fill: none;
+}
+
+.mmr-chart__line--midwars {
+    stroke: var(--gold);
+    stroke-width: 2;
+    fill: none;
+}
+
+.mmr-chart__point--caldavar {
+    fill: var(--accent);
+}
+
+.mmr-chart__point--midwars {
+    fill: var(--gold);
+}
+
+.mmr-chart__area--caldavar {
+    fill: oklch(from var(--accent) l c h / 0.12);
+}
+
+.mmr-chart__area--midwars {
+    fill: oklch(from var(--gold) l c h / 0.12);
+}
+
+.mmr-chart__legend {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.mmr-chart__legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.mmr-chart__legend-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    display: inline-block;
+}
+
+.mmr-chart__legend-dot--caldavar {
+    background: var(--accent);
+}
+
+.mmr-chart__legend-dot--midwars {
+    background: var(--gold);
 }
 
 /* ---------- Responsive ---------- */

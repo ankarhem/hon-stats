@@ -116,6 +116,7 @@ public class MatchRosterGoldTests
             services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
             services.AddSingleton<IMatchQuery>(matchQuery);
             services.AddSingleton<IParsedReplayQuery, NullParsedReplayQuery>();
+            services.AddSingleton<IPlayerRatingsQuery>(new FakeRatingsQuery());
             services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
             services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
                 new FakeNameResolver(),
@@ -190,5 +191,11 @@ public class MatchRosterGoldTests
     {
         public Task<ParsedReplay?> GetAsync(int gameId, CancellationToken ct = default) =>
             Task.FromResult<ParsedReplay?>(null);
+    }
+
+    private sealed class FakeRatingsQuery : IPlayerRatingsQuery
+    {
+        public Task<PlayerRatings?> GetAsync(Guid accountId, CancellationToken ct = default) =>
+            Task.FromResult<PlayerRatings?>(new PlayerRatings(1500.0, 1600.0, 1700.0));
     }
 }

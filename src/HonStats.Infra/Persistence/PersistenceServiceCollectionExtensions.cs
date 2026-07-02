@@ -1,3 +1,4 @@
+using HonStats.App.Players;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,8 @@ public static class PersistenceServiceCollectionExtensions
         services.AddDbContextFactory<HonStatsDbContext>(options =>
             options.UseSqlite(connectionString)
         );
+
+        services.AddScoped<IMmrHistoryQuery, SqliteMmrHistoryQuery>();
 
         return services;
     }

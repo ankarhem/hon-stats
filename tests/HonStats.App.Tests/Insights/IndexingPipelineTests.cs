@@ -68,6 +68,7 @@ public class IndexingPipelineTests
             services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
             services.AddSingleton<IMatchQuery>(matchQuery);
             services.AddSingleton<IParsedReplayQuery>(new ThrowingParsedReplayQuery());
+            services.AddSingleton<IPlayerRatingsQuery>(new FakeRatingsQuery());
             services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
             services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
                 nameResolver,
@@ -92,6 +93,13 @@ public class IndexingPipelineTests
             var indexed = await query.GetIndexedPlayerAsync(PlayerA);
             indexed.Should().NotBeNull();
             indexed!.Status.Should().Be(IndexingStatus.Indexed);
+
+            var dbFactory2 = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>();
+            await using var db2 = dbFactory2.CreateDbContext();
+            var snapshots = await db2.MmrSnapshots.Where(s => s.AccountId == PlayerA).ToListAsync();
+            snapshots.Should().HaveCount(1);
+            snapshots[0].RankedCaldavarRating.Should().Be(1600.0);
+            snapshots[0].RankedMidwarsRating.Should().Be(1700.0);
 
             var build = await query.GetHeroBuildAsync(PlayerA, Hero);
             build
@@ -243,6 +251,7 @@ public class IndexingPipelineTests
             services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
             services.AddSingleton<IMatchQuery>(matchQuery);
             services.AddSingleton<IParsedReplayQuery>(replayQuery);
+            services.AddSingleton<IPlayerRatingsQuery>(new FakeRatingsQuery());
             services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
             services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
                 new FakeNameResolver(
@@ -350,6 +359,7 @@ public class IndexingPipelineTests
             services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
             services.AddSingleton<IMatchQuery>(matchQuery);
             services.AddSingleton<IParsedReplayQuery>(new ThrowingParsedReplayQuery());
+            services.AddSingleton<IPlayerRatingsQuery>(new FakeRatingsQuery());
             services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
             services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
                 nameResolver,
@@ -496,6 +506,7 @@ public class IndexingPipelineTests
             services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
             services.AddSingleton<IMatchQuery>(matchQuery);
             services.AddSingleton<IParsedReplayQuery>(replayQuery);
+            services.AddSingleton<IPlayerRatingsQuery>(new FakeRatingsQuery());
             services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
             services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
                 new FakeNameResolver(
@@ -621,6 +632,7 @@ public class IndexingPipelineTests
             services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
             services.AddSingleton<IMatchQuery>(matchQuery);
             services.AddSingleton<IParsedReplayQuery>(replayQuery);
+            services.AddSingleton<IPlayerRatingsQuery>(new FakeRatingsQuery());
             services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
             services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
                 new FakeNameResolver(
@@ -869,5 +881,13 @@ public class IndexingPipelineTests
     {
         public Task<ParsedReplay?> GetAsync(int gameId, CancellationToken ct = default) =>
             Task.FromResult(replays.TryGetValue(gameId, out var r) ? r : null);
+    }
+
+    private sealed class FakeRatingsQuery : IPlayerRatingsQuery
+    {
+        public Task<PlayerRatings?> GetAsync(Guid accountId, CancellationToken ct = default)
+        {
+            return Task.FromResult<PlayerRatings?>(new PlayerRatings(1500.0, 1600.0, 1700.0));
+        }
     }
 }

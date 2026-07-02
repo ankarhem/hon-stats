@@ -16,6 +16,7 @@ public sealed class HonStatsDbContext(DbContextOptions<HonStatsDbContext> option
     public DbSet<Teammate> Teammates => this.Set<Teammate>();
     public DbSet<Player> Players => this.Set<Player>();
     public DbSet<MatchItemTiming> MatchItemTimings => this.Set<MatchItemTiming>();
+    public DbSet<MmrSnapshot> MmrSnapshots => this.Set<MmrSnapshot>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

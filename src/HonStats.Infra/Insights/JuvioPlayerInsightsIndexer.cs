@@ -22,6 +22,7 @@ internal sealed class JuvioPlayerInsightsIndexer(
     IDomainEventDispatcher dispatcher,
     IIndexProgressTracker progressTracker,
     IParsedReplayQuery replays,
+    IPlayerRatingsQuery ratings,
     IOptions<IndexingOptions> options,
     ILogger<JuvioPlayerInsightsIndexer> logger
 ) : IPlayerInsightsIndexer
@@ -117,6 +118,49 @@ internal sealed class JuvioPlayerInsightsIndexer(
         indexed.IndexedAt = DateTimeOffset.UtcNow;
         indexed.LastReindexAt = DateTimeOffset.UtcNow;
         indexed.Status = IndexingStatus.Indexed;
+
+        // Capture MMR snapshot (one per UTC day, upsert). Fails softly — a juvio
+        // ratings fetch failure must never block the core indexing pipeline.
+        try
+        {
+            var playerRatings = await ratings.GetAsync(accountId, ct);
+            if (playerRatings is not null)
+            {
+                var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.Date);
+                var existing = await db.MmrSnapshots.FindAsync(
+                    new object?[] { accountId, today },
+                    ct
+                );
+                if (existing is not null)
+                {
+                    existing.CurrentMmr = playerRatings.CurrentMmr;
+                    existing.RankedCaldavarRating = playerRatings.RankedCaldavarRating;
+                    existing.RankedMidwarsRating = playerRatings.RankedMidwarsRating;
+                }
+                else
+                {
+                    db.MmrSnapshots.Add(
+                        new MmrSnapshot
+                        {
+                            AccountId = accountId,
+                            CapturedDate = today,
+                            CurrentMmr = playerRatings.CurrentMmr,
+                            RankedCaldavarRating = playerRatings.RankedCaldavarRating,
+                            RankedMidwarsRating = playerRatings.RankedMidwarsRating,
+                        }
+                    );
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "MMR snapshot capture failed for {AccountId}", accountId);
+        }
+
         await db.SaveChangesAsync(ct);
 
         await dispatcher.DispatchAsync(
