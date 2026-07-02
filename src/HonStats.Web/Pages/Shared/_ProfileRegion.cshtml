@@ -3,21 +3,15 @@
 @using HonStats.App.Insights
 <nav class="tabs" aria-label="Profile sections">
     <a class="tab" href="?tab=matches&map=@Model.SelectedMap"
-       aria-current="@(Model.Tab == "matches" ? "true" : null)"
-       hx-get="?tab=matches&map=@Model.SelectedMap"
-       hx-target="#profile-context" hx-swap="innerHTML" hx-push-url="true">
+       aria-current="@(Model.Tab == "matches" ? "true" : null)">
         Matches
     </a>
     <a class="tab" href="?tab=teammates&map=@Model.SelectedMap"
-       aria-current="@(Model.Tab == "teammates" ? "true" : null)"
-       hx-get="?tab=teammates&map=@Model.SelectedMap"
-       hx-target="#profile-context" hx-swap="innerHTML" hx-push-url="true">
+       aria-current="@(Model.Tab == "teammates" ? "true" : null)">
         Teammates
     </a>
     <a class="tab" href="?tab=heroBuilds&map=@Model.SelectedMap"
-       aria-current="@(Model.Tab == "heroBuilds" ? "true" : null)"
-       hx-get="?tab=heroBuilds&map=@Model.SelectedMap"
-       hx-target="#profile-context" hx-swap="innerHTML" hx-push-url="true">
+       aria-current="@(Model.Tab == "heroBuilds" ? "true" : null)">
         Hero Builds
     </a>
 </nav>
@@ -76,8 +70,7 @@
                                 {
                                     var isActive = h.HeroId == Model.SelectedHeroId;
                                     <a class="hero-portrait" aria-current="@(isActive ? "true" : null)"
-                                        hx-get="?tab=heroBuilds&heroId=@h.HeroId&map=@Model.SelectedMap"
-                                        hx-target="#profile-region" hx-swap="innerHTML" hx-push-url="true"
+                                        href="?tab=heroBuilds&heroId=@h.HeroId&map=@Model.SelectedMap"
                                         title="@h.Hero!.DisplayName (@h.Games)">
                                         <img src="@h.Hero!.IconUrl" alt="@h.Hero.DisplayName" loading="lazy" />
                                     </a>

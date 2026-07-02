@@ -9,7 +9,6 @@ using HonStats.Domain.Matches;
 using HonStats.Domain.Players;
 using HonStats.Domain.ReferenceData;
 using HonStats.Infra.Insights;
-using Htmx;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
@@ -80,17 +79,11 @@ public class ProfileModel(
         this.Indexed = await insights.GetIndexedPlayerAsync(this.AccountId, ct);
         this.Heroes = (await reference.GetHeroesAsync(ct)).ToDictionary(h => h.Id);
 
-        // The juvio overview drives the header only (name, rank, matches played),
-        // which renders solely on full page load — HTMX swaps never touch it.
-        if (!Request.IsHtmxNonBoosted())
-        {
-            this.Profile = await profiles.GetAsync(this.AccountId, ct);
-            this.MmrHistory = await mmrHistory.GetAsync(this.AccountId, ct: ct);
-        }
+        // Always loaded — juvio responses are cached server-side (60s for stats,
+        // 1h for rank/identity), so repeated calls within the TTL are free.
+        this.Profile = await profiles.GetAsync(this.AccountId, ct);
+        this.MmrHistory = await mmrHistory.GetAsync(this.AccountId, ct: ct);
 
-        // Stats panel numbers now come entirely from indexed data. "all" aggregates
-        // every map into a single entry; a specific map picks its row. MapStats is
-        // loaded unconditionally to feed the per-map game-count summary.
         this.MapStats = await insights.GetMapStatsAsync(this.AccountId, ct);
         this.MapOverview =
             this.SelectedMap == "all"
@@ -166,17 +159,6 @@ public class ProfileModel(
                 break;
         }
 
-        if (Request.IsHtmxNonBoosted())
-        {
-            // Map pills target #profile-context (stats + region together); tab pills
-            // and hero-picker chips target #profile-region. Default to the region.
-            var target = Request.Headers["HX-Target"].ToString();
-            return target switch
-            {
-                "profile-context" => Partial("_ProfileContext", this),
-                _ => Partial("_ProfileRegion", this),
-            };
-        }
         return Page();
     }
 
