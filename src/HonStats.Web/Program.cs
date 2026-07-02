@@ -27,6 +27,38 @@ var app = builder.Build();
 await MigrateDatabaseAsync(app.Services);
 
 app.UseStaticFiles();
+
+// Browser cache headers for the htmx preload extension to work: the preloaded
+// GET is cached by the browser, so the actual click is served instantly. Vary
+// by HX-Request because many Razor Pages branch on Request.IsHtmx() (full page
+// vs fragment) — without it a cached fragment could be served for a full page.
+app.Use(
+    async (context, next) =>
+    {
+        context.Response.OnStarting(() =>
+        {
+            context.Response.Headers.Vary = "HX-Request";
+
+            if (context.Request.Method is "GET" && context.Response.StatusCode is 200)
+            {
+                var path = context.Request.Path;
+                context.Response.Headers.CacheControl = path switch
+                {
+                    _ when path.StartsWithSegments("/heroes")
+                            || path.StartsWithSegments("/items") => "max-age=3600",
+                    _ when path.StartsWithSegments("/players") => "max-age=30",
+                    _ when path.StartsWithSegments("/search") => "no-store",
+                    _ => "no-cache",
+                };
+            }
+
+            return Task.CompletedTask;
+        });
+
+        await next();
+    }
+);
+
 app.MapRazorPages();
 
 app.MapPost(
