@@ -54,8 +54,20 @@
         .Select(i => min + (range * i / gridLineCount))
         .ToList();
 
-    var firstDate = Model[0].CapturedDate.ToDateTime(TimeOnly.MinValue).ToString("MMM d");
-    var lastDate = Model[^1].CapturedDate.ToDateTime(TimeOnly.MinValue).ToString("MMM d");
+    // Evenly-spaced date ticks along the x-axis (first, last, and interior ones).
+    var dateTickCount = Math.Min(4, Model.Count);
+    var dateTickIndexes = dateTickCount <= 1
+        ? new List<int> { 0 }
+        : Enumerable
+            .Range(0, dateTickCount)
+            .Select(t => (int)Math.Round(t * (Model.Count - 1) / (double)(dateTickCount - 1)))
+            .Distinct()
+            .ToList();
+
+    // Half the spacing between adjacent columns — used to size the invisible
+    // full-height hover targets so hovering anywhere in a column's band shows
+    // both ratings for that day (a crosshair, not a tiny per-dot target).
+    var colHalfWidth = Model.Count <= 1 ? plotWidth / 2 : plotWidth / (double)(Model.Count - 1) / 2;
 }
 
 <svg viewBox="0 0 @width @height" class="mmr-chart" preserveAspectRatio="xMidYMid meet" role="img" aria-label="MMR history for the last @Model.Count days">
@@ -74,21 +86,34 @@
 
     @for (var i = 0; i < caldavar.Count; i++)
     {
-        var date = Model[i].CapturedDate.ToDateTime(TimeOnly.MinValue).ToString("MMM d, yyyy");
-        <circle class="mmr-chart__point--caldavar" cx="@X(i).ToString("0.##")" cy="@Y(caldavar[i]).ToString("0.##")" r="2.5">
-            <title>Caldavar @caldavar[i].ToString("0") · @date</title>
-        </circle>
+        <circle class="mmr-chart__point--caldavar" cx="@X(i).ToString("0.##")" cy="@Y(caldavar[i]).ToString("0.##")" r="2.5" />
     }
     @for (var i = 0; i < midwars.Count; i++)
     {
-        var date = Model[i].CapturedDate.ToDateTime(TimeOnly.MinValue).ToString("MMM d, yyyy");
-        <circle class="mmr-chart__point--midwars" cx="@X(i).ToString("0.##")" cy="@Y(midwars[i]).ToString("0.##")" r="2.5">
-            <title>Mid Wars @midwars[i].ToString("0") · @date</title>
-        </circle>
+        <circle class="mmr-chart__point--midwars" cx="@X(i).ToString("0.##")" cy="@Y(midwars[i]).ToString("0.##")" r="2.5" />
     }
 
-    @SvgLabel(padLeft, height - 6, "start", firstDate)
-    @SvgLabel(width - padRight, height - 6, "end", lastDate)
+    @* Per-day hover band: a full-height transparent rect so hovering anywhere in
+       the column reveals a guide line + a native tooltip with both ratings. *@
+    @for (var i = 0; i < Model.Count; i++)
+    {
+        var cx = X(i);
+        var rectX = cx - colHalfWidth;
+        var rectW = colHalfWidth * 2;
+        <g class="mmr-chart__col">
+            <line class="mmr-chart__guide" x1="@cx.ToString("0.##")" y1="@padTop" x2="@cx.ToString("0.##")" y2="@(padTop + plotHeight)" />
+            <rect class="mmr-chart__hit" x="@rectX.ToString("0.##")" y="@padTop" width="@rectW.ToString("0.##")" height="@plotHeight">
+                <title>Caldavar @caldavar[i].ToString("0") · Mid Wars @midwars[i].ToString("0")</title>
+            </rect>
+        </g>
+    }
+
+    @foreach (var i in dateTickIndexes)
+    {
+        var anchor = i == 0 ? "start" : i == Model.Count - 1 ? "end" : "middle";
+        var label = Model[i].CapturedDate.ToDateTime(TimeOnly.MinValue).ToString("MMM d");
+        @SvgLabel(X(i), height - 6, anchor, label)
+    }
 </svg>
 
 <div class="mmr-chart__legend">

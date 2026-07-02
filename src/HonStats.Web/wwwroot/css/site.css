@@ -1690,12 +1690,6 @@ li.loading-row {
     fill: none;
 }
 
-.mmr-chart__point--caldavar,
-.mmr-chart__point--midwars {
-    cursor: pointer;
-    transition: r 0.1s ease;
-}
-
 .mmr-chart__point--caldavar {
     fill: var(--accent);
 }
@@ -1704,9 +1698,22 @@ li.loading-row {
     fill: var(--gold);
 }
 
-.mmr-chart__point--caldavar:hover,
-.mmr-chart__point--midwars:hover {
-    r: 4.5;
+/* Transparent full-height hit target; hovering it reveals the sibling guide line. */
+.mmr-chart__hit {
+    fill: transparent;
+    cursor: pointer;
+}
+
+.mmr-chart__guide {
+    stroke: var(--muted);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+    opacity: 0;
+    transition: opacity 0.08s ease;
+}
+
+.mmr-chart__col:hover .mmr-chart__guide {
+    opacity: 0.6;
 }
 
 .mmr-chart__area--caldavar {
