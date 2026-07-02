@@ -339,6 +339,19 @@ public class ProfileModel(
             7 => "#b5ab24",
             _ => "#ffffff",
         };
+
+    public static string RoleSlug(int roleIndex) =>
+        roleIndex switch
+        {
+            1 => "carry",
+            2 => "mid",
+            3 => "offlane",
+            4 => "softsupport",
+            5 => "hardsupport",
+            6 => "soloofflane",
+            7 => "jungle",
+            _ => "unassigned",
+        };
 }
 
 public record MatchesView(

@@ -16,7 +16,9 @@ public class MatchTests
     private async Task<string> OpenModalAsync()
     {
         await _e2e.GotoProfileAsync(TestPlayers.ManyGames);
-        await Page.GetByTestId("match-row").First.ClickAsync();
+        await Page.GetByTestId("match-row")
+            .Filter(new() { HasText = "ForestsOfCaldavar" })
+            .First.ClickAsync();
         await Assertions.Expect(Page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
         var href = await Page.Locator("dialog.modal[open] a[href^='/match/']")
             .GetAttributeAsync("href");
@@ -32,7 +34,9 @@ public class MatchTests
         await Assertions.Expect(dialog.GetByText("GPM").First).ToBeVisibleAsync();
         await Assertions.Expect(dialog.GetByText("XPM").First).ToBeVisibleAsync();
         await Assertions.Expect(dialog.GetByText("DPM").First).ToBeVisibleAsync();
-        await Assertions.Expect(Page.Locator("dialog.modal .role-chip").First).ToBeVisibleAsync();
+        await Assertions
+            .Expect(Page.Locator("dialog.modal img.hero-icon__role").First)
+            .ToBeVisibleAsync();
     }
 
     [Fact]

@@ -650,6 +650,24 @@ p {
     flex-shrink: 0;
 }
 
+.hero-icon-wrap {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.hero-icon__role {
+    position: absolute;
+    right: -0.2rem;
+    bottom: -0.2rem;
+    width: 1rem;
+    height: 1rem;
+    padding: 1px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    box-shadow: 0 0 0 1px var(--surface-3);
+}
+
 .hero-name {
     font-weight: 600;
 }
@@ -1877,20 +1895,6 @@ li.loading-row {
 }
 
 /* ---------- Match detail enrichment ---------- */
-.role-chip {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.15rem 0.45rem;
-    border-radius: 999px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    background: oklch(from var(--role, var(--muted)) l c h / 0.18);
-    color: var(--role, var(--muted));
-    border: 1px solid oklch(from var(--role, var(--muted)) l c h / 0.4);
-}
-
 .build-timeline {
     display: flex;
     align-items: center;
