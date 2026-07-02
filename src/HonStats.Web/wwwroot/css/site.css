@@ -1716,6 +1716,34 @@ li.loading-row {
     opacity: 0.6;
 }
 
+.mmr-chart__pill {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.08s ease;
+}
+
+.mmr-chart__col:hover .mmr-chart__pill {
+    opacity: 1;
+}
+
+.mmr-chart__pill-bg {
+    stroke: none;
+}
+
+.mmr-chart__pill--caldavar .mmr-chart__pill-bg {
+    fill: var(--accent);
+}
+
+.mmr-chart__pill--midwars .mmr-chart__pill-bg {
+    fill: var(--gold);
+}
+
+.mmr-chart__pill .mmr-chart__label {
+    fill: var(--bg);
+    font-size: 9px;
+    font-weight: 700;
+}
+
 .mmr-chart__area--caldavar {
     fill: oklch(from var(--accent) l c h / 0.12);
 }
