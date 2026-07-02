@@ -4,15 +4,27 @@
 @{
     var v = Model.View!;
     var d = v.Summary.Detail!;
+    var loserTeam = d.WinningTeam == "Legion" ? "Hellbourne" : "Legion";
     ViewData["Title"] = $"Match #{d.GameId}";
 }
 
-<div class="detail-header">
-    <h1 class="detail-header__name">Match #@d.GameId</h1>
-    <p class="detail-header__meta">@d.Map · @(d.Duration / 60)m @(d.Duration % 60)s · @TimeDisplay.Relative(d.Date)</p>
+<div class="detail-header match-header">
+    <div class="match-header__result">
+        <span class="team--@(d.WinningTeam.ToLowerInvariant())">@d.WinningTeam Victory</span>
+        <span class="match-header__vs">vs</span>
+        <span class="team--@(loserTeam.ToLowerInvariant())">@loserTeam</span>
+    </div>
+    <h1 class="match-header__title">Match #@d.GameId</h1>
+    <div class="match-header__meta">
+        <span>@ProfileModel.MapLabel(d.Map)</span>
+        <span>@(d.Duration / 60)m @(d.Duration % 60)s</span>
+        <span>@TimeDisplay.Relative(d.Date)</span>
+    </div>
 </div>
 
-<partial name="Shared/Partials/_MatchSummaryTables" model="v.Summary" />
+<div class="match-scoreboards">
+    <partial name="Shared/Partials/_MatchSummaryTables" model="v.Summary" />
+</div>
 
 @if (v.HasReplay)
 {
@@ -27,25 +39,42 @@
 
     <section class="panel card">
         <p class="eyebrow card__title">Builds &amp; Skill Order</p>
-        @foreach (var team in v.Players.GroupBy(p => p.Team))
-        {
-            <p class="match-section__title team--@(team.Key.ToLowerInvariant())">
-                @team.Key @(team.Key == d.WinningTeam ? "· Winner" : "")
-            </p>
-            @foreach (var p in team)
+        <div class="match-builds">
+            @foreach (var team in v.Players.GroupBy(p => p.Team))
             {
-                var hero = v.Summary.Heroes.GetValueOrDefault(p.HeroId);
-                <div class="match-build">
-                    <div class="match-build__head">
-                        <img class="hero-icon" src="@hero?.IconUrl" alt="" loading="lazy" />
-                        <span class="hero-name">@(hero?.TranslatedName ?? ("Hero " + p.HeroId))</span>
-                        <span class="muted">@p.DisplayName</span>
+                var teamLower = team.Key.ToLowerInvariant();
+                <div class="match-builds__team">
+                    <div class="match-builds__team-head match-builds__team-head--@teamLower">
+                        <p class="match-builds__team-name team--@teamLower">@team.Key</p>
+                        <span class="team-result @(team.Key == d.WinningTeam ? "team-result--win" : "team-result--loss")">
+                            @(team.Key == d.WinningTeam ? "Victory" : "Defeat")
+                        </span>
                     </div>
-                    <partial name="Match/Partials/_BuildTimeline" model="new BuildTimelineView(p, v.Summary.Items)" />
-                    <partial name="Match/Partials/_SkillBuild" model="new SkillBuildView(p, v.Abilities)" />
+                    @foreach (var p in team)
+                    {
+                        var hero = v.Summary.Heroes.GetValueOrDefault(p.HeroId);
+                        <details class="match-build">
+                            <summary class="match-build__summary">
+                                <img class="hero-icon" src="@hero?.IconUrl" alt="" loading="lazy" />
+                                <span class="hero-name">@(hero?.TranslatedName ?? ("Hero " + p.HeroId))</span>
+                                <span class="muted">@p.DisplayName</span>
+                                <span class="match-build__chevron">▼</span>
+                            </summary>
+                            <div class="match-build__body">
+                                <div>
+                                    <p class="match-build__label">Item Build</p>
+                                    <partial name="Match/Partials/_BuildTimeline" model="new BuildTimelineView(p, v.Summary.Items)" />
+                                </div>
+                                <div>
+                                    <p class="match-build__label">Skill Order</p>
+                                    <partial name="Match/Partials/_SkillBuild" model="new SkillBuildView(p, v.Abilities)" />
+                                </div>
+                            </div>
+                        </details>
+                    }
                 </div>
             }
-        }
+        </div>
     </section>
 }
 else

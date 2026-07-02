@@ -65,11 +65,18 @@
     @SvgLabel(X(maxTime), height - 6, "end", (maxTime / 60) + "m")
 </svg>
 <div class="match-chart__legend">
-    @foreach (var p in Model)
+    @foreach (var teamGroup in Model.GroupBy(p => p.Team))
     {
-        var dotClass = p.Team == "Legion" ? "match-chart__legend-dot--legion" : "match-chart__legend-dot--hellbourne";
-        <span class="match-chart__legend-item">
-            <span class="match-chart__legend-dot @dotClass"></span>@p.DisplayName
-        </span>
+        var teamLower = teamGroup.Key.ToLowerInvariant();
+        <div class="match-chart__legend-group">
+            <span class="match-chart__legend-team match-chart__legend-team--@teamLower">@teamGroup.Key</span>
+            @foreach (var p in teamGroup)
+            {
+                var dotClass = p.Team == "Legion" ? "match-chart__legend-dot--legion" : "match-chart__legend-dot--hellbourne";
+                <span class="match-chart__legend-item">
+                    <span class="match-chart__legend-dot @dotClass"></span>@p.DisplayName
+                </span>
+            }
+        </div>
     }
 </div>

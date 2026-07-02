@@ -56,6 +56,7 @@ public class MatchTests
         await Page.GotoAsync(_e2e.BaseUrl + "/match/" + gameId);
 
         await Assertions.Expect(Page.Locator("svg.match-chart")).ToHaveCountAsync(2);
+        await Page.Locator(".match-build__summary").First.ClickAsync();
         await Assertions.Expect(Page.Locator(".build-timeline").First).ToBeVisibleAsync();
         await Assertions.Expect(Page.Locator(".skill-build").First).ToBeVisibleAsync();
     }
