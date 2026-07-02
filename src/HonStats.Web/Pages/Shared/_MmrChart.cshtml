@@ -74,11 +74,17 @@
 
     @for (var i = 0; i < caldavar.Count; i++)
     {
-        <circle class="mmr-chart__point--caldavar" cx="@X(i).ToString("0.##")" cy="@Y(caldavar[i]).ToString("0.##")" r="2.5" />
+        var date = Model[i].CapturedDate.ToDateTime(TimeOnly.MinValue).ToString("MMM d, yyyy");
+        <circle class="mmr-chart__point--caldavar" cx="@X(i).ToString("0.##")" cy="@Y(caldavar[i]).ToString("0.##")" r="2.5">
+            <title>Caldavar @caldavar[i].ToString("0") · @date</title>
+        </circle>
     }
     @for (var i = 0; i < midwars.Count; i++)
     {
-        <circle class="mmr-chart__point--midwars" cx="@X(i).ToString("0.##")" cy="@Y(midwars[i]).ToString("0.##")" r="2.5" />
+        var date = Model[i].CapturedDate.ToDateTime(TimeOnly.MinValue).ToString("MMM d, yyyy");
+        <circle class="mmr-chart__point--midwars" cx="@X(i).ToString("0.##")" cy="@Y(midwars[i]).ToString("0.##")" r="2.5">
+            <title>Mid Wars @midwars[i].ToString("0") · @date</title>
+        </circle>
     }
 
     @SvgLabel(padLeft, height - 6, "start", firstDate)

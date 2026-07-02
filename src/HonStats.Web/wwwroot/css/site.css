@@ -1675,7 +1675,7 @@ li.loading-row {
 
 .mmr-chart__label {
     fill: var(--muted);
-    font-size: 10px;
+    font-size: 14px;
 }
 
 .mmr-chart__line--caldavar {
@@ -1690,12 +1690,23 @@ li.loading-row {
     fill: none;
 }
 
+.mmr-chart__point--caldavar,
+.mmr-chart__point--midwars {
+    cursor: pointer;
+    transition: r 0.1s ease;
+}
+
 .mmr-chart__point--caldavar {
     fill: var(--accent);
 }
 
 .mmr-chart__point--midwars {
     fill: var(--gold);
+}
+
+.mmr-chart__point--caldavar:hover,
+.mmr-chart__point--midwars:hover {
+    r: 4.5;
 }
 
 .mmr-chart__area--caldavar {
