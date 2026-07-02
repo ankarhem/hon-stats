@@ -9,6 +9,7 @@
         var active = Model.SelectedMap == value;
         <a class="pill"
            href="?map=@value&tab=@Model.Tab@heroParam"
+           hx-swap="innerHTML show:none"
            aria-current="@(active ? "true" : null)">
             @label
         </a>

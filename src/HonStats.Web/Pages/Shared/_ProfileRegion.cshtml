@@ -1,7 +1,13 @@
 @* /* noqa: SIZE_OK */ Intentionally single large HTMX fragment; splitting would break hx-swap boundaries. *@
 @model ProfileModel
 @using HonStats.App.Insights
-<nav class="tabs" aria-label="Profile sections">
+<nav
+    class="tabs"
+    aria-label="Profile sections"
+    hx-target="#profile-region"
+    hx-select="#profile-region"
+    hx-swap="innerHTML show:none"
+>
     <a class="tab" href="?tab=matches&map=@Model.SelectedMap"
        aria-current="@(Model.Tab == "matches" ? "true" : null)">
         Matches
@@ -71,6 +77,9 @@
                                     var isActive = h.HeroId == Model.SelectedHeroId;
                                     <a class="hero-portrait" aria-current="@(isActive ? "true" : null)"
                                         href="?tab=heroBuilds&heroId=@h.HeroId&map=@Model.SelectedMap"
+                                        hx-target="#profile-region"
+                                        hx-select="#profile-region"
+                                        hx-swap="innerHTML show:none"
                                         title="@h.Hero!.DisplayName (@h.Games)">
                                         <img src="@h.Hero!.IconUrl" alt="@h.Hero.DisplayName" loading="lazy" />
                                     </a>
