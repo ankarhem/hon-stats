@@ -173,7 +173,7 @@ partial fragment (htmx swap). Always set `@model` on every `.cshtml`.
   Close paths: Esc, backdrop click, and the `<form method="dialog">` button — all
   fire the native `close` event. The closed `<dialog>` stays in the DOM (just
   `display:none`); reopening re-fires `showModal()` via the `:not([open])` guard.
-  Covered by `tests/HonStats.Web.E2E/MatchModalCloseTests.cs`.
+  Covered by `tests/HonStats.Web.E2E/ProfileTests.cs`.
 - **Tooltips + top layer (Firefox limitation)**: Firefox cannot resolve a CSS
   anchor ACROSS top-layer roots — a popover tooltip anchored to an element inside
   the open modal `<dialog>` positions statically (Chrome handles it per spec).
