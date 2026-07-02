@@ -46,7 +46,7 @@ public class ItemsModel(IReferenceDataQuery reference) : PageModel
         Query = q;
 
         var hxTarget = Request.Headers["HX-Target"].ToString();
-        return Request.IsHtmx()
+        return Request.IsHtmxNonBoosted()
             ? (hxTarget == "item-grid" ? Partial("_ItemGrid", this) : Partial("_ItemRegion", this))
             : Page();
     }

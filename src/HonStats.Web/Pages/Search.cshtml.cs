@@ -17,7 +17,7 @@ public class SearchModel(IPlayerSearch search, IPlayerNameSearch localSearch) : 
     {
         Response.Headers["Vary"] = "HX-Request";
 
-        if (Request.IsHtmx())
+        if (Request.IsHtmxNonBoosted())
         {
             if (string.IsNullOrWhiteSpace(q))
                 return Content(string.Empty);

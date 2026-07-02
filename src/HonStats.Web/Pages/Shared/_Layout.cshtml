@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/htmx.org@2.0.10" defer></script>
     <script src="https://unpkg.com/htmx-ext-preload@2.1.2" defer></script>
 </head>
-<body hx-ext="preload" preload>
+<body hx-ext="preload" preload hx-boost="true">
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
         <div class="site-header__inner">
@@ -29,7 +29,7 @@
                     hx-swap="innerHTML"
                     hx-indicator="#search-indicator" />
                 <span id="search-indicator" class="htmx-indicator search__spinner" aria-hidden="true">⏳</span>
-                <div id="search-results" class="search-results" role="listbox" aria-label="Search results"></div>
+                <div id="search-results" class="search-results" role="listbox" aria-label="Search results" hx-boost="false"></div>
             </form>
             <nav class="site-nav" aria-label="Main navigation">
                 <a href="/heroes">Heroes</a>

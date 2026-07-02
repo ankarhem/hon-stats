@@ -82,7 +82,7 @@ public class ProfileModel(
 
         // The juvio overview drives the header only (name, rank, matches played),
         // which renders solely on full page load — HTMX swaps never touch it.
-        if (!Request.IsHtmx())
+        if (!Request.IsHtmxNonBoosted())
         {
             this.Profile = await profiles.GetAsync(this.AccountId, ct);
             this.MmrHistory = await mmrHistory.GetAsync(this.AccountId, ct: ct);
@@ -166,7 +166,7 @@ public class ProfileModel(
                 break;
         }
 
-        if (Request.IsHtmx())
+        if (Request.IsHtmxNonBoosted())
         {
             // Map pills target #profile-context (stats + region together); tab pills
             // and hero-picker chips target #profile-region. Default to the region.
