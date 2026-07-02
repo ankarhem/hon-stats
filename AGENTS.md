@@ -56,9 +56,9 @@ credentials in user-secrets). **Locators: prefer user-facing over CSS classes** 
 `searchbox`, not `textbox`), `GetByTestId(...)` (`data-testid` on `.match-row` /
 teammate rows) where role/text aren't unique. NEVER `WaitForTimeoutAsync` — use
 auto-retrying web-first assertions (`Expect(locator).ToBeVisibleAsync`). To wait
-for an HTMX swap deterministically, arm `window.addEventListener('htmx:afterSettle', …)`
-BEFORE the action and `WaitForFunctionAsync` the flag after (see
-`E2EFixture.AssertNavigationKeepsScroll`) — server-rendered markers like
+for an HTMX swap deterministically use the `HtmxPageExtensions` IPage extensions:
+`Page.InstallHtmxSupportAsync()` BEFORE the action, `Page.WaitForHtmxSettledAsync()`
+after (arms/polls an `htmx:afterSettle` flag) — server-rendered markers like
 `aria-current` can appear before htmx finishes settling (and also pass on an
 accidental full-page navigation).
 
