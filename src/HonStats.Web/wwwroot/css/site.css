@@ -1727,19 +1727,28 @@ li.loading-row {
 }
 
 .mmr-chart__pill-bg {
-    stroke: none;
+    stroke-width: 1;
 }
 
 .mmr-chart__pill--caldavar .mmr-chart__pill-bg {
-    fill: var(--accent);
+    fill: oklch(from var(--accent) l c h / 0.2);
+    stroke: var(--accent);
 }
 
 .mmr-chart__pill--midwars .mmr-chart__pill-bg {
+    fill: oklch(from var(--gold) l c h / 0.2);
+    stroke: var(--gold);
+}
+
+.mmr-chart__pill--caldavar .mmr-chart__label {
+    fill: var(--accent);
+}
+
+.mmr-chart__pill--midwars .mmr-chart__label {
     fill: var(--gold);
 }
 
 .mmr-chart__pill .mmr-chart__label {
-    fill: var(--bg);
     font-size: 9px;
     font-weight: 700;
 }
