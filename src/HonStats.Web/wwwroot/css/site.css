@@ -1730,13 +1730,15 @@ li.loading-row {
     stroke-width: 1;
 }
 
+/* Mix in oklab, not oklch — oklch would swing gold's hue through green on the
+   way to the blue surface; oklab blends components linearly (no hue arc). */
 .mmr-chart__pill--caldavar .mmr-chart__pill-bg {
-    fill: color-mix(in oklch, var(--accent) 20%, var(--surface));
+    fill: color-mix(in oklab, var(--accent) 20%, var(--surface));
     stroke: var(--accent);
 }
 
 .mmr-chart__pill--midwars .mmr-chart__pill-bg {
-    fill: color-mix(in oklch, var(--gold) 20%, var(--surface));
+    fill: color-mix(in oklab, var(--gold) 20%, var(--surface));
     stroke: var(--gold);
 }
 
