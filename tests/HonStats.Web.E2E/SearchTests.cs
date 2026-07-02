@@ -6,10 +6,9 @@ namespace HonStats.Web.E2E;
 [Collection("E2E")]
 public class SearchTests
 {
-    // A known real juvio account whose username is an exact (Score 100) match —
-    // required for the Enter test, which only redirects to the profile on an exact
-    // match (a fuzzy query lands on the /search results page instead).
-    private const string KnownPlayer = "Testie";
+    // The Enter test only redirects to the profile on an exact (Score 100)
+    // username match — a fuzzy query lands on the /search results page instead.
+    private const string KnownPlayer = TestPlayers.FewGames;
 
     private readonly E2EFixture _e2e;
 

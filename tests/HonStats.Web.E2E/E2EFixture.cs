@@ -64,6 +64,47 @@ public sealed class E2EFixture : IAsyncLifetime
         Page = await (await _browser.NewContextAsync()).NewPageAsync();
     }
 
+    public async Task<IPage> GotoProfileAsync(string username)
+    {
+        await Page.GotoAsync($"{BaseUrl}/players/{username}");
+        await Assertions
+            .Expect(Page.GetByTestId("match-row").First)
+            .ToBeVisibleAsync(new() { Timeout = 30_000 });
+        return Page;
+    }
+
+    public async Task<IPage> OpenMatchModalAsync(string username)
+    {
+        await GotoProfileAsync(username);
+        await Page.GetByTestId("match-row").First.ClickAsync();
+        await Assertions.Expect(Page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
+        return Page;
+    }
+
+    // Clicks a nav link that HTMX-swaps a region (marked active via aria-current)
+    // and asserts the swap did not move the scroll position.
+    // Scrolls far enough that a reset-to-top is detectable, but not so far that
+    // the nav links slide under the sticky header — Playwright would then have
+    // to auto-scroll to click, which moves scrollY and poisons the measurement.
+    public async Task AssertNavigationKeepsScroll(ILocator link, string expectedUrl)
+    {
+        await Page.EvaluateAsync(
+            "() => { document.body.style.minHeight = '3000px'; window.scrollTo(0, 200); }"
+        );
+        var before = await GetScrollYAsync();
+        Assert.True(before > 0, $"setup failed: page did not scroll (scrollY={before})");
+
+        await link.ClickAsync();
+        await Assertions.Expect(Page).ToHaveURLAsync(expectedUrl);
+        await Assertions.Expect(link).ToHaveAttributeAsync("aria-current", "true");
+
+        var after = await GetScrollYAsync();
+        Assert.True(after == before, $"navigation moved scroll from {before} to {after}");
+    }
+
+    private Task<int> GetScrollYAsync() =>
+        Page.EvaluateAsync<int>("() => Math.round(window.scrollY)");
+
     public async Task DisposeAsync()
     {
         if (_browser is not null)

@@ -6,37 +6,35 @@ namespace HonStats.Web.E2E;
 [Collection("E2E")]
 public class TooltipTests
 {
-    private const string KnownPlayer = "idealpink";
-
     private readonly E2EFixture _e2e;
 
     public TooltipTests(E2EFixture e2e) => _e2e = e2e;
 
+    private IPage Page => _e2e.Page;
+
     [Fact]
     public async Task Hero_tooltip_renders_below_the_hero_tile()
     {
-        var page = _e2e.Page;
-        await page.GotoAsync(_e2e.BaseUrl + "/heroes");
+        await Page.GotoAsync(_e2e.BaseUrl + "/heroes");
 
-        await AssertTooltipAnchoredBelowTile(page.Locator(".hero-tile").First);
+        await AssertTooltipAnchoredBelowTile(Page.Locator(".hero-tile").First);
     }
 
     [Fact]
     public async Task Item_tooltip_renders_below_the_item_tile()
     {
-        var page = _e2e.Page;
-        await page.GotoAsync(_e2e.BaseUrl + "/items");
+        await Page.GotoAsync(_e2e.BaseUrl + "/items");
 
-        await AssertTooltipAnchoredBelowTile(page.Locator(".item-tile").First);
+        await AssertTooltipAnchoredBelowTile(Page.Locator(".item-tile").First);
     }
 
     [Fact]
     public async Task Item_tooltip_anchors_below_the_tile_inside_the_match_modal()
     {
-        var page = await OpenMatchModalAsync();
+        await _e2e.OpenMatchModalAsync(TestPlayers.ManyGames);
 
         // Only tiles that carry a tooltip — empty inventory slots render none.
-        var tile = page.Locator(
+        var tile = Page.Locator(
             "dialog.modal[open] .loadout-item.item-tile:has(.item-tooltip)"
         ).First;
 
@@ -65,20 +63,5 @@ public class TooltipTests
         Assert.InRange(tipBox.Y, tileBottom, tileBottom + 16);
         // Left edges align (span-right, not span-left — these tiles have room to the right).
         Assert.InRange(tipBox.X, tileBox.X - 1, tileBox.X + 1);
-    }
-
-    private async Task<IPage> OpenMatchModalAsync()
-    {
-        var page = _e2e.Page;
-
-        await page.GotoAsync(_e2e.BaseUrl + "/players/" + KnownPlayer);
-
-        var firstMatch = page.GetByTestId("match-row").First;
-        await Assertions.Expect(firstMatch).ToBeVisibleAsync(new() { Timeout = 60_000 });
-        await firstMatch.ClickAsync();
-
-        await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
-
-        return page;
     }
 }

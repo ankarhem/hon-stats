@@ -6,9 +6,6 @@ namespace HonStats.Web.E2E;
 [Collection("E2E")]
 public class ProfileTests
 {
-    private const string ModalPlayer = "idealpink";
-    private const string IndexPlayer = "Testie";
-
     private readonly E2EFixture _e2e;
 
     public ProfileTests(E2EFixture e2e) => _e2e = e2e;
@@ -18,7 +15,7 @@ public class ProfileTests
     [Fact]
     public async Task Escape_key_closes_the_match_modal()
     {
-        await OpenMatchModalAsync();
+        await _e2e.OpenMatchModalAsync(TestPlayers.ManyGames);
 
         await Page.Keyboard.PressAsync("Escape");
 
@@ -28,7 +25,7 @@ public class ProfileTests
     [Fact]
     public async Task Clicking_outside_closes_the_match_modal()
     {
-        await OpenMatchModalAsync();
+        await _e2e.OpenMatchModalAsync(TestPlayers.ManyGames);
 
         // The modal is centered; (5, 5) is on the ::backdrop. closedby="any"
         // makes a backdrop click dismiss the dialog (Chrome/Firefox).
@@ -40,7 +37,7 @@ public class ProfileTests
     [Fact]
     public async Task Close_button_closes_the_match_modal()
     {
-        await OpenMatchModalAsync();
+        await _e2e.OpenMatchModalAsync(TestPlayers.ManyGames);
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Close ✕" }).ClickAsync();
 
@@ -50,7 +47,7 @@ public class ProfileTests
     [Fact]
     public async Task Reindexing_populates_the_teammates_tab()
     {
-        await GotoProfileAsync(IndexPlayer);
+        await _e2e.GotoProfileAsync(TestPlayers.FewGames);
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Index" })
             .Or(Page.GetByRole(AriaRole.Button, new() { Name = "Reindex" }))
@@ -78,7 +75,7 @@ public class ProfileTests
     [Fact]
     public async Task Match_list_loads_more_rows_on_scroll()
     {
-        await GotoProfileAsync();
+        await _e2e.GotoProfileAsync(TestPlayers.ManyGames);
         var matchRows = Page.GetByTestId("match-row");
         var initial = await matchRows.CountAsync();
         var sentinel = Page.Locator(".loading-row");
@@ -94,7 +91,7 @@ public class ProfileTests
     [Fact]
     public async Task Switching_tabs_does_not_scroll_back_to_top()
     {
-        await GotoProfileAsync();
+        await _e2e.GotoProfileAsync(TestPlayers.ManyGames);
 
         await AssertNavigationKeepsScroll(
             Page.GetByRole(AriaRole.Link, new() { Name = "Teammates" }),
@@ -113,7 +110,7 @@ public class ProfileTests
     [Fact]
     public async Task Changing_map_filter_does_not_scroll_back_to_top()
     {
-        await GotoProfileAsync();
+        await _e2e.GotoProfileAsync(TestPlayers.ManyGames);
 
         await AssertNavigationKeepsScroll(
             Page.GetByRole(AriaRole.Link, new() { Name = "Mid Wars" }),
@@ -129,44 +126,9 @@ public class ProfileTests
         );
     }
 
-    private async Task AssertNavigationKeepsScroll(ILocator link, string expectedQuery)
-    {
-        // Scroll far enough that a reset-to-top is detectable, but not so far that
-        // the nav links slide under the sticky header — Playwright would then have
-        // to auto-scroll to click, which moves scrollY and poisons the measurement.
-        await Page.EvaluateAsync(
-            "() => { document.body.style.minHeight = '3000px'; window.scrollTo(0, 200); }"
+    private Task AssertNavigationKeepsScroll(ILocator link, string expectedQuery) =>
+        _e2e.AssertNavigationKeepsScroll(
+            link,
+            $"{_e2e.BaseUrl}/players/{TestPlayers.ManyGames}{expectedQuery}"
         );
-        var before = await GetScrollYAsync();
-        Assert.True(before > 0, $"setup failed: page did not scroll (scrollY={before})");
-
-        await link.ClickAsync();
-        await Assertions
-            .Expect(Page)
-            .ToHaveURLAsync(_e2e.BaseUrl + "/players/" + ModalPlayer + expectedQuery);
-        await Assertions.Expect(link).ToHaveAttributeAsync("aria-current", "true");
-
-        var after = await GetScrollYAsync();
-        Assert.True(after == before, $"navigation moved scroll from {before} to {after}");
-    }
-
-    private async Task<int> GetScrollYAsync() =>
-        int.Parse(await Page.EvaluateAsync<string>("() => String(Math.round(window.scrollY))"));
-
-    private async Task GotoProfileAsync(string username = ModalPlayer)
-    {
-        await Page.GotoAsync(_e2e.BaseUrl + "/players/" + username);
-        await Assertions.Expect(Page.GetByTestId("match-row").First).ToBeVisibleAsync();
-    }
-
-    private async Task OpenMatchModalAsync()
-    {
-        await Page.GotoAsync(_e2e.BaseUrl + "/players/" + ModalPlayer);
-
-        var firstMatch = Page.GetByTestId("match-row").First;
-        await Assertions.Expect(firstMatch).ToBeVisibleAsync();
-        await firstMatch.ClickAsync();
-
-        await Assertions.Expect(Page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
-    }
 }
