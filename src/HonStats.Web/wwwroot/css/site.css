@@ -1250,9 +1250,11 @@ li.loading-row {
     box-shadow: var(--shadow);
     pointer-events: none;
     inset: auto;
-    top: anchor(bottom);
-    left: anchor(left);
-    position-try-fallbacks: --bottom-left, --top-right, --top-left;
+    /* position-area, not top/left anchor() — Firefox resolves it across the modal
+       dialog's top-layer boundary where anchor() inset fails. bottom span-right =
+       below the anchor, left edges aligned. */
+    position-area: bottom span-right;
+    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
     opacity: 0;
     transition:
         opacity 200ms,
@@ -1268,29 +1270,23 @@ li.loading-row {
     }
 }
 
-@position-try --bottom-right {
-    inset: auto;
-    translate: 0;
-    top: anchor(bottom);
-    left: anchor(left);
+/* In-dialog variant: Firefox can't resolve an anchor across top-layer roots
+   (tooltip popover ↔ the modal <dialog> holding its anchor), so these skip the
+   popover API and live in the dialog's own top-layer root. position: fixed
+   resolves against the dialog (its transform makes it the fixed containing
+   block), so position-area + try fallbacks work against the dialog box. */
+.item-tooltip--hover {
+    position: fixed;
+    display: none;
+    z-index: 1;
 }
-@position-try --bottom-left {
-    inset: auto;
-    translate: 0;
-    top: anchor(bottom);
-    right: anchor(right);
-}
-@position-try --top-left {
-    inset: auto;
-    translate: 0;
-    bottom: anchor(top);
-    right: anchor(right);
-}
-@position-try --top-right {
-    inset: auto;
-    translate: 0;
-    bottom: anchor(top);
-    left: anchor(left);
+
+.item-tile:hover > .item-tooltip--hover {
+    display: block;
+    opacity: 1;
+    @starting-style {
+        opacity: 0;
+    }
 }
 
 .hero-tooltip__head {

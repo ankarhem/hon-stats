@@ -54,13 +54,11 @@ else
                                             {
                                                 var item = Model.Items.GetValueOrDefault(itemId);
                                                 var iconUrl = item?.IconUrl ?? $"https://gamestorage.juvio.com/items/{itemId}/icon.webp";
-                                                <span class="loadout-item item-tile"
-                                                      hx-on:pointerenter="this.querySelector('[popover]')?.showPopover()"
-                                                      hx-on:pointerleave="this.querySelector('[popover]')?.hidePopover()">
+                                                <span class="loadout-item item-tile">
                                                     <img class="loadout-item__img" src="@iconUrl" alt="@item?.DisplayName" loading="lazy" />
                                                     @if (item is not null)
                                                     {
-                                                        <partial name="Shared/_ItemTooltip" model="new ItemTooltipView(item, iconUrl)" />
+                                                        <partial name="Shared/_ItemTooltip" model="new ItemTooltipView(item, iconUrl, Hover: true)" />
                                                     }
                                                 </span>
                                             }

@@ -174,6 +174,19 @@ partial fragment (htmx swap). Always set `@model` on every `.cshtml`.
   fire the native `close` event. The closed `<dialog>` stays in the DOM (just
   `display:none`); reopening re-fires `showModal()` via the `:not([open])` guard.
   Covered by `tests/HonStats.Web.E2E/MatchModalCloseTests.cs`.
+- **Tooltips + top layer (Firefox limitation)**: Firefox cannot resolve a CSS
+  anchor ACROSS top-layer roots — a popover tooltip anchored to an element inside
+  the open modal `<dialog>` positions statically (Chrome handles it per spec).
+  Also use `position-area` (+ `position-try-fallbacks: flip-block, flip-inline, …`),
+  never `anchor()` insets, which fail across the boundary in Firefox even outside
+  dialogs. Fix: in-dialog item tooltips are NOT popovers — `ItemTooltipView.Hover
+  = true` renders `.item-tooltip--hover` (no `popover` attr, `position: fixed`,
+  shown via `.item-tile:hover`, `z-index: 1` to beat later positioned rows). Both
+  tooltip + anchor then live in the dialog's top-layer root, so anchoring works in
+  both browsers. `dialog.modal`'s `transform` makes it the fixed containing block,
+  so position-area flips are computed against the dialog box (tooltips near edges
+  flip above / span-left and stay inside). Everywhere else tooltips stay
+  `popover="hint"` shown via `hx-on:pointerenter` `showPopover()`.
 - **Tabs**: each handler returns a region partial (tab bar + content) swapped
   into `#profile-region`. Active state is server-rendered (HATEOAS). Mark the
   selected tab/pill with `aria-current="true"` (`null` when inactive), NOT an
