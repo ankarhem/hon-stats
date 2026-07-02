@@ -2,14 +2,18 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using HonStats.App.Players;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace HonStats.Infra.Juvio.Adapters;
 
-internal sealed class JuvioPlayerNameResolver(IHttpClientFactory httpClientFactory)
-    : IPlayerNameResolver
+internal sealed class JuvioPlayerNameResolver(
+    IHttpClientFactory httpClientFactory,
+    IMemoryCache cache
+) : IPlayerNameResolver
 {
     private const int BatchSize = 50;
     private const int MaxAttempts = 5;
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromHours(1);
 
     public async Task<IReadOnlyDictionary<Guid, ResolvedName>> ResolveAsync(
         IReadOnlyCollection<Guid> accountIds,
@@ -20,9 +24,24 @@ internal sealed class JuvioPlayerNameResolver(IHttpClientFactory httpClientFacto
         if (accountIds.Count == 0)
             return result;
 
+        var uncached = new List<Guid>();
+        foreach (var id in accountIds)
+        {
+            if (
+                cache.TryGetValue($"juvio:userinfo:{id}", out ResolvedName? cached)
+                && cached is not null
+            )
+                result[id] = cached;
+            else
+                uncached.Add(id);
+        }
+
+        if (uncached.Count == 0)
+            return result;
+
         var client = httpClientFactory.CreateClient(JuvioHttpClients.Auth);
 
-        foreach (var batch in accountIds.Chunk(BatchSize))
+        foreach (var batch in uncached.Chunk(BatchSize))
         {
             using var response = await PostWithRetryAsync(client, batch, ct);
 
@@ -36,7 +55,7 @@ internal sealed class JuvioPlayerNameResolver(IHttpClientFactory httpClientFacto
             foreach (var user in dto?.UsersValue ?? [])
             {
                 var id = Guid.Parse(user.AccountId);
-                result[id] = new ResolvedName
+                var resolved = new ResolvedName
                 {
                     AccountId = id,
                     DisplayName = user.DisplayName,
@@ -44,6 +63,8 @@ internal sealed class JuvioPlayerNameResolver(IHttpClientFactory httpClientFacto
                     Country = user.Country,
                     CreatedAt = user.CreatedAt,
                 };
+                result[id] = resolved;
+                cache.Set($"juvio:userinfo:{id}", resolved, CacheTtl);
             }
         }
 

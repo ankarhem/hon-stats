@@ -1,12 +1,14 @@
 using System.Text.Json;
 using HonStats.App.Players;
 using HonStats.Domain.Players;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace HonStats.Infra.Juvio.Adapters;
 
 internal sealed class JuvioPlayerProfileQuery(
     IHttpClientFactory httpClientFactory,
-    IPlayerNameResolver nameResolver
+    IPlayerNameResolver nameResolver,
+    IMemoryCache cache
 ) : IPlayerProfileQuery
 {
     public async Task<PlayerProfile?> GetAsync(Guid accountId, CancellationToken ct = default)
@@ -48,13 +50,36 @@ internal sealed class JuvioPlayerProfileQuery(
     private async Task<ProfileOverviewDto?> GetOverviewAsync(
         Guid accountId,
         CancellationToken ct
-    ) => await GetAsync<ProfileOverviewDto>($"/v1/stats/getprofilestats?userId={accountId}", ct);
+    ) =>
+        await cache.GetOrCreateAsync(
+            $"juvio:profilestats:{accountId}",
+            _ => GetAsync<ProfileOverviewDto>($"/v1/stats/getprofilestats?userId={accountId}", ct),
+            new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60),
+            }
+        );
 
     private async Task<ProfileSummaryDto?> GetSummaryAsync(Guid accountId, CancellationToken ct) =>
-        await GetAsync<ProfileSummaryDto>($"/v1/stats/getplayersummary?accountId={accountId}", ct);
+        await cache.GetOrCreateAsync(
+            $"juvio:playersummary:{accountId}",
+            _ =>
+                GetAsync<ProfileSummaryDto>(
+                    $"/v1/stats/getplayersummary?accountId={accountId}",
+                    ct
+                ),
+            new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60),
+            }
+        );
 
     private async Task<PlayerRankDto?> GetRankAsync(Guid accountId, CancellationToken ct) =>
-        await GetAsync<PlayerRankDto>($"/v1/stats/getplayerrank?accountId={accountId}", ct);
+        await cache.GetOrCreateAsync(
+            $"juvio:playerrank:{accountId}",
+            _ => GetAsync<PlayerRankDto>($"/v1/stats/getplayerrank?accountId={accountId}", ct),
+            new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1) }
+        );
 
     private async Task<T?> GetAsync<T>(string path, CancellationToken ct)
         where T : class

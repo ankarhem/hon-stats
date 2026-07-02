@@ -33,7 +33,7 @@ public class FlowTests
 
         // The tab content is static once loaded, so re-open Teammates to re-fetch
         // as background indexing completes; the roster renders once it finishes.
-        var teammatesTab = page.GetByRole(AriaRole.Button, new() { Name = "Teammates" });
+        var teammatesTab = page.GetByRole(AriaRole.Link, new() { Name = "Teammates" });
         var firstTeammate = page.GetByTestId("teammate-row").First;
         var deadline = DateTime.UtcNow.AddSeconds(240);
         while (DateTime.UtcNow < deadline)

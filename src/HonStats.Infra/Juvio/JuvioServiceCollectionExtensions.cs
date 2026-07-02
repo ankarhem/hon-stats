@@ -19,7 +19,8 @@ public static class JuvioServiceCollectionExtensions
         services
             .Configure<JuvioOptions>(configuration.GetSection(JuvioOptions.SectionName))
             .AddSingleton<ITokenPool, TokenPool>()
-            .AddTransient<AuthenticatingHandler>();
+            .AddTransient<AuthenticatingHandler>()
+            .AddMemoryCache();
 
         var retry = HttpPolicyExtensions
             .HandleTransientHttpError()

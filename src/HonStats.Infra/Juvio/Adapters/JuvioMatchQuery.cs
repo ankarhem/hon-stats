@@ -1,10 +1,12 @@
 using System.Text.Json;
 using HonStats.App.Matches;
 using HonStats.Domain.Matches;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace HonStats.Infra.Juvio.Adapters;
 
-internal sealed class JuvioMatchQuery(IHttpClientFactory httpClientFactory) : IMatchQuery
+internal sealed class JuvioMatchQuery(IHttpClientFactory httpClientFactory, IMemoryCache cache)
+    : IMatchQuery
 {
     public async Task<IReadOnlyList<PlayerMatch>> GetRecentForPlayerAsync(
         Guid playerId,
@@ -13,11 +15,22 @@ internal sealed class JuvioMatchQuery(IHttpClientFactory httpClientFactory) : IM
         CancellationToken ct = default
     )
     {
-        var dto = await GetAsync<RecentMatchesDto>(
-            $"/v1/stats/getrecentmatchesforplayer?playerId={playerId}&limit={limit}&offset={offset}",
-            ct
+        return await cache.GetOrCreateAsync(
+            $"juvio:recentmatches:{playerId}:{limit}:{offset}",
+            async _ =>
+            {
+                var dto = await GetAsync<RecentMatchesDto>(
+                    $"/v1/stats/getrecentmatchesforplayer?playerId={playerId}&limit={limit}&offset={offset}",
+                    ct
+                );
+                return (IReadOnlyList<PlayerMatch>)
+                    (dto?.MatchesValue ?? []).Select(m => MapRecent(m, playerId)).ToList();
+            },
+            new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60),
+            }
         );
-        return (dto?.MatchesValue ?? []).Select(m => MapRecent(m, playerId)).ToList();
     }
 
     public async Task<MatchDetail?> GetSummaryAsync(int gameId, CancellationToken ct = default)

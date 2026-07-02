@@ -2,21 +2,24 @@
 @model ProfileModel
 @using HonStats.App.Insights
 <nav class="tabs" aria-label="Profile sections">
-    <button class="tab" aria-current="@(Model.Tab == "matches" ? "true" : null)"
-            hx-get="?tab=matches&map=@Model.SelectedMap"
-            hx-target="#profile-context" hx-swap="innerHTML" hx-push-url="true">
+    <a class="tab" href="?tab=matches&map=@Model.SelectedMap"
+       aria-current="@(Model.Tab == "matches" ? "true" : null)"
+       hx-get="?tab=matches&map=@Model.SelectedMap"
+       hx-target="#profile-context" hx-swap="innerHTML" hx-push-url="true">
         Matches
-    </button>
-    <button class="tab" aria-current="@(Model.Tab == "teammates" ? "true" : null)"
-            hx-get="?tab=teammates&map=@Model.SelectedMap"
-            hx-target="#profile-context" hx-swap="innerHTML" hx-push-url="true">
+    </a>
+    <a class="tab" href="?tab=teammates&map=@Model.SelectedMap"
+       aria-current="@(Model.Tab == "teammates" ? "true" : null)"
+       hx-get="?tab=teammates&map=@Model.SelectedMap"
+       hx-target="#profile-context" hx-swap="innerHTML" hx-push-url="true">
         Teammates
-    </button>
-    <button class="tab" aria-current="@(Model.Tab == "heroBuilds" ? "true" : null)"
-            hx-get="?tab=heroBuilds&map=@Model.SelectedMap"
-            hx-target="#profile-context" hx-swap="innerHTML" hx-push-url="true">
+    </a>
+    <a class="tab" href="?tab=heroBuilds&map=@Model.SelectedMap"
+       aria-current="@(Model.Tab == "heroBuilds" ? "true" : null)"
+       hx-get="?tab=heroBuilds&map=@Model.SelectedMap"
+       hx-target="#profile-context" hx-swap="innerHTML" hx-push-url="true">
         Hero Builds
-    </button>
+    </a>
 </nav>
 
 @switch (Model.Tab)
