@@ -4,13 +4,12 @@
     @foreach (var item in Model.Items)
     {
         <li class="grid-list__item item-tile @(Model.IsDimmed(item) ? "item-tile--dimmed" : null)"
-            style="anchor-name: --i@(item.Id)"
             hx-on:pointerenter="this.querySelector('[popover]')?.showPopover()"
             hx-on:pointerleave="this.querySelector('[popover]')?.hidePopover()">
             <a href="/items/@item.Slug" aria-label="@item.DisplayName">
                 <img class="grid-list__icon" src="@item.IconUrl" alt="@item.DisplayName" loading="lazy" />
             </a>
-            <partial name="Shared/_ItemTooltip" model="@(new ItemTooltipView(item, item.IconUrl, $"--i{item.Id}"))" />
+            <partial name="Shared/_ItemTooltip" model="new ItemTooltipView(item, item.IconUrl)" />
         </li>
     }
 </ul>

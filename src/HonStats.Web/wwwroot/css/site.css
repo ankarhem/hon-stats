@@ -1216,6 +1216,8 @@ li.loading-row {
 
 .hero-tile {
     position: relative;
+    anchor-name: --hero-anchor;
+    anchor-scope: --hero-anchor;
 }
 
 .hero-tile__icon {
@@ -1459,7 +1461,10 @@ li.loading-row {
 }
 
 .item-tile {
-    /*position: relative;*/
+    /* Shared name + anchor-scope confines it per tile, so each tooltip binds to
+       its own tile without generated per-item anchor ids. */
+    anchor-name: --item-anchor;
+    anchor-scope: --item-anchor;
 }
 
 .item-tile--dimmed .grid-list__icon {

@@ -152,14 +152,13 @@
                                 var boughtAt = timingByItem.TryGetValue(entry.ItemId, out var timing)
                                     ? ProfileModel.FormatBuyTime(timing.AvgSeconds)
                                     : "—";
-                                var anchorName = $"--{tier.ToString().ToLowerInvariant()}-{itemIdx}";
-                                <span class="loadout-item item-tile" style="anchor-name: @anchorName"
+                                <span class="loadout-item item-tile"
                                       hx-on:pointerenter="this.querySelector('[popover]')?.showPopover()"
                                       hx-on:pointerleave="this.querySelector('[popover]')?.hidePopover()">
                                     <img src="@iconUrl" alt="@(item?.DisplayName ?? "")" class="loadout-item__img" loading="lazy" />
                                     @if (item is not null)
                                     {
-                                        <partial name="Shared/_ItemTooltip" model="new ItemTooltipView(item, iconUrl, anchorName, new BuildStatsView(entry.Frequency, games, pickPct, winPct, boughtAt))" />
+                                        <partial name="Shared/_ItemTooltip" model="new ItemTooltipView(item, iconUrl, new BuildStatsView(entry.Frequency, games, pickPct, winPct, boughtAt))" />
                                     }
                                 </span>
                             }
@@ -180,12 +179,11 @@
                                         {
                                             var item = itemsById.GetValueOrDefault(itemId);
                                             if (item is null) { continue; }
-                                            var anchorName = $"--loadout{loadoutIndex}-item{itemIndex}";
-                                            <span class="loadout-item item-tile" style="anchor-name: @anchorName"
+                                            <span class="loadout-item item-tile"
                                                   hx-on:pointerenter="this.querySelector('[popover]')?.showPopover()"
                                                   hx-on:pointerleave="this.querySelector('[popover]')?.hidePopover()">
                                                 <img src="@item.IconUrl" alt="@item.DisplayName" class="loadout-item__img" loading="lazy" />
-                                                <partial name="Shared/_ItemTooltip" model="new ItemTooltipView(item, item.IconUrl, anchorName)" />
+                                                <partial name="Shared/_ItemTooltip" model="new ItemTooltipView(item, item.IconUrl)" />
                                             </span>
                                         }
                                     </span>

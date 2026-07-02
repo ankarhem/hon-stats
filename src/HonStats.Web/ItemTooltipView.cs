@@ -2,12 +2,7 @@ using HonStats.Domain.ReferenceData;
 
 namespace HonStats.Web;
 
-public sealed record ItemTooltipView(
-    Item Item,
-    string IconUrl,
-    string AnchorName,
-    BuildStatsView? Stats = null
-);
+public sealed record ItemTooltipView(Item Item, string IconUrl, BuildStatsView? Stats = null);
 
 public sealed record BuildStatsView(
     int Frequency,
