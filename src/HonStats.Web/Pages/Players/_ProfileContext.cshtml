@@ -9,6 +9,8 @@
         var active = Model.SelectedMap == value;
         <a class="pill"
            href="?map=@value&tab=@Model.Tab@heroParam"
+           hx-target="#profile-context"
+           hx-select="#profile-context"
            hx-swap="innerHTML show:none"
            aria-current="@(active ? "true" : null)">
             @label

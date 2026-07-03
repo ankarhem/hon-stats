@@ -2577,3 +2577,195 @@ li.loading-row {
 .hero-stats + .hero__hint {
     margin-top: 2rem;
 }
+
+/* ---------- Records: single-match-performance leaderboards ---------- */
+/* A responsive 2-up grid of independent ranking cards (Most Kills, Highest KDA,
+   Fastest Win, …). Each card holds a compact 4-column table. Mirrors the
+   leaderboard page's map/period pill selectors (aria-current drives active). */
+.records {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.records__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.records__head h1 {
+    margin-bottom: 0.15rem;
+}
+
+.records__sub {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.records__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+}
+
+/* Stack the map + period pill rows on narrow screens. */
+.records__filters .map-selector {
+    margin-bottom: 0;
+}
+
+.records__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    align-items: start;
+}
+
+@media (max-width: 880px) {
+    .records__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.records-card {
+    padding: 1rem 1.1rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    /* Cards in the same row align to top; let tall lists define their own height. */
+    min-width: 0;
+}
+
+.records-card__head {
+    margin-bottom: 0.5rem;
+}
+
+.records-card__title {
+    font-size: 1.05rem;
+    margin: 0;
+}
+
+.records-card__empty {
+    margin: 0.5rem 0 1rem;
+    font-size: 0.85rem;
+}
+
+.records-table {
+    table-layout: fixed;
+}
+
+.records-table th.records-table__rank,
+.records-table td.records-table__rank {
+    width: 2.25rem;
+    color: var(--faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.records-table__player {
+    width: 38%;
+}
+
+.records-table__value {
+    width: 4.5rem;
+    text-align: right;
+}
+
+.records-table th.records-table__value {
+    text-align: right;
+}
+
+/* Rank #1 gets an accent bar on the leading edge of its row (see .records-row:first-child). */
+.records-row {
+    vertical-align: middle;
+}
+
+.records-row:hover {
+    background: oklch(from var(--surface-2) l c h / 0.6);
+}
+
+.records-row__player {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.2rem;
+    color: var(--fg);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.records-row__player:hover {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.records-row__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* The hero cell is also the match link: icon + hero name + muted W/L · time · date. */
+.records-row__match {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--muted);
+}
+
+.records-row__match:hover {
+    text-decoration: none;
+}
+
+.records-row__match:hover .records-row__hero-name {
+    color: var(--accent);
+}
+
+.records-row__hero-body {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+    min-width: 0;
+}
+
+.records-row__hero-name {
+    color: var(--fg);
+    font-size: 0.82rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.records-row__meta {
+    font-size: 0.72rem;
+    white-space: nowrap;
+}
+
+.rec-hero {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+}
+
+.records-value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 0.95rem;
+}
+
+/* Time values read better without the accent's "big number" feel. */
+.records-value--time {
+    color: var(--fg);
+}
+
+/* Number 1 rank: a subtle accent bar on the leading edge of the row. */
+.records-row:first-child td {
+    box-shadow: inset 2px 0 0 var(--accent);
+}
+

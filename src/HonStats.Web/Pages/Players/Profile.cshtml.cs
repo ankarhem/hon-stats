@@ -27,7 +27,8 @@ public class ProfileModel(
     IReindexQueue queue,
     IIndexProgressTracker progressTracker,
     IOptions<TierTimingOptions> tierTiming,
-    IMmrHistoryQuery mmrHistory
+    IMmrHistoryQuery mmrHistory,
+    IPlayerRosterStatsQuery rosterStats
 ) : PageModel
 {
     public const int PageSize = 25;
@@ -50,6 +51,7 @@ public class ProfileModel(
     public IReadOnlyList<ItemTimingEntry> HeroItemTiming { get; set; } = [];
     public IReadOnlyList<MapStatEntry> MapStats { get; set; } = [];
     public MapStatEntry? MapOverview { get; set; }
+    public PlayerRosterStats? RosterStats { get; set; }
     public Dictionary<int, Item> Items { get; set; } = new();
     public int SelectedHeroId { get; set; }
     public IReadOnlyList<LoadoutEntry> Loadouts { get; set; } = [];
@@ -90,6 +92,15 @@ public class ProfileModel(
             this.SelectedMap == "all"
                 ? await insights.GetOverallStatsAsync(this.AccountId, ct)
                 : this.MapStats.FirstOrDefault(e => e.Map == this.SelectedMap);
+
+        // Roster-sourced per-game averages (CS, denies, building damage) — these
+        // metrics live only in match_roster, so they need their own local query
+        // alongside the MapOverview stats. Same map scoping as MapOverview above.
+        this.RosterStats = await rosterStats.GetAsync(
+            this.AccountId,
+            MapFilter(this.SelectedMap),
+            ct
+        );
 
         switch (tab)
         {
@@ -143,20 +154,37 @@ public class ProfileModel(
                 break;
             default:
                 this.Tab = "matches";
-                var fetched = await matches.GetRecentForPlayerAsync(
-                    this.AccountId,
-                    PageSize,
-                    0,
-                    ct
-                );
-                // The juvio match query has no server-side map filter, so filter
-                // post-fetch. HasMore reflects the unfiltered page so pagination
-                // keeps walking the full history across sparse per-map slices.
-                this.RecentMatches =
-                    this.SelectedMap == "all"
-                        ? fetched
-                        : fetched.Where(m => m.Map == this.SelectedMap).ToList();
-                this.HasMoreMatches = fetched.Count == PageSize;
+                if (this.Indexed?.Status == IndexingStatus.Indexed)
+                {
+                    // Indexed players: serve from the local diff-store, which holds
+                    // full history and supports a real map filter — so Mid Wars (etc.)
+                    // returns actual matches instead of a sparse first-page slice.
+                    this.RecentMatches = await insights.GetRecentMatchesAsync(
+                        this.AccountId,
+                        PageSize,
+                        0,
+                        MapFilter(this.SelectedMap),
+                        ct
+                    );
+                    this.HasMoreMatches = this.RecentMatches.Count == PageSize;
+                }
+                else
+                {
+                    // Not indexed: fall back to the live juvio feed. It has no
+                    // server-side map filter, so filter post-fetch; HasMore reflects
+                    // the unfiltered page so pagination keeps walking history.
+                    var fetched = await matches.GetRecentForPlayerAsync(
+                        this.AccountId,
+                        PageSize,
+                        0,
+                        ct
+                    );
+                    this.RecentMatches =
+                        this.SelectedMap == "all"
+                            ? fetched
+                            : fetched.Where(m => m.Map == this.SelectedMap).ToList();
+                    this.HasMoreMatches = fetched.Count == PageSize;
+                }
                 break;
         }
 
@@ -170,25 +198,37 @@ public class ProfileModel(
         CancellationToken ct = default
     )
     {
-        var fetched = await matches.GetRecentForPlayerAsync(accountId, PageSize, offset, ct);
         var heroes = (await reference.GetHeroesAsync(ct)).ToDictionary(h => h.Id);
-        // Post-fetch map filter mirrors OnGet: the juvio query has no server-side
-        // map param. SelectedMap is threaded into the view so row partials can carry
-        // &map= in their own pagination URLs (Wired by T-UI-ROWS).
         var selectedMap = string.IsNullOrEmpty(map) ? "all" : map;
-        var recent =
-            selectedMap == "all" ? fetched : fetched.Where(m => m.Map == selectedMap).ToList();
+
+        // Mirror OnGet's source choice so infinite-scroll paging stays consistent
+        // with the first page: DB (full history + real map filter) for indexed
+        // players, live juvio feed (post-filtered) otherwise.
+        var indexed = await insights.GetIndexedPlayerAsync(accountId, ct);
+        IReadOnlyList<PlayerMatch> recent;
+        bool hasMore;
+        if (indexed?.Status == IndexingStatus.Indexed)
+        {
+            recent = await insights.GetRecentMatchesAsync(
+                accountId,
+                PageSize,
+                offset,
+                MapFilter(selectedMap),
+                ct
+            );
+            hasMore = recent.Count == PageSize;
+        }
+        else
+        {
+            var fetched = await matches.GetRecentForPlayerAsync(accountId, PageSize, offset, ct);
+            recent =
+                selectedMap == "all" ? fetched : fetched.Where(m => m.Map == selectedMap).ToList();
+            hasMore = fetched.Count == PageSize;
+        }
+
         return Partial(
             "Players/Partials/_MatchesRows",
-            new MatchesView(
-                accountId,
-                recent,
-                heroes,
-                offset,
-                PageSize,
-                fetched.Count == PageSize,
-                selectedMap
-            )
+            new MatchesView(accountId, recent, heroes, offset, PageSize, hasMore, selectedMap)
         );
     }
 

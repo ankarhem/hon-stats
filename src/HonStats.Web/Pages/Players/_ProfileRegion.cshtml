@@ -5,8 +5,8 @@
 <nav
     class="tabs"
     aria-label="Profile sections"
-    hx-target="#profile-region"
-    hx-select="#profile-region"
+    hx-target="#profile-context"
+    hx-select="#profile-context"
     hx-swap="innerHTML show:none"
 >
     <a class="tab" href="?tab=matches&map=@Model.SelectedMap"
@@ -78,8 +78,8 @@
                                     var isActive = h.HeroId == Model.SelectedHeroId;
                                     <a class="hero-portrait" aria-current="@(isActive ? "true" : null)"
                                         href="?tab=heroBuilds&heroId=@h.HeroId&map=@Model.SelectedMap"
-                                        hx-target="#profile-region"
-                                        hx-select="#profile-region"
+                                        hx-target="#profile-context"
+                                        hx-select="#profile-context"
                                         hx-swap="innerHTML show:none"
                                         title="@h.Hero!.DisplayName (@h.Games)">
                                         <img src="@h.Hero!.IconUrl" alt="@h.Hero.DisplayName" loading="lazy" />
