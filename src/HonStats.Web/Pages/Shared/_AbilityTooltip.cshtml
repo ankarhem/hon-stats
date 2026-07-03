@@ -22,7 +22,7 @@
             }
             @if (ability.Cooldown.Count > 0 && ability.Cooldown.Any(c => c > 0))
             {
-                <li><span class="muted">Cooldown</span> <span class="highlight">@string.Join(" / ", ability.Cooldown.Select(c => (c / 1000.0).ToString("0.#") + "s"))</span></li>
+                <li><span class="muted">Cooldown</span> <span class="highlight">@string.Join(" / ", ability.Cooldown.Select(c => c + "s"))</span></li>
             }
             @if (ability.Range > 0)
             {
