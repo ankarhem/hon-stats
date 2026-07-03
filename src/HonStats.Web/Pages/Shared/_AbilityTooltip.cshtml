@@ -1,0 +1,37 @@
+@using HonStats.Web
+@model AbilityTooltipView
+@{
+    var ability = Model.Ability;
+}
+<div class="item-tooltip ability-tooltip" role="tooltip" style="position-anchor: --item-anchor">
+    <div class="item-tooltip__head">
+        <img class="item-tooltip__head-icon" src="@Model.IconUrl" alt="" loading="lazy" width="40" height="40" />
+        <div class="item-tooltip__head-text">
+            <span class="item-tooltip__name">@ability.TranslatedName</span>
+        </div>
+    </div>
+    <div class="item-tooltip__body">
+        @if (!string.IsNullOrEmpty(ability.Description))
+        {
+            <div class="item-tooltip__desc">@GameText.Render(ability.Description)</div>
+        }
+        <ul class="item-stat-list">
+            @if (ability.ManaCost.Count > 0 && ability.ManaCost.Any(m => m > 0))
+            {
+                <li><span class="muted">Mana cost</span> @string.Join(" / ", ability.ManaCost)</li>
+            }
+            @if (ability.Cooldown.Count > 0 && ability.Cooldown.Any(c => c > 0))
+            {
+                <li><span class="muted">Cooldown</span> <span class="highlight">@string.Join(" / ", ability.Cooldown.Select(c => (c / 1000.0).ToString("0.#") + "s"))</span></li>
+            }
+            @if (ability.Range > 0)
+            {
+                <li><span class="muted">Range</span> @ability.Range</li>
+            }
+            @if (ability.TargetRadius > 0)
+            {
+                <li><span class="muted">Radius</span> @ability.TargetRadius</li>
+            }
+        </ul>
+    </div>
+</div>

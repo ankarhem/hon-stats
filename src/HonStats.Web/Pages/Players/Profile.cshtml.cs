@@ -380,7 +380,8 @@ public record MatchDetailView(
     Dictionary<int, Hero> Heroes,
     Dictionary<int, Item> Items,
     IReadOnlyDictionary<Guid, ResolvedName> Names,
-    IReadOnlyDictionary<Guid, int> HeroDamageByAccount
+    IReadOnlyDictionary<Guid, int> HeroDamageByAccount,
+    IReadOnlyDictionary<Guid, int>? SlotsByAccount = null
 );
 
 public record ReindexButtonView(

@@ -3,6 +3,7 @@
 @{
     var p = Model.Player;
     var abilities = Model.Abilities;
+    const string attributeBoostName = "Ability_AttributeBoost";
 }
 @if (p.Skills.Count > 0)
 {
@@ -11,9 +12,25 @@
         {
             var ability = abilities.GetValueOrDefault(s.SkillId);
             var iconUrl = ability?.IconUrl ?? $"https://gamestorage.juvio.com/abilities/{s.SkillId}/icon.webp";
-            <span class="skill-build__ability" title="@ability?.TranslatedName">
-                <img src="@iconUrl" alt="@ability?.TranslatedName" loading="lazy" />
+            var isAttributeBoost = ability?.Name == attributeBoostName || ability?.TranslatedName == "Attribute Boost";
+            <span class="skill-build__ability item-tile">
+                @if (isAttributeBoost)
+                {
+                    <span class="skill-build__attrboost">
+                        <svg viewBox="0 0 16 16" aria-hidden="true">
+                            <path d="M8 1v14M1 8h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" />
+                        </svg>
+                    </span>
+                }
+                else
+                {
+                    <img src="@iconUrl" alt="@ability?.TranslatedName" loading="lazy" />
+                }
                 <span class="skill-build__level">@s.Level</span>
+                @if (ability is not null && !isAttributeBoost)
+                {
+                    <partial name="Shared/_AbilityTooltip" model="new AbilityTooltipView(ability, iconUrl)" />
+                }
             </span>
         }
     </div>

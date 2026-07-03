@@ -19,6 +19,19 @@
     --gold: oklch(83.69% 0.1644 84.43);
     --win: oklch(80.03% 0.1821 151.71);
     --loss: oklch(71.06% 0.1661 22.22);
+
+    /* HoN player slot colors (Legion 0-4, Hellbourne 0-4). Converted via culori. */
+    --slot-legion-0: oklch(60.09% 0.2165 262.57);
+    --slot-legion-1: oklch(90.15% 0.159 162.53);
+    --slot-legion-2: oklch(56.68% 0.2605 328.36);
+    --slot-legion-3: oklch(92.71% 0.1997 108.81);
+    --slot-legion-4: oklch(70.22% 0.2004 45.1);
+    --slot-hellbourne-0: oklch(76.98% 0.1597 350.2);
+    --slot-hellbourne-1: oklch(70.9% 0 none);
+    --slot-hellbourne-2: oklch(81.47% 0.1182 228.69);
+    --slot-hellbourne-3: oklch(53.02% 0.1667 145.01);
+    --slot-hellbourne-4: oklch(57.08% 0.1228 71.11);
+
     --radius: 10px;
     --radius-sm: 6px;
     --shadow: 0 8px 24px oklch(0% 0 0 / 0.35);
@@ -713,6 +726,13 @@ p {
     gap: 0.6rem;
 }
 
+.match-row__slot {
+    width: 4px;
+    height: 34px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
 .hero-icon {
     width: 34px;
     height: 34px;
@@ -724,7 +744,7 @@ p {
 
 .hero-icon-wrap {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
     flex-shrink: 0;
 }
 
@@ -1510,6 +1530,18 @@ li.loading-row {
     gap: 0.55rem;
 }
 
+.ability-tooltip .item-tooltip__head-icon {
+    width: 40px;
+    height: 40px;
+    max-width: 40px;
+    max-height: 40px;
+    flex-shrink: 0;
+}
+
+.ability-tooltip .item-tooltip__name {
+    word-break: break-word;
+}
+
 .item-tooltip__desc {
     font-size: 0.82rem;
     line-height: 1.45;
@@ -1939,13 +1971,7 @@ li.loading-row {
     fill: none;
 }
 
-.match-chart__line--legion {
-    stroke: var(--legion);
-}
-
-.match-chart__line--hellbourne {
-    stroke: var(--hellbourne);
-}
+/* Per-player slot strokes are generated via .slot-stroke--{team}-{slot}. */
 
 .match-chart__point {
     fill: var(--fg);
@@ -1953,17 +1979,9 @@ li.loading-row {
     stroke-width: 1.5;
 }
 
-.match-chart__point--legion {
-    fill: var(--legion);
-}
-
-.match-chart__point--hellbourne {
-    fill: var(--hellbourne);
-}
-
 .match-chart__hit {
     fill: transparent;
-    cursor: pointer;
+    cursor: crosshair;
 }
 
 .match-chart__guide {
@@ -1976,6 +1994,95 @@ li.loading-row {
 
 .match-chart__col:hover .match-chart__guide {
     opacity: 0.6;
+}
+
+.match-chart__line {
+    transition: stroke-width 0.08s ease, opacity 0.08s ease;
+}
+
+.match-chart__line:hover {
+    stroke-width: 3;
+    opacity: 1;
+}
+
+.match-chart__readout {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.08s ease;
+}
+
+.match-chart__col:hover .match-chart__readout {
+    opacity: 1;
+}
+
+.match-chart__readout-bg {
+    fill: oklch(from var(--surface) l c h / 0.95);
+    stroke: var(--border);
+    stroke-width: 1;
+}
+
+.match-chart__readout-fo {
+    overflow: visible;
+}
+
+.match-chart__readout-panel {
+    padding: 8px;
+    color: var(--fg);
+    font-size: 11px;
+    line-height: 1.25;
+}
+
+.match-chart__readout-header {
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.match-chart__readout-cols {
+    display: flex;
+    gap: 10px;
+}
+
+.match-chart__readout-col {
+    flex: 1;
+    min-width: 0;
+}
+
+.match-chart__readout-team {
+    text-align: center;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+}
+
+.match-chart__readout-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 8px;
+}
+
+.match-chart__readout-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.match-chart__readout-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--muted);
+}
+
+.match-chart__readout-value {
+    flex-shrink: 0;
+    font-weight: 700;
 }
 
 .match-chart__label {
@@ -2006,14 +2113,6 @@ li.loading-row {
     font-size: 0.72rem;
 }
 
-.match-chart__legend-team--legion {
-    color: var(--legion);
-}
-
-.match-chart__legend-team--hellbourne {
-    color: var(--hellbourne);
-}
-
 .match-chart__legend-item {
     display: flex;
     align-items: center;
@@ -2026,14 +2125,6 @@ li.loading-row {
     border-radius: 999px;
     display: inline-block;
     background: var(--fg);
-}
-
-.match-chart__legend-dot--legion {
-    background: var(--legion);
-}
-
-.match-chart__legend-dot--hellbourne {
-    background: var(--hellbourne);
 }
 
 /* ---------- Match detail enrichment ---------- */
@@ -2093,6 +2184,13 @@ li.loading-row {
     list-style: none;
     background: var(--surface-2);
     border-bottom: 1px solid transparent;
+}
+
+.match-build__slot {
+    width: 4px;
+    height: 34px;
+    border-radius: 2px;
+    flex-shrink: 0;
 }
 
 .match-build__summary::-webkit-details-marker {
@@ -2189,6 +2287,22 @@ li.loading-row {
     background: var(--surface-3);
 }
 
+.skill-build__attrboost {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-sm);
+    background: var(--surface-3);
+    color: var(--muted);
+}
+
+.skill-build__attrboost svg {
+    width: 16px;
+    height: 16px;
+}
+
 .skill-build__level {
     position: absolute;
     right: -0.2rem;
@@ -2204,6 +2318,56 @@ li.loading-row {
     line-height: 1rem;
     text-align: center;
 }
+
+/* ---------- Player slot color utilities ---------- */
+.slot-color--legion-0 { color: var(--slot-legion-0); }
+.slot-color--legion-1 { color: var(--slot-legion-1); }
+.slot-color--legion-2 { color: var(--slot-legion-2); }
+.slot-color--legion-3 { color: var(--slot-legion-3); }
+.slot-color--legion-4 { color: var(--slot-legion-4); }
+.slot-color--hellbourne-0 { color: var(--slot-hellbourne-0); }
+.slot-color--hellbourne-1 { color: var(--slot-hellbourne-1); }
+.slot-color--hellbourne-2 { color: var(--slot-hellbourne-2); }
+.slot-color--hellbourne-3 { color: var(--slot-hellbourne-3); }
+.slot-color--hellbourne-4 { color: var(--slot-hellbourne-4); }
+
+.slot-stroke--legion-0 { stroke: var(--slot-legion-0); }
+.slot-stroke--legion-1 { stroke: var(--slot-legion-1); }
+.slot-stroke--legion-2 { stroke: var(--slot-legion-2); }
+.slot-stroke--legion-3 { stroke: var(--slot-legion-3); }
+.slot-stroke--legion-4 { stroke: var(--slot-legion-4); }
+.slot-stroke--hellbourne-0 { stroke: var(--slot-hellbourne-0); }
+.slot-stroke--hellbourne-1 { stroke: var(--slot-hellbourne-1); }
+.slot-stroke--hellbourne-2 { stroke: var(--slot-hellbourne-2); }
+.slot-stroke--hellbourne-3 { stroke: var(--slot-hellbourne-3); }
+.slot-stroke--hellbourne-4 { stroke: var(--slot-hellbourne-4); }
+
+.slot-bg--legion-0 { background: var(--slot-legion-0); }
+.slot-bg--legion-1 { background: var(--slot-legion-1); }
+.slot-bg--legion-2 { background: var(--slot-legion-2); }
+.slot-bg--legion-3 { background: var(--slot-legion-3); }
+.slot-bg--legion-4 { background: var(--slot-legion-4); }
+.slot-bg--hellbourne-0 { background: var(--slot-hellbourne-0); }
+.slot-bg--hellbourne-1 { background: var(--slot-hellbourne-1); }
+.slot-bg--hellbourne-2 { background: var(--slot-hellbourne-2); }
+.slot-bg--hellbourne-3 { background: var(--slot-hellbourne-3); }
+.slot-bg--hellbourne-4 { background: var(--slot-hellbourne-4); }
+
+.slot-fill--legion-0 { fill: var(--slot-legion-0); }
+.slot-fill--legion-1 { fill: var(--slot-legion-1); }
+.slot-fill--legion-2 { fill: var(--slot-legion-2); }
+.slot-fill--legion-3 { fill: var(--slot-legion-3); }
+.slot-fill--legion-4 { fill: var(--slot-legion-4); }
+.slot-fill--hellbourne-0 { fill: var(--slot-hellbourne-0); }
+.slot-fill--hellbourne-1 { fill: var(--slot-hellbourne-1); }
+.slot-fill--hellbourne-2 { fill: var(--slot-hellbourne-2); }
+.slot-fill--hellbourne-3 { fill: var(--slot-hellbourne-3); }
+.slot-fill--hellbourne-4 { fill: var(--slot-hellbourne-4); }
+
+.team-fill--legion { fill: var(--legion); }
+.team-fill--hellbourne { fill: var(--hellbourne); }
+.team-color--legion { color: var(--legion); }
+.team-color--hellbourne { color: var(--hellbourne); }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 640px) {

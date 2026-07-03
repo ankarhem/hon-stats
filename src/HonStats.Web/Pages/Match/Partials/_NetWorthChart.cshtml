@@ -2,11 +2,12 @@
 @using Microsoft.AspNetCore.Html
 @using System.Net
 @{
-    IHtmlContent SvgLabel(double x, double y, string anchor, string content, string? baseline = null)
+    IHtmlContent SvgLabel(double x, double y, string anchor, string content, string? baseline = null, string? cls = null)
     {
         var baselineAttr = baseline is null ? "" : $" dominant-baseline=\"{baseline}\"";
+        var classAttr = cls is null ? "" : $" class=\"{cls}\"";
         return new HtmlString(
-            $"<text class=\"match-chart__label\" x=\"{x:0.##}\" y=\"{y:0.##}\" text-anchor=\"{anchor}\"{baselineAttr}>{WebUtility.HtmlEncode(content)}</text>"
+            $"<text{classAttr} x=\"{x:0.##}\" y=\"{y:0.##}\" text-anchor=\"{anchor}\"{baselineAttr}>{WebUtility.HtmlEncode(content)}</text>"
         );
     }
 
@@ -44,6 +45,19 @@
 
     const int gridLines = 4;
     var tickTimes = new[] { 0, maxTime / 2, maxTime };
+
+    var orderedPlayers = Model.OrderBy(p => p.Team == "Legion" ? 0 : 1).ThenBy(p => p.SlotIndex).ToList();
+    var snapshots = points.Select(p => p.TimeSeconds).Distinct().OrderBy(t => t).ToList();
+    var colHalfWidth = snapshots.Count <= 1 ? plotWidth / 2 : plotWidth / (double)(snapshots.Count - 1) / 2;
+
+    int? ValueAt(PlayerSeries p, int time)
+    {
+        var exact = p.Timeline.FirstOrDefault(t => t.TimeSeconds == time && t.NetWorth.HasValue);
+        if (exact != null)
+            return exact.NetWorth!.Value;
+        var prev = p.Timeline.LastOrDefault(t => t.TimeSeconds <= time && t.NetWorth.HasValue);
+        return prev?.NetWorth;
+    }
 }
 <svg viewBox="0 0 @width @height" class="match-chart" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Net worth over time">
     @for (var i = 0; i <= gridLines; i++)
@@ -51,32 +65,90 @@
         var gv = lo + range * i / gridLines;
         var gy = Y(gv);
         <line class="match-chart__grid" x1="@padLeft" y1="@gy.ToString("0.##")" x2="@(width - padRight)" y2="@gy.ToString("0.##")" />
-        @SvgLabel(padLeft - 6, gy, "end", (gv / 1000.0).ToString("0.#") + "k", "middle")
+        @SvgLabel(padLeft - 6, gy, "end", (gv / 1000.0).ToString("0.#") + "k", "middle", "match-chart__label")
     }
-    @foreach (var p in Model)
+    @foreach (var p in orderedPlayers)
     {
         var pts = LinePoints(p);
         if (string.IsNullOrEmpty(pts))
         {
             continue;
         }
-        var teamClass = p.Team == "Legion" ? "match-chart__line--legion" : "match-chart__line--hellbourne";
-        <polyline class="match-chart__line @teamClass" points="@pts" />
+        var slotClass = $"slot-stroke--{p.Team.ToLowerInvariant()}-{p.SlotIndex}";
+        <polyline class="match-chart__line @slotClass" points="@pts" />
     }
-    @SvgLabel(padLeft, height - 6, "start", "0m")
-    @SvgLabel(X(maxTime), height - 6, "end", (maxTime / 60) + "m")
+    @SvgLabel(padLeft, height - 6, "start", "0m", cls: "match-chart__label")
+    @SvgLabel(X(maxTime), height - 6, "end", (maxTime / 60) + "m", cls: "match-chart__label")
+
+    @{
+        const double readoutW = 230;
+        const double readoutH = 120;
+    }
+    @for (var i = 0; i < snapshots.Count; i++)
+    {
+        var time = snapshots[i];
+        var cx = X(time);
+        var rectX = i == 0 ? padLeft : i == snapshots.Count - 1 ? cx - colHalfWidth * 2 : cx - colHalfWidth;
+        var rectW = i == 0 || i == snapshots.Count - 1 ? colHalfWidth * 2 : colHalfWidth * 2;
+        var readoutX = cx + 10;
+        if (cx + readoutW + 10 > width - padRight)
+        {
+            readoutX = cx - readoutW - 10;
+        }
+        var readoutY = padTop + 4;
+        var legion = orderedPlayers.Where(p => p.Team == "Legion").ToList();
+        var hellbourne = orderedPlayers.Where(p => p.Team == "Hellbourne").ToList();
+
+        IHtmlContent TeamCol(string team, List<PlayerSeries> players)
+        {
+            var teamLower = team.ToLowerInvariant();
+            var sb = new System.Text.StringBuilder();
+            sb.Append("<div class=\"match-chart__readout-col\">");
+            sb.Append($"<div class=\"match-chart__readout-team team-color--{teamLower}\">{team}</div>");
+            foreach (var p in players)
+            {
+                var val = ValueAt(p, time);
+                var valText = val.HasValue ? (val.Value / 1000.0).ToString("0.0") + "k" : "—";
+                var slotClass = $"slot-bg--{p.Team.ToLowerInvariant()}-{p.SlotIndex}";
+                var valueClass = $"slot-color--{p.Team.ToLowerInvariant()}-{p.SlotIndex}";
+                sb.Append("<div class=\"match-chart__readout-row\">");
+                sb.Append($"<span class=\"match-chart__readout-dot {slotClass}\"></span>");
+                sb.Append($"<span class=\"match-chart__readout-name\">{WebUtility.HtmlEncode(p.DisplayName)}</span>");
+                sb.Append($"<span class=\"match-chart__readout-value {valueClass}\">{valText}</span>");
+                sb.Append("</div>");
+            }
+            sb.Append("</div>");
+            return new HtmlString(sb.ToString());
+        }
+
+        <g class="match-chart__col">
+            <line class="match-chart__guide" x1="@cx.ToString("0.##")" y1="@padTop" x2="@cx.ToString("0.##")" y2="@(padTop + plotHeight)" />
+            <rect class="match-chart__hit" x="@rectX.ToString("0.##")" y="@padTop" width="@rectW.ToString("0.##")" height="@plotHeight" />
+            <g class="match-chart__readout">
+                <rect class="match-chart__readout-bg" x="@readoutX" y="@readoutY" width="@readoutW" height="@readoutH" rx="4" />
+                <foreignObject x="@readoutX" y="@readoutY" width="@readoutW" height="@readoutH" class="match-chart__readout-fo">
+                    <div xmlns="http://www.w3.org/1999/xhtml" class="match-chart__readout-panel">
+                        <div class="match-chart__readout-header">@(time / 60)m</div>
+                        <div class="match-chart__readout-cols">
+                            @TeamCol("Legion", legion)
+                            @TeamCol("Hellbourne", hellbourne)
+                        </div>
+                    </div>
+                </foreignObject>
+            </g>
+        </g>
+    }
 </svg>
 <div class="match-chart__legend">
-    @foreach (var teamGroup in Model.GroupBy(p => p.Team))
+    @foreach (var teamGroup in orderedPlayers.GroupBy(p => p.Team))
     {
         var teamLower = teamGroup.Key.ToLowerInvariant();
         <div class="match-chart__legend-group">
-            <span class="match-chart__legend-team match-chart__legend-team--@teamLower">@teamGroup.Key</span>
+            <span class="match-chart__legend-team slot-color--@teamLower-0">@teamGroup.Key</span>
             @foreach (var p in teamGroup)
             {
-                var dotClass = p.Team == "Legion" ? "match-chart__legend-dot--legion" : "match-chart__legend-dot--hellbourne";
                 <span class="match-chart__legend-item">
-                    <span class="match-chart__legend-dot @dotClass"></span>@p.DisplayName
+                    <span class="match-chart__legend-dot slot-bg--@(p.Team.ToLowerInvariant())-@(p.SlotIndex)"></span>@p.DisplayName
                 </span>
             }
         </div>

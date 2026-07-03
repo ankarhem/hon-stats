@@ -49,28 +49,50 @@ public class MatchDetailModel(
                 ? BuildTimeline(replay)
                 : new Dictionary<Guid, List<TimelinePoint>>();
 
+        var slotByAccount = BuildSlotIndexMap(replay);
+
         var players = detail
-            .Players.Select(p =>
+            .Players.GroupBy(p => p.Team)
+            .SelectMany(team =>
             {
-                var acct = p.AccountId;
-                var name = names.GetValueOrDefault(acct);
-                return new PlayerSeries(
-                    acct,
-                    p.HeroId,
-                    p.Team,
-                    name?.DisplayName ?? name?.Username ?? acct.ToString(),
-                    timeline.GetValueOrDefault(acct) ?? new List<TimelinePoint>(),
-                    itemBuys
-                        .Where(b => b.AccountId == acct)
-                        .OrderBy(b => b.FirstSeenSeconds)
-                        .ToList(),
-                    skillEvents.Where(s => s.AccountId == acct).ToList()
+                var ordered = team.Select((p, idx) => new { Player = p, Index = idx })
+                    .OrderBy(x => slotByAccount.GetValueOrDefault(x.Player.AccountId) ?? x.Index)
+                    .ToList();
+                return ordered.Select(
+                    (x, effectiveSlot) =>
+                    {
+                        var acct = x.Player.AccountId;
+                        var name = names.GetValueOrDefault(acct);
+                        return new PlayerSeries(
+                            acct,
+                            x.Player.HeroId,
+                            x.Player.RoleIndex,
+                            x.Player.Team,
+                            name?.DisplayName ?? name?.Username ?? acct.ToString(),
+                            effectiveSlot,
+                            timeline.GetValueOrDefault(acct) ?? new List<TimelinePoint>(),
+                            itemBuys
+                                .Where(b => b.AccountId == acct)
+                                .OrderBy(b => b.FirstSeenSeconds)
+                                .ToList(),
+                            skillEvents.Where(s => s.AccountId == acct).ToList()
+                        );
+                    }
                 );
             })
+            .OrderBy(p => p.Team == "Legion" ? 0 : 1)
+            .ThenBy(p => p.SlotIndex)
             .ToList();
 
         View = new MatchPageView(
-            new MatchDetailView(detail, heroes, items, names, HeroDamageAggregator.Build(replay)),
+            new MatchDetailView(
+                detail,
+                heroes,
+                items,
+                names,
+                HeroDamageAggregator.Build(replay),
+                slotByAccount.ToDictionary(kv => kv.Key, kv => kv.Value ?? 0)
+            ),
             hasReplay,
             abilities,
             players
@@ -134,6 +156,25 @@ public class MatchDetailModel(
 
         return byAccount;
     }
+
+    private static Dictionary<Guid, int?> BuildSlotIndexMap(ParsedReplay? replay)
+    {
+        if (replay is null || replay.Snapshots.Count == 0)
+            return new Dictionary<Guid, int?>();
+
+        var anchor = replay.Snapshots[0];
+        var map = new Dictionary<Guid, int?>();
+        foreach (var team in anchor.Teams)
+        {
+            foreach (var player in team.Players)
+            {
+                if (player.AccountId is { } id && id != Guid.Empty)
+                    map[id] = player.SlotIndex;
+            }
+        }
+
+        return map;
+    }
 }
 
 public sealed record MatchPageView(
@@ -146,8 +187,10 @@ public sealed record MatchPageView(
 public sealed record PlayerSeries(
     Guid AccountId,
     int HeroId,
+    int RoleIndex,
     string Team,
     string DisplayName,
+    int? SlotIndex,
     IReadOnlyList<TimelinePoint> Timeline,
     IReadOnlyList<ItemBuyTime> Items,
     IReadOnlyList<SkillLevelEvent> Skills

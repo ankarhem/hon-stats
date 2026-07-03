@@ -4,14 +4,15 @@
     var d = Model.Detail!;
     var teamIndex = 0;
 }
-@foreach (var team in d.Players.GroupBy(p => p.Team))
+@foreach (var team in d.Players.GroupBy(p => p.Team).Select(g => g.OrderBy(p => Model.SlotsByAccount?.GetValueOrDefault(p.AccountId) ?? int.MaxValue)))
 {
-    var teamLower = team.Key.ToLowerInvariant();
-    var isWinner = team.Key == d.WinningTeam;
+    var teamName = team.First().Team;
+    var teamLower = teamName.ToLowerInvariant();
+    var isWinner = teamName == d.WinningTeam;
     var ti = teamIndex++;
     <section class="match-section">
         <div class="match-section__head">
-            <p class="match-section__title team--@teamLower">@team.Key</p>
+            <p class="match-section__title team--@teamLower">@teamName</p>
             <span class="team-result @(isWinner ? "team-result--win" : "team-result--loss")">
                 @(isWinner ? "Victory" : "Defeat")
             </span>
@@ -22,13 +23,15 @@
                     <tr><th>Hero</th><th>K/D/A</th><th>Wards</th><th>GPM</th><th>XPM</th><th>DPM</th><th>Items</th></tr>
                 </thead>
                 <tbody>
-                    @foreach (var (pl, pi) in team.Select((p, i) => (p, i)))
-                    {
-                        var hero = Model.Heroes.GetValueOrDefault(pl.HeroId);
-                        var name = Model.Names.GetValueOrDefault(pl.AccountId);
-                        <tr>
-                            <td>
-                                <div class="match-row__hero">
+                @foreach (var (pl, pi) in team.Select((p, i) => (p, i)))
+                {
+                    var hero = Model.Heroes.GetValueOrDefault(pl.HeroId);
+                    var name = Model.Names.GetValueOrDefault(pl.AccountId);
+                    var slot = Model.SlotsByAccount?.GetValueOrDefault(pl.AccountId) ?? pi;
+                    <tr class="match-row">
+                        <td>
+                            <div class="match-row__hero">
+                                <span class="match-row__slot slot-bg--@teamLower-@slot" aria-hidden="true"></span>
                                     <span class="hero-icon-wrap">
                                         <img class="hero-icon" src="@hero?.IconUrl" alt="" loading="lazy" />
                                         @if (pl.RoleIndex != 0 && d.Map != "MidWars")

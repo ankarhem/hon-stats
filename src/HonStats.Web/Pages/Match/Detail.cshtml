@@ -50,12 +50,20 @@
                             @(team.Key == d.WinningTeam ? "Victory" : "Defeat")
                         </span>
                     </div>
-                    @foreach (var p in team)
+                    @foreach (var p in team.OrderBy(p => p.SlotIndex))
                     {
                         var hero = v.Summary.Heroes.GetValueOrDefault(p.HeroId);
+                        var playerTeamLower = p.Team.ToLowerInvariant();
                         <details class="match-build">
                             <summary class="match-build__summary">
-                                <img class="hero-icon" src="@hero?.IconUrl" alt="" loading="lazy" />
+                                <span class="match-build__slot slot-bg--@playerTeamLower-@p.SlotIndex" aria-hidden="true"></span>
+                                <span class="hero-icon-wrap">
+                                    <img class="hero-icon" src="@hero?.IconUrl" alt="" loading="lazy" />
+                                    @if (p.RoleIndex != 0 && d.Map != "MidWars")
+                                    {
+                                        <img class="hero-icon__role" src="/img/roles/role-@(ProfileModel.RoleSlug(p.RoleIndex)).png" alt="@ProfileModel.RoleLabel(p.RoleIndex)" title="@ProfileModel.RoleLabel(p.RoleIndex)" loading="lazy" />
+                                    }
+                                </span>
                                 <span class="hero-name">@(hero?.TranslatedName ?? ("Hero " + p.HeroId))</span>
                                 <span class="muted">@p.DisplayName</span>
                                 <span class="match-build__chevron">▼</span>
