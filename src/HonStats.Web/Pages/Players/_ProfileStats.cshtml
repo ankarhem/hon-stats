@@ -2,6 +2,7 @@
 @{
     var s = Model.MapOverview;
     var kdr = s is null ? (double?)null : s.AvgDeaths > 0 ? s.AvgKills / s.AvgDeaths : (double?)null;
+    var r = Model.RosterStats;
 }
 
 <div class="panel card">
@@ -39,6 +40,22 @@
         <div class="stat">
             <div class="eyebrow">Avg DPM</div>
             <div class="stat__value">@(s?.AvgDPM?.ToString("0") ?? "—")</div>
+        </div>
+        <div class="stat">
+            <div class="eyebrow">Avg CS</div>
+            <div class="stat__value">@(r?.AvgCreepScore?.ToString("0.0") ?? "—")</div>
+        </div>
+        <div class="stat">
+            <div class="eyebrow">Avg CS/min</div>
+            <div class="stat__value">@(r?.AvgCsPerMinute?.ToString("0.00") ?? "—")</div>
+        </div>
+        <div class="stat">
+            <div class="eyebrow">Avg denies</div>
+            <div class="stat__value">@(r?.AvgDenies?.ToString("0.0") ?? "—")</div>
+        </div>
+        <div class="stat">
+            <div class="eyebrow">Avg bldg dmg</div>
+            <div class="stat__value">@(r?.AvgBuildingDamage?.ToString("0") ?? "—")</div>
         </div>
     </div>
 </div>

@@ -1,4 +1,5 @@
 using HonStats.App.Players;
+using HonStats.App.Records;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,11 @@ public static class PersistenceServiceCollectionExtensions
             options.UseSqlite(connectionString)
         );
 
+        services.AddMemoryCache();
+
         services.AddScoped<IMmrHistoryQuery, SqliteMmrHistoryQuery>();
+        services.AddScoped<IPlayerRosterStatsQuery, SqlitePlayerRosterStatsQuery>();
+        services.AddScoped<IRecordsQuery, SqliteRecordsQuery>();
 
         return services;
     }

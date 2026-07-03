@@ -1,0 +1,98 @@
+@page "/records"
+@model RecordsModel
+@using HonStats.App.Records
+@{
+    ViewData["Title"] = "Records";
+
+    var totalRows = Model.Categories.Sum(c => c.Rows.Count);
+}
+
+<section class="records">
+    <header class="records__head">
+        <div>
+            <h1>Records</h1>
+            <p class="records__sub muted">Top single-match performances · @RecordsModel.MapLabel(Model.Map) · @RecordsModel.PeriodLabel(Model.Period) · @totalRows ranked games</p>
+        </div>
+        <div class="records__filters">
+            <nav class="map-selector" aria-label="Map filter">
+                <a class="pill" href="/records?map=All&amp;period=@Model.Period" aria-current="@(Model.Map == "All" ? "true" : null)">All</a>
+                <a class="pill" href="/records?map=ForestsOfCaldavar&amp;period=@Model.Period" aria-current="@(Model.Map == "ForestsOfCaldavar" ? "true" : null)">Forests of Caldavar</a>
+                <a class="pill" href="/records?map=MidWars&amp;period=@Model.Period" aria-current="@(Model.Map == "MidWars" ? "true" : null)">Mid Wars</a>
+            </nav>
+            <nav class="map-selector" aria-label="Time window">
+                <a class="pill" href="/records?map=@Model.Map&amp;period=all" aria-current="@(Model.Period == "all" ? "true" : null)">All time</a>
+                <a class="pill" href="/records?map=@Model.Map&amp;period=30d" aria-current="@(Model.Period == "30d" ? "true" : null)">Last 30 days</a>
+            </nav>
+        </div>
+    </header>
+
+    @if (totalRows == 0)
+    {
+        <div class="empty-state">
+            <h2>No record data yet</h2>
+            <p>Performances will appear here once matches have been indexed for this filter.</p>
+        </div>
+    }
+    else
+    {
+        <div class="records__grid">
+            @foreach (var category in Model.Categories)
+            {
+                <section class="panel records-card">
+                    <header class="records-card__head">
+                        <p class="eyebrow">@category.Subtitle</p>
+                        <h2 class="records-card__title">@category.Title</h2>
+                    </header>
+                    @if (category.Rows.Count == 0)
+                    {
+                        <p class="records-card__empty muted">No games match this filter.</p>
+                    }
+                    else
+                    {
+                        <table class="table records-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="records-table__rank">#</th>
+                                    <th scope="col">Player</th>
+                                    <th scope="col">Hero</th>
+                                    <th scope="col" class="records-table__value">@RecordsModel.ValueColumnHeader(category.Format)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in category.Rows)
+                                {
+                                    <tr class="records-row">
+                                        <td class="records-table__rank">@row.Rank</td>
+                                        <td class="records-table__player">
+                                            <a class="records-row__player" href="/players/@Uri.EscapeDataString(row.Username)">
+                                                <span class="flag" aria-hidden="true">@ProfileModel.Flag(row.Country)</span>
+                                                <span class="records-row__name">@row.DisplayName</span>
+                                            </a>
+                                        </td>
+                                        <td class="records-table__hero">
+                                            <a class="records-row__match" href="/match/@row.GameId">
+                                                @if (!string.IsNullOrEmpty(row.HeroIconUrl))
+                                                {
+                                                    <img class="rec-hero" src="@row.HeroIconUrl" alt="" loading="lazy" />
+                                                }
+                                                <span class="records-row__hero-body">
+                                                    <span class="records-row__hero-name">@row.HeroName</span>
+                                                    <span class="records-row__meta muted">@(row.Won ? "Win" : "Loss") · @RecordsModel.FormatSeconds(row.DurationSeconds) · @row.Date.ToLocalTime().ToString("MMM d")</span>
+                                                </span>
+                                            </a>
+                                        </td>
+                                        <td class="records-table__value">
+                                            <span class="records-value @(category.Format == RecordFormat.Duration ? "records-value--time" : null)">
+                                                @RecordsModel.FormatValue(category.Format, row.Value)
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </section>
+            }
+        </div>
+    }
+</section>
