@@ -259,3 +259,31 @@ internal sealed class ParsedReplaySkillDto
     public int SkillId { get; set; }
     public int Level { get; set; }
 }
+
+internal sealed class LeaderboardDto
+{
+    public List<LeaderboardPlayerDto>? TopPlayers { get; set; }
+    public List<LeaderboardPlayerDto> TopPlayersValue => TopPlayers ?? [];
+}
+
+internal sealed class LeaderboardPlayerDto
+{
+    public int Rank { get; set; }
+    public string AccountId { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
+    public double Mmr { get; set; }
+    public string? Country { get; set; }
+    public string RankName { get; set; } = string.Empty;
+    public string RankIcon { get; set; } = string.Empty;
+    public int StarLevel { get; set; }
+    public string? Color { get; set; }
+    public string? Avatar { get; set; }
+}
+
+// getnumberofmatches — community/global match volume (no params).
+internal sealed class NumberOfMatchesDto
+{
+    public int TotalMatches { get; set; }
+    public int FocMatches { get; set; }
+    public int MidwarsMatches { get; set; }
+}

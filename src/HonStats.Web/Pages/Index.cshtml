@@ -10,6 +10,22 @@
         Search any player to explore match history, see who they queue with,
         inspect hero builds, and track K/D, wards, and win rate.
     </p>
+
+    @if (Model.Counts is { } counts)
+    {
+        <div class="hero-stats" role="group" aria-label="Matches tracked">
+            <div class="hero-stats__figure">
+                <span class="hero-stats__total">@IndexModel.FormatCompact(counts.TotalMatches)</span>
+                <span class="hero-stats__total-label">total matches tracked</span>
+            </div>
+            <p class="hero-stats__split">
+                <strong>@IndexModel.FormatCompact(counts.FocMatches)</strong> Caldavar
+                <span class="hero-stats__dot" aria-hidden="true">·</span>
+                <strong>@IndexModel.FormatCompact(counts.MidwarsMatches)</strong> Mid Wars
+            </p>
+        </div>
+    }
+
     <p class="hero__hint">↑ Use the search bar at the top to find a player.</p>
 </section>
 

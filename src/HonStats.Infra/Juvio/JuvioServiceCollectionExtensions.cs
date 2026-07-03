@@ -1,3 +1,4 @@
+using HonStats.App.Leaderboard;
 using HonStats.App.Matches;
 using HonStats.App.Players;
 using HonStats.Infra.Juvio.Adapters;
@@ -75,6 +76,8 @@ public static class JuvioServiceCollectionExtensions
         services.AddScoped<IPlayerRatingsQuery, JuvioPlayerRatingsQuery>();
         services.AddScoped<IMatchQuery, JuvioMatchQuery>();
         services.AddScoped<IParsedReplayQuery, JuvioParsedReplayQuery>();
+        services.AddScoped<ILeaderboardQuery, JuvioLeaderboardQuery>();
+        services.AddScoped<IMatchCountQuery, JuvioMatchCountQuery>();
 
         return services;
     }

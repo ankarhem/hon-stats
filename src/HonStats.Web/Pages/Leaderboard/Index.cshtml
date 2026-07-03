@@ -1,0 +1,62 @@
+@page "/leaderboard"
+@model LeaderboardModel
+@{
+    ViewData["Title"] = "Leaderboard";
+
+    var entries = Model.Entries;
+}
+
+<section class="leaderboard">
+    <header class="leaderboard__head">
+        <div>
+            <h1>Leaderboard</h1>
+            <p class="leaderboard__sub muted">Top @entries.Count · @LeaderboardModel.MapLabel(Model.Map) · ranked season 1</p>
+        </div>
+        <nav class="map-selector" aria-label="Map filter">
+            <a class="pill" href="/leaderboard?map=ForestsOfCaldavar" aria-current="@(Model.Map == "ForestsOfCaldavar" ? "true" : null)">Forests of Caldavar</a>
+            <a class="pill" href="/leaderboard?map=MidWars" aria-current="@(Model.Map == "MidWars" ? "true" : null)">Mid Wars</a>
+        </nav>
+    </header>
+
+    @if (entries.Count == 0)
+    {
+        <div class="empty-state">
+            <h2>No leaderboard data</h2>
+            <p>The board could not be loaded right now. Try again shortly.</p>
+        </div>
+    }
+    else
+    {
+        <div class="panel lb-table-wrap">
+            <table class="table lb-table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="lb-table__rank">#</th>
+                        <th scope="col">Player</th>
+                        <th scope="col" class="lb-table__mmr">MMR</th>
+                        <th scope="col" class="lb-table__tier">Rank tier</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in entries)
+                    {
+                        <tr class="lb-row">
+                            <td class="lb-table__rank">@e.Rank</td>
+                            <td>
+                                <a class="lb-row__player" href="/players/@Uri.EscapeDataString(e.Username)">
+                                    <span class="flag">@ProfileModel.Flag(e.Country)</span>@e.DisplayName
+                                </a>
+                            </td>
+                            <td class="lb-table__mmr">@e.Mmr.ToString("0")</td>
+                            <td class="lb-table__tier">
+                                <span class="rank-badge" style="color: @(string.IsNullOrEmpty(e.Color) ? "var(--fg)" : e.Color)">
+                                    @e.RankName <span class="rank-badge__stars">@ProfileModel.Stars(e.StarLevel)</span>
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

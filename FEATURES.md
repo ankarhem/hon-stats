@@ -14,7 +14,7 @@ Native `<dialog>` opened from any match row. Shows two team sections (winner
 flagged), per-player hero / K-D-A / wards / net worth / final items (with hover
 tooltips). Close via Esc, backdrop click, or Close button.
 
-### `[planned]` Enriched match modal (per-minute rates + role + link)
+### `[exists]` Enriched match modal (per-minute rates + role + link)
 The quick-peek view gets more signal without becoming a graph surface.
 
 **How it should work (user view):**
@@ -36,7 +36,7 @@ fetches live — `netWorth, experience, heroDamage, RoleIndex` are all present. 
 new endpoint, no persistence change; pure view work (Razor + the existing
 `<dialog>`). Effort: S.
 
-### `[planned]` Full match detail page (graphs + timelines)
+### `[exists]` Full match detail page (graphs + timelines)
 The deep-dive a graph surface needs room for — the flagship parity feature.
 Reached from the modal link, a match row, or deep-linkable at `/match/{gameId}`.
 
@@ -79,7 +79,7 @@ Reached from the modal link, a match row, or deep-linkable at `/match/{gameId}`.
 
 ## Community / global
 
-### `[planned]` Leaderboard
+### `[exists]` Leaderboard
 A community ranking page — the most-requested stats-site feature and currently
 our most conspicuous gap.
 
@@ -95,7 +95,7 @@ page + nav link; cache ~5 min server-side. NOTE the known limitation: no ordinal
 global rank exists for players outside the top 100, and omitting `seasonId` yields
 a different/larger board than `seasonId=1` — pin the season. Effort: S–M.
 
-### `[planned]` Total-matches counter (home)
+### `[exists]` Total-matches counter (home)
 A live "X total matches (Y Caldavar / Z Mid Wars)" stat on the home page, the way
 honbuff shows match volume. Cheap signal of scale.
 

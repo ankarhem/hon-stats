@@ -844,6 +844,10 @@ dialog.modal::backdrop {
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
+    /* Above the fixed item/hero tooltips (z-index 150) so they don't paint over
+       the bar when scrolling inside the modal. The dialog's transform makes it the
+       containing block + stacking-context root, so this competes locally only. */
+    z-index: 200;
     background: var(--surface);
 }
 
@@ -2417,4 +2421,159 @@ li.loading-row {
         flex-wrap: wrap;
         gap: 0.4rem;
     }
+}
+
+/* ---------- Leaderboard ---------- */
+.leaderboard {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.leaderboard__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.leaderboard__head h1 {
+    margin-bottom: 0.15rem;
+}
+
+.leaderboard__sub {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* Leaderboard data table */
+.lb-table-wrap {
+    overflow-x: auto;
+}
+
+.lb-table {
+    table-layout: fixed;
+}
+
+.lb-table th.lb-table__rank,
+.lb-table td.lb-table__rank {
+    width: 3rem;
+    color: var(--faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.lb-table__tier {
+    width: 10rem;
+    text-align: right;
+}
+
+.lb-table th.lb-table__tier {
+    text-align: right;
+}
+
+.lb-table__mmr {
+    width: 4.5rem;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.lb-table th.lb-table__mmr {
+    text-align: right;
+}
+
+.lb-row__player {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.15rem;
+    color: var(--fg);
+    font-weight: 600;
+}
+
+.lb-row__player:hover {
+    color: var(--accent);
+}
+
+.lb-row:hover {
+    background: var(--surface-2);
+}
+
+.lb-table .rank-badge {
+    font-size: 0.74rem;
+    padding: 0.2rem 0.5rem;
+}
+
+@media (max-width: 560px) {
+    .lb-table__tier {
+        width: auto;
+    }
+}
+
+/* ---------- Home hero: total-matches counter ---------- */
+.hero-stats {
+    margin: 2rem auto 0;
+    max-width: 26rem;
+    padding: 1.4rem 1.75rem 1.25rem;
+    border-radius: 14px;
+    background: oklch(from var(--accent) l c h / 0.10);
+    border: 1px solid oklch(from var(--accent) l c h / 0.28);
+    box-shadow:
+        0 1px 0 oklch(from var(--accent) l c h / 0.14) inset,
+        0 18px 40px -28px oklch(from var(--accent) l c h / 0.9);
+}
+
+.hero-stats__figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.hero-stats__total {
+    font-size: clamp(2.4rem, 6vw, 3.4rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    /* Solid fallback if background-clip:text is unsupported. */
+    color: var(--accent);
+    background: linear-gradient(120deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-stats__total-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+}
+
+.hero-stats__split {
+    margin: 0.85rem 0 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.hero-stats__split strong {
+    color: var(--fg);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.hero-stats__dot {
+    color: var(--faint);
+}
+
+/* When the counter is present it abuts the hint — give them breathing room. */
+.hero-stats + .hero__hint {
+    margin-top: 2rem;
 }
