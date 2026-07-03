@@ -44,6 +44,7 @@ public class InsightsRawQueryTests
                         AccountId = PlayerA,
                         Team = "Legion",
                         Won = true,
+                        HeroId = Hero,
                     },
                     new MatchRoster
                     {
@@ -51,6 +52,7 @@ public class InsightsRawQueryTests
                         AccountId = PlayerA,
                         Team = "Legion",
                         Won = false,
+                        HeroId = Hero,
                     }
                 );
                 db.PlayerMatches.AddRange(
@@ -116,7 +118,6 @@ public class InsightsRawQueryTests
         {
             GameId = gameId,
             AccountId = PlayerA,
-            HeroId = Hero,
             Slot = slot,
             ItemId = itemId,
         };

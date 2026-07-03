@@ -50,7 +50,7 @@ public sealed class TeammateAggregate
 // Value object consumed by MapStatsAggregator: one row per played match. GoldEarned
 // is null when the gold breakdown is absent (pre-gold-ingestion matches).
 // WardsPlaced is the subject's observer-ward count for that game (sourced from
-// match_player_items; 0 when the player has no item rows for the game).
+// match_roster; 0 when the roster row predates the column).
 public sealed class MatchStatInput
 {
     public long GameId { get; set; }

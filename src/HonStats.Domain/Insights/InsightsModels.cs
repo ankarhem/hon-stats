@@ -19,31 +19,51 @@ public sealed class IndexedPlayer
     public IndexingStatus Status { get; set; } = IndexingStatus.NotIndexed;
 }
 
-// Persisted raw store: one row per (game, player, slot). Feeds hero-build aggregation.
+// Persisted raw store: one row per (game, player, slot). Pure item-slot store —
+// feeds hero-build aggregation. All per-match-per-player scalars live on
+// MatchRoster (the single 1:1 summary row); this table carries only which item
+// occupied which slot.
 public sealed class MatchPlayerItem
 {
     public int GameId { get; set; }
     public Guid AccountId { get; set; }
-    public int HeroId { get; set; }
     public int Slot { get; set; }
     public int ItemId { get; set; }
-    public int RoleIndex { get; set; }
-    public int WardsPlaced { get; set; }
-    public int WardsRevelation { get; set; }
-    public int NetWorth { get; set; }
-    public int Kills { get; set; }
-    public int Deaths { get; set; }
-    public int Assists { get; set; }
 }
 
-// Persisted raw store: one row per (game, player). Feeds teammate aggregation
-// via a self-join on GameId + Team.
+// Persisted raw store: one row per (game, player). The single clean 1:1
+// per-match-per-player summary row. Feeds teammate aggregation via a self-join
+// on GameId + Team, and carries all per-match metrics (KDA, wards, net worth,
+// gold breakdown, experience, hero/building damage).
 public sealed class MatchRoster
 {
     public int GameId { get; set; }
     public Guid AccountId { get; set; }
     public string Team { get; set; } = string.Empty;
     public bool Won { get; set; }
+
+    // HeroId is nullable because historical 0-item games (where the player had
+    // no inventory rows to backfill from) have no source for it — the migration
+    // lifts HeroId from match_player_items, and those games leave it null.
+    // New indexing always writes HeroId.
+    public int? HeroId { get; set; }
+
+    // Per-match metrics. Nullable/forward-only: rows ingested before these
+    // columns existed stay null (never a lying 0).
+    public int? Kills { get; set; }
+    public int? Deaths { get; set; }
+    public int? Assists { get; set; }
+    public int? NetWorth { get; set; }
+    public double? Level { get; set; }
+    public int? CreepKills { get; set; }
+    public int? NeutralKills { get; set; }
+    public int? CreepDenies { get; set; }
+    public int? BuildingDamage { get; set; }
+    public int? Buybacks { get; set; }
+    public int? RavenPlaced { get; set; }
+    public int? WardOfSightPlaced { get; set; }
+    public int? WardOfRevelationPlaced { get; set; }
+    public int? RoleIndex { get; set; }
 
     // Per-game gold breakdown (feeds per-map GPM). Nullable/forward-only: rows
     // ingested before these columns existed stay null.

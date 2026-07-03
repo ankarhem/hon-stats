@@ -1,5 +1,6 @@
 using HonStats.App.Insights;
 using HonStats.Domain.Insights;
+using HonStats.Domain.Matches;
 using HonStats.Infra.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,25 @@ internal sealed class SqlitePlayerInsightsQuery(
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         return await db.IndexedPlayers.FindAsync(new object?[] { accountId }, ct);
+    }
+
+    public async Task<IReadOnlyList<PlayerMatch>> GetRecentMatchesAsync(
+        Guid accountId,
+        int limit,
+        int offset,
+        string? map = null,
+        CancellationToken ct = default
+    )
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        var rows = await db.PlayerMatches.Where(p => p.AccountId == accountId).ToListAsync(ct);
+
+        // Filter + order in memory: SQLite's EF provider can't order by DateTimeOffset
+        // (Date) server-side, and the map store has no server-side map param.
+        IEnumerable<PlayerMatch> q = rows;
+        if (ShouldFilterByMap(map))
+            q = q.Where(r => string.Equals(r.Map, map, StringComparison.OrdinalIgnoreCase));
+        return q.OrderByDescending(r => r.Date).Skip(offset).Take(limit).ToList();
     }
 
     public async Task<IReadOnlyList<TeammateStat>> GetTeammatesAsync(
@@ -135,11 +155,11 @@ internal sealed class SqlitePlayerInsightsQuery(
         await using var db = await dbFactory.CreateDbContextAsync(ct);
 
         // match_item_timing has no HeroId; scope to this hero's games via the games
-        // the player played as that hero in match_player_items. Each (GameId, ItemId)
+        // the player played as that hero in match_roster. Each (GameId, ItemId)
         // is unique per account, so the mean is naturally over distinct games.
         var heroGames = db
-            .MatchPlayerItems.Where(mpi => mpi.AccountId == accountId && mpi.HeroId == heroId)
-            .Select(mpi => mpi.GameId)
+            .MatchRoster.Where(r => r.AccountId == accountId && r.HeroId == heroId)
+            .Select(r => r.GameId)
             .Distinct();
 
         return await (
@@ -191,22 +211,10 @@ internal sealed class SqlitePlayerInsightsQuery(
             .MatchRoster.Where(r => r.AccountId == accountId && gameIds.Contains(r.GameId))
             .ToDictionaryAsync(r => r.GameId, ct);
 
-        // WardsPlaced lives on match_player_items, duplicated across every inventory
-        // slot row for a (game, player) — so take Max per GameId (the rows are
-        // identical; Sum would over-count by slot count). Absent for games whose
-        // player has no item rows → treated as 0 by the lookup fallback.
-        var wardsByGame = await (
-            from mpi in db.MatchPlayerItems
-            where mpi.AccountId == accountId && gameIds.Contains(mpi.GameId)
-            group mpi by mpi.GameId into g
-            select new { GameId = g.Key, Wards = g.Max(x => x.WardsPlaced) }
-        ).ToDictionaryAsync(x => x.GameId, x => x.Wards, ct);
-
         return matches
             .Select(m =>
             {
                 rosterByGame.TryGetValue(m.GameId, out var r);
-                wardsByGame.TryGetValue(m.GameId, out var wards);
                 var goldEarned = GoldEarnedFor(r);
                 return new MatchStatInput
                 {
@@ -220,7 +228,7 @@ internal sealed class SqlitePlayerInsightsQuery(
                     HeroDamage = r?.HeroDamage,
                     DurationSeconds = m.Duration,
                     Won = r?.Won ?? false,
-                    WardsPlaced = wards,
+                    WardsPlaced = r?.WardOfSightPlaced ?? 0,
                 };
             })
             .ToList();

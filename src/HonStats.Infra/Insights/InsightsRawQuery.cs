@@ -15,8 +15,8 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         return await db
-            .MatchPlayerItems.Where(i => i.AccountId == accountId)
-            .Select(i => i.HeroId)
+            .MatchRoster.Where(r => r.AccountId == accountId && r.HeroId != null)
+            .Select(r => r.HeroId!.Value)
             .Distinct()
             .ToListAsync(ct);
     }
@@ -29,19 +29,17 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
     )
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
-        var rows = await db
-            .MatchPlayerItems.Where(i => i.AccountId == accountId && i.HeroId == heroId)
+        var heroGames = await db
+            .MatchRoster.Where(r => r.AccountId == accountId && r.HeroId == heroId)
             .ToListAsync(ct);
-        if (rows.Count == 0)
+        if (heroGames.Count == 0)
             return [];
 
-        var gameIds = rows.Select(r => r.GameId).Distinct().ToList();
+        var wonByGame = heroGames.ToDictionary(r => r.GameId, r => r.Won);
+        var gameIds = heroGames.Select(r => r.GameId).Distinct().ToList();
 
-        // Won lives on the subject's match_roster row (one per game); Map lives on
-        // the subject's player_matches row (only the aggregated account has one).
-        var wonByGame = await db
-            .MatchRoster.Where(r => r.AccountId == accountId && gameIds.Contains(r.GameId))
-            .ToDictionaryAsync(r => r.GameId, r => r.Won, ct);
+        // Map lives on the subject's player_matches row (only the aggregated
+        // account has one).
         var mapByGame = await db
             .PlayerMatches.Where(m => m.AccountId == accountId && gameIds.Contains(m.GameId))
             .ToDictionaryAsync(m => m.GameId, m => m.Map, ct);
@@ -51,10 +49,14 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
         if (ShouldFilterByMap(map))
         {
             var matchingGameIds = MatchingGameIds(mapByGame, map!);
-            rows = rows.Where(r => matchingGameIds.Contains(r.GameId)).ToList();
-            if (rows.Count == 0)
+            gameIds = gameIds.Where(g => matchingGameIds.Contains(g)).ToList();
+            if (gameIds.Count == 0)
                 return [];
         }
+
+        var rows = await db
+            .MatchPlayerItems.Where(i => i.AccountId == accountId && gameIds.Contains(i.GameId))
+            .ToListAsync(ct);
 
         return rows.GroupBy(r => r.GameId)
             .Select(g => new MatchItemInput
@@ -126,17 +128,15 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct);
 
-        var heroRows = await db
-            .MatchPlayerItems.Where(i => i.AccountId == accountId && i.HeroId == heroId)
+        var heroGames = await db
+            .MatchRoster.Where(r => r.AccountId == accountId && r.HeroId == heroId)
             .ToListAsync(ct);
-        if (heroRows.Count == 0)
+        if (heroGames.Count == 0)
             return [];
 
-        var gameIds = heroRows.Select(r => r.GameId).Distinct().ToList();
+        var wonByGame = heroGames.ToDictionary(r => r.GameId, r => r.Won);
+        var gameIds = heroGames.Select(r => r.GameId).Distinct().ToList();
 
-        var wonByGame = await db
-            .MatchRoster.Where(r => r.AccountId == accountId && gameIds.Contains(r.GameId))
-            .ToDictionaryAsync(r => r.GameId, r => r.Won, ct);
         var mapByGame = await db
             .PlayerMatches.Where(m => m.AccountId == accountId && gameIds.Contains(m.GameId))
             .ToDictionaryAsync(m => m.GameId, m => m.Map, ct);
@@ -144,11 +144,14 @@ internal sealed class InsightsRawQuery(IDbContextFactory<HonStatsDbContext> dbFa
         if (ShouldFilterByMap(map))
         {
             var matchingGameIds = MatchingGameIds(mapByGame, map!);
-            heroRows = heroRows.Where(r => matchingGameIds.Contains(r.GameId)).ToList();
-            gameIds = heroRows.Select(r => r.GameId).Distinct().ToList();
+            gameIds = gameIds.Where(g => matchingGameIds.Contains(g)).ToList();
             if (gameIds.Count == 0)
                 return [];
         }
+
+        var heroRows = await db
+            .MatchPlayerItems.Where(r => r.AccountId == accountId && gameIds.Contains(r.GameId))
+            .ToListAsync(ct);
 
         var timingRows = await db
             .MatchItemTimings.Where(t => t.AccountId == accountId && gameIds.Contains(t.GameId))

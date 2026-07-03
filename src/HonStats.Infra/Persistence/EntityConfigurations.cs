@@ -34,6 +34,7 @@ public sealed class MatchRosterConfiguration : IEntityTypeConfiguration<MatchRos
         b.ToTable("match_roster");
         b.HasKey(x => new { x.GameId, x.AccountId });
         b.HasIndex(x => x.AccountId);
+        b.HasIndex(x => new { x.AccountId, x.HeroId });
     }
 }
 
@@ -48,7 +49,6 @@ public sealed class MatchPlayerItemConfiguration : IEntityTypeConfiguration<Matc
             x.AccountId,
             x.Slot,
         });
-        b.HasIndex(x => new { x.AccountId, x.HeroId });
     }
 }
 

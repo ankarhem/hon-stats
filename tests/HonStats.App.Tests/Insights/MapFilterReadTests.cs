@@ -199,11 +199,35 @@ public class MapFilterReadTests
             );
 
             db.MatchRoster.AddRange(
-                Roster(1, PlayerA, "Legion", won: true, experience: 600, heroDamage: 10_000),
+                Roster(
+                    1,
+                    PlayerA,
+                    "Legion",
+                    won: true,
+                    heroId: Hero,
+                    experience: 600,
+                    heroDamage: 10_000
+                ),
                 Roster(1, PlayerB, "Legion", won: true),
-                Roster(2, PlayerA, "Legion", won: false, experience: 600, heroDamage: 10_000),
+                Roster(
+                    2,
+                    PlayerA,
+                    "Legion",
+                    won: false,
+                    heroId: Hero,
+                    experience: 600,
+                    heroDamage: 10_000
+                ),
                 Roster(2, PlayerB, "Legion", won: false),
-                Roster(3, PlayerA, "Legion", won: true, experience: 300, heroDamage: 5_000),
+                Roster(
+                    3,
+                    PlayerA,
+                    "Legion",
+                    won: true,
+                    heroId: Hero,
+                    experience: 300,
+                    heroDamage: 5_000
+                ),
                 Roster(3, PlayerC, "Legion", won: true)
             );
 
@@ -292,7 +316,6 @@ public class MapFilterReadTests
             {
                 GameId = gameId,
                 AccountId = PlayerA,
-                HeroId = Hero,
                 Slot = slot,
                 ItemId = itemId,
             };
@@ -302,6 +325,7 @@ public class MapFilterReadTests
             Guid accountId,
             string team,
             bool won,
+            int? heroId = null,
             int? experience = null,
             int? heroDamage = null
         ) =>
@@ -311,6 +335,7 @@ public class MapFilterReadTests
                 AccountId = accountId,
                 Team = team,
                 Won = won,
+                HeroId = heroId,
                 Experience = experience,
                 HeroDamage = heroDamage,
             };
