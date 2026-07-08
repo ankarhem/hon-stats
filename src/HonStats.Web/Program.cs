@@ -39,7 +39,8 @@ app.MapPost(
         IReindexQueue queue,
         IDbContextFactory<HonStatsDbContext> dbFactory,
         IOptions<JuvioOptions> juvioOptions,
-        bool force
+        bool force,
+        Guid[]? accountIds
     ) =>
     {
         if (!IsAuthorized(ctx, juvioOptions.Value))
@@ -47,15 +48,32 @@ app.MapPost(
             return Results.Unauthorized();
         }
 
+        if (accountIds is { Length: > 0 })
+        {
+            foreach (var id in accountIds)
+            {
+                await queue.RequestReindexAsync(id, forceBackfill: force, ctx.RequestAborted);
+            }
+
+            return Results.Ok(
+                new
+                {
+                    players = accountIds.Length,
+                    enqueued = accountIds.Length,
+                    phase = force ? "full" : "incremental",
+                }
+            );
+        }
+
         await using var db = await dbFactory.CreateDbContextAsync(ctx.RequestAborted);
-        var accountIds = await db
+        var allIds = await db
             .IndexedPlayers.Where(p => p.Status == IndexingStatus.Indexed)
             .Select(p => p.AccountId)
             .ToListAsync(ctx.RequestAborted);
 
         if (force)
         {
-            foreach (var id in accountIds)
+            foreach (var id in allIds)
             {
                 await queue.RequestReindexAsync(id, forceBackfill: true, ctx.RequestAborted);
             }
@@ -63,14 +81,14 @@ app.MapPost(
             return Results.Ok(
                 new
                 {
-                    players = accountIds.Count,
-                    enqueued = accountIds.Count,
+                    players = allIds.Count,
+                    enqueued = allIds.Count,
                     phase = "full",
                 }
             );
         }
 
-        foreach (var id in accountIds)
+        foreach (var id in allIds)
         {
             await dispatcher.DispatchAsync(new PlayerMatchesIndexed(id, []), ctx.RequestAborted);
         }
@@ -78,8 +96,8 @@ app.MapPost(
         return Results.Ok(
             new
             {
-                players = accountIds.Count,
-                dispatched = accountIds.Count,
+                players = allIds.Count,
+                dispatched = allIds.Count,
                 phase = "events",
             }
         );
