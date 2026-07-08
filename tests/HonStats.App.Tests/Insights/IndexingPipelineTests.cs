@@ -776,6 +776,287 @@ public class IndexingPipelineTests
         }
     }
 
+    // Regression test for the production "Unexpected entry.EntityState: Detached"
+    // crash. The bug: IngestSummariesAsync creates MatchItemTimings and saves them
+    // (Added → Unchanged in the change tracker). When the replay produces all-same
+    // FirstSeenSeconds (the stale fingerprint), ReprocessStaleItemTimingsAsync
+    // immediately re-processes the same game. ExecuteDeleteAsync deletes the DB
+    // rows but does NOT update the change tracker (per EF Core docs), so the old
+    // MatchItemTimings remain tracked as Unchanged. AddRange of new timings with the
+    // same composite key then either throws an identity-conflict (swallowed by
+    // IngestItemTimingAsync's catch, silently losing the timings) or corrupts the
+    // tracker so the subsequent SaveChanges throws ArgumentOutOfRangeException.
+    //
+    // Key difference from Index_ReprocessesStaleItemTimings_OnReindex (which PASSES
+    // today): that test seeds timings via a SEPARATE DbContext, so they are never
+    // tracked by the indexer's own context. This test lets the indexer CREATE them,
+    // exercising the real desync path.
+    [Fact]
+    public async Task Index_StaleItemTimingsCreatedByIngest_AreReprocessedWithoutError()
+    {
+        var dbPath = Path.Combine(
+            Path.GetTempPath(),
+            $"honstats-staleingest-{Guid.NewGuid():N}.db"
+        );
+        try
+        {
+            var matchQuery = CreateMatchQuery();
+            // Replay where ALL items first appear in the SAME snapshot (t=120).
+            // ItemTimingAggregator.Build → both items get FirstSeenSeconds=120
+            // → all-same fingerprint → ReprocessStaleItemTimingsAsync fires.
+            var replayQuery = new FakeParsedReplayQuery(
+                new Dictionary<int, ParsedReplay>
+                {
+                    [1] = new ParsedReplay
+                    {
+                        GameId = 1,
+                        Snapshots =
+                        [
+                            new() // anchor (identity)
+                            {
+                                Time = -90,
+                                Teams =
+                                [
+                                    new()
+                                    {
+                                        Players = [new() { AccountId = PlayerA, HeroId = Hero }],
+                                    },
+                                ],
+                            },
+                            new() // first content snapshot — both items here
+                            {
+                                Time = 120,
+                                Teams =
+                                [
+                                    new()
+                                    {
+                                        Players =
+                                        [
+                                            new()
+                                            {
+                                                Items =
+                                                [
+                                                    new() { ItemId = 10, Slot = 0 },
+                                                    new() { ItemId = 20, Slot = 1 },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            new() // second snapshot — same items (keeps replay non-degenerate)
+                            {
+                                Time = 240,
+                                Teams =
+                                [
+                                    new()
+                                    {
+                                        Players =
+                                        [
+                                            new()
+                                            {
+                                                Items =
+                                                [
+                                                    new() { ItemId = 10, Slot = 0 },
+                                                    new() { ItemId = 20, Slot = 1 },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                }
+            );
+
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddDbContextFactory<HonStatsDbContext>(o =>
+                o.UseSqlite($"Data Source={dbPath}")
+            );
+            services.Configure<IndexingOptions>(o =>
+            {
+                o.RecentMatchesLimit = 50;
+                o.MatchSummaryConcurrency = 2;
+            });
+            services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
+            services.AddSingleton<IIndexProgressTracker, IndexProgressTracker>();
+            services.AddScoped<IInsightsRawQuery, InsightsRawQuery>();
+            services.AddScoped<IInsightsAggregateStore, InsightsAggregateStore>();
+            services.AddScoped<IPlayerInsightsQuery, SqlitePlayerInsightsQuery>();
+            services.AddScoped<IPlayerInsightsIndexer, JuvioPlayerInsightsIndexer>();
+            services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildHeroBuildsHandler>();
+            services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
+            services.AddSingleton<IMatchQuery>(matchQuery);
+            services.AddSingleton<IParsedReplayQuery>(replayQuery);
+            services.AddSingleton<IPlayerRatingsQuery>(new FakeRatingsQuery());
+            services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
+            services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
+                new FakeNameResolver(
+                    new Dictionary<Guid, ResolvedName>
+                    {
+                        [PlayerA] = new()
+                        {
+                            AccountId = PlayerA,
+                            Username = "alpha",
+                            Country = "SE",
+                        },
+                    }
+                ),
+                sp.GetRequiredService<IPlayerNameStore>()
+            ));
+            var sp = services.BuildServiceProvider();
+
+            await using (
+                var db = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                await db.Database.MigrateAsync();
+            }
+
+            using var scope = sp.CreateScope();
+            var indexer = scope.ServiceProvider.GetRequiredService<IPlayerInsightsIndexer>();
+
+            // Act — must not throw ArgumentOutOfRangeException (Detached) and must
+            // not silently lose the timings. On the buggy code this either crashes
+            // (Detached during SaveChanges) or leaves zero MatchItemTimings (the
+            // AddRange identity-conflict is swallowed, ExecuteDelete already ran).
+            await indexer.IndexAsync(PlayerA);
+
+            // Assert
+            await using (
+                var assertDb = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                var indexed = await assertDb.IndexedPlayers.FindAsync([PlayerA]);
+                indexed.Should().NotBeNull();
+                indexed!.Status.Should().Be(IndexingStatus.Indexed);
+
+                var timings = await assertDb
+                    .MatchItemTimings.Where(t => t.GameId == 1)
+                    .ToListAsync();
+                timings.Should().HaveCount(2);
+                timings
+                    .Should()
+                    .ContainEquivalentOf(
+                        new
+                        {
+                            GameId = 1,
+                            AccountId = PlayerA,
+                            ItemId = 10,
+                            FirstSeenSeconds = 120,
+                        }
+                    );
+                timings
+                    .Should()
+                    .ContainEquivalentOf(
+                        new
+                        {
+                            GameId = 1,
+                            AccountId = PlayerA,
+                            ItemId = 20,
+                            FirstSeenSeconds = 120,
+                        }
+                    );
+            }
+        }
+        finally
+        {
+            if (File.Exists(dbPath))
+                File.Delete(dbPath);
+        }
+    }
+
+    [Fact]
+    public async Task Index_SummaryFetchFailure_PropagatesAndMarksFailed()
+    {
+        var dbPath = Path.Combine(
+            Path.GetTempPath(),
+            $"honstats-summaryfail-{Guid.NewGuid():N}.db"
+        );
+        try
+        {
+            var matchQuery = new ThrowingSummaryMatchQuery(
+                new List<PlayerMatch>
+                {
+                    new()
+                    {
+                        AccountId = PlayerA,
+                        GameId = 1,
+                        HeroId = Hero,
+                        Team = "Legion",
+                        WinningTeam = "Legion",
+                    },
+                }
+            );
+
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddDbContextFactory<HonStatsDbContext>(o =>
+                o.UseSqlite($"Data Source={dbPath}")
+            );
+            services.Configure<IndexingOptions>(o =>
+            {
+                o.RecentMatchesLimit = 50;
+                o.MatchSummaryConcurrency = 2;
+            });
+            services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
+            services.AddSingleton<IIndexProgressTracker, IndexProgressTracker>();
+            services.AddScoped<IInsightsRawQuery, InsightsRawQuery>();
+            services.AddScoped<IInsightsAggregateStore, InsightsAggregateStore>();
+            services.AddScoped<IPlayerInsightsQuery, SqlitePlayerInsightsQuery>();
+            services.AddScoped<IPlayerInsightsIndexer, JuvioPlayerInsightsIndexer>();
+            services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildHeroBuildsHandler>();
+            services.AddScoped<IEventHandler<PlayerMatchesIndexed>, RebuildTeammatesHandler>();
+            services.AddSingleton<IMatchQuery>(matchQuery);
+            services.AddSingleton<IParsedReplayQuery>(new ThrowingParsedReplayQuery());
+            services.AddSingleton<IPlayerRatingsQuery>(new FakeRatingsQuery());
+            services.AddSingleton<IPlayerNameStore, SqlitePlayerNameStore>();
+            services.AddSingleton<IPlayerNameResolver>(sp => new LocalFirstPlayerNameResolver(
+                new FakeNameResolver([]),
+                sp.GetRequiredService<IPlayerNameStore>()
+            ));
+            var sp = services.BuildServiceProvider();
+
+            await using (
+                var db = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                await db.Database.MigrateAsync();
+            }
+
+            using var scope = sp.CreateScope();
+            var indexer = scope.ServiceProvider.GetRequiredService<IPlayerInsightsIndexer>();
+
+            // Act — the original exception must propagate, not a secondary
+            // "Unexpected entry.EntityState: Detached" from the catch block
+            // reusing a corrupted context.
+            var act = async () => await indexer.IndexAsync(PlayerA);
+            await act.Should().ThrowAsync<InvalidOperationException>();
+
+            // Assert — player is marked Failed regardless of which context the
+            // catch block uses (this is the regression anchor for the fresh-context fix).
+            await using (
+                var assertDb = sp.GetRequiredService<IDbContextFactory<HonStatsDbContext>>()
+                    .CreateDbContext()
+            )
+            {
+                var indexed = await assertDb.IndexedPlayers.FindAsync([PlayerA]);
+                indexed.Should().NotBeNull();
+                indexed!.Status.Should().Be(IndexingStatus.Failed);
+            }
+        }
+        finally
+        {
+            if (File.Exists(dbPath))
+                File.Delete(dbPath);
+        }
+    }
+
     private static FakeMatchQuery CreateMatchQuery() =>
         new(
             recent: new List<PlayerMatch>
@@ -889,5 +1170,18 @@ public class IndexingPipelineTests
         {
             return Task.FromResult<PlayerRatings?>(new PlayerRatings(1500.0, 1600.0, 1700.0));
         }
+    }
+
+    private sealed class ThrowingSummaryMatchQuery(IReadOnlyList<PlayerMatch> recent) : IMatchQuery
+    {
+        public Task<IReadOnlyList<PlayerMatch>> GetRecentForPlayerAsync(
+            Guid playerId,
+            int limit,
+            int offset,
+            CancellationToken ct = default
+        ) => Task.FromResult(recent);
+
+        public Task<MatchDetail?> GetSummaryAsync(int gameId, CancellationToken ct = default) =>
+            throw new InvalidOperationException("summary fetch failure");
     }
 }

@@ -54,8 +54,17 @@ internal sealed class JuvioPlayerInsightsIndexer(
         }
         catch (Exception ex)
         {
-            indexed.Status = IndexingStatus.Failed;
-            await db.SaveChangesAsync(CancellationToken.None);
+            // Fresh context: the main db may hold a corrupted change tracker
+            // (a failed SaveChanges inside DoIndexAsync can leave entries in a
+            // Detached state — reusing db here masks the original exception with
+            // a secondary "Unexpected entry.EntityState: Detached" throw).
+            await using var failDb = await dbFactory.CreateDbContextAsync(CancellationToken.None);
+            var fail = await failDb.IndexedPlayers.FindAsync([accountId], CancellationToken.None);
+            if (fail is not null)
+            {
+                fail.Status = IndexingStatus.Failed;
+                await failDb.SaveChangesAsync(CancellationToken.None);
+            }
             progressTracker.Complete(accountId);
             logger.LogError(ex, "Indexing failed for {AccountId}", accountId);
             throw;
@@ -106,8 +115,20 @@ internal sealed class JuvioPlayerInsightsIndexer(
 
         var newGameIds = newMatches.Select(m => m.GameId).ToList();
         progressTracker.Start(accountId, newGameIds.Count);
-        await this.IngestSummariesAsync(db, accountId, newGameIds, forceBackfill, ct);
-        await this.ReprocessStaleItemTimingsAsync(db, accountId, ct);
+
+        // Each ingestion phase gets its own DbContext: ExecuteDeleteAsync (untracked
+        // bulk ops) must never share a change tracker with tracked Add/SaveChanges.
+        // Mixing the two desyncs the identity map — tracked entities survive the
+        // ExecuteDelete, AddRange conflicts on the same composite key, and the next
+        // SaveChanges throws "Unexpected entry.EntityState: Detached".
+        await using (var ingestDb = await dbFactory.CreateDbContextAsync(ct))
+        {
+            await this.IngestSummariesAsync(ingestDb, accountId, newGameIds, forceBackfill, ct);
+        }
+        await using (var reprocessDb = await dbFactory.CreateDbContextAsync(ct))
+        {
+            await this.ReprocessStaleItemTimingsAsync(reprocessDb, accountId, ct);
+        }
 
         // Resolve the player's name to write-through into the players table (the
         // LocalFirstPlayerNameResolver). The result is not assigned to
